@@ -31,7 +31,22 @@ import java.io.Serializable;
     @NamedQuery(name = "Venues.findByName", query = "SELECT v FROM Venues v WHERE v.name = :name"),
     @NamedQuery(name = "Venues.findByCapacity", query = "SELECT v FROM Venues v WHERE v.capacity = :capacity"),
     @NamedQuery(name = "Venues.findByLocation", query = "SELECT v FROM Venues v WHERE v.location = :location"),
-    @NamedQuery(name = "Venues.findByStatus", query = "SELECT v FROM Venues v WHERE v.status = :status")})
+    @NamedQuery(name = "Venues.findByStatus", query = "SELECT v FROM Venues v WHERE v.status = :status"),
+    @NamedQuery(
+        name="Venues.findAll",
+        query="SELECT v FROM Venues v"
+        ),
+
+        @NamedQuery(
+        name="Venues.findByVenueId",
+        query="SELECT v FROM Venues v WHERE v.venueId = :venueId"
+        ),
+
+        @NamedQuery(
+        name="Venues.findByCapacity",
+        query="SELECT v FROM Venues v WHERE v.capacity >= :capacity"
+        )
+})
 public class Venues implements Serializable {
 
     private static final long serialVersionUID = 1L;

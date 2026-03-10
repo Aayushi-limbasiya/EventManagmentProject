@@ -33,7 +33,33 @@ import java.util.Date;
     @NamedQuery(name = "EventSchedule.findByEventId", query = "SELECT e FROM EventSchedule e WHERE e.eventId = :eventId"),
     @NamedQuery(name = "EventSchedule.findByVenueId", query = "SELECT e FROM EventSchedule e WHERE e.venueId = :venueId"),
     @NamedQuery(name = "EventSchedule.findByStartTime", query = "SELECT e FROM EventSchedule e WHERE e.startTime = :startTime"),
-    @NamedQuery(name = "EventSchedule.findByEndTime", query = "SELECT e FROM EventSchedule e WHERE e.endTime = :endTime")})
+    @NamedQuery(name = "EventSchedule.findByEndTime", query = "SELECT e FROM EventSchedule e WHERE e.endTime = :endTime"),
+    @NamedQuery(
+        name="EventSchedule.findAll",
+        query="SELECT e FROM EventSchedule e"
+        ),
+
+        @NamedQuery(
+        name="EventSchedule.findByScheduleId",
+        query="SELECT e FROM EventSchedule e WHERE e.scheduleId = :scheduleId"
+        ),
+
+        @NamedQuery(
+        name="EventSchedule.findByEventId",
+        query="SELECT e FROM EventSchedule e WHERE e.eventId = :eventId"
+        ),
+
+        @NamedQuery(
+        name="EventSchedule.findByVenueId",
+        query="SELECT e FROM EventSchedule e WHERE e.venueId = :venueId"
+        ),
+
+        @NamedQuery(
+        name="EventSchedule.checkVenueAvailability",
+        query="SELECT e FROM EventSchedule e WHERE e.venueId = :venueId AND "
+        + "(e.startTime <= :endTime AND e.endTime >= :startTime)"
+        )
+})
 public class EventSchedule implements Serializable {
 
     private static final long serialVersionUID = 1L;

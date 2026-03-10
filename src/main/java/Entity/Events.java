@@ -35,7 +35,22 @@ import java.util.Date;
     @NamedQuery(name = "Events.findByTitle", query = "SELECT e FROM Events e WHERE e.title = :title"),
     @NamedQuery(name = "Events.findByOrganizerId", query = "SELECT e FROM Events e WHERE e.organizerId = :organizerId"),
     @NamedQuery(name = "Events.findByStatus", query = "SELECT e FROM Events e WHERE e.status = :status"),
-    @NamedQuery(name = "Events.findByCreatedAt", query = "SELECT e FROM Events e WHERE e.createdAt = :createdAt")})
+    @NamedQuery(name = "Events.findByCreatedAt", query = "SELECT e FROM Events e WHERE e.createdAt = :createdAt"),
+    @NamedQuery(
+        name="Events.findAll",
+        query="SELECT e FROM Events e"
+        ),
+
+        @NamedQuery(
+        name="Events.findByEventId",
+        query="SELECT e FROM Events e WHERE e.eventId = :eventId"
+        ),
+
+        @NamedQuery(
+        name="Events.findByOrganizerId",
+        query="SELECT e FROM Events e WHERE e.organizerId = :organizerId"
+        )
+})
 public class Events implements Serializable {
 
     private static final long serialVersionUID = 1L;

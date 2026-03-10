@@ -52,11 +52,6 @@ import java.util.Date;
     ),
 
     @NamedQuery(
-        name="Users.findAll",
-        query="SELECT u FROM User u"
-    ),
-
-    @NamedQuery(
         name="Users.findByRole",
         query="SELECT u FROM User u WHERE u.role = :role"
     )
@@ -308,3 +303,5 @@ public class Users implements Serializable {
     }
     
 }
+
+

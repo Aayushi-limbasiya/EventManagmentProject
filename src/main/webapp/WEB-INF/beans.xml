@@ -4,3 +4,7 @@
        xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/beans_4_0.xsd"
        bean-discovery-mode="all">
 </beans>
+
+<beans xmlns="https://jakarta.ee/xml/ns/jakartaee"
+       version="4.0">
+</beans>
