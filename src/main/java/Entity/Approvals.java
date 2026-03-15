@@ -16,7 +16,6 @@ import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
@@ -27,16 +26,16 @@ import java.util.Date;
  * @author OS
  */
 @Entity
-@Table(name = "approval")
+@Table(name = "approvals")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Approval.findAll", query = "SELECT a FROM Approval a"),
-    @NamedQuery(name = "Approval.findByApprovalId", query = "SELECT a FROM Approval a WHERE a.approvalId = :approvalId"),
-    @NamedQuery(name = "Approval.findByEventId", query = "SELECT a FROM Approval a WHERE a.eventId = :eventId"),
-    @NamedQuery(name = "Approval.findByAdminId", query = "SELECT a FROM Approval a WHERE a.adminId = :adminId"),
-    @NamedQuery(name = "Approval.findByDecision", query = "SELECT a FROM Approval a WHERE a.decision = :decision"),
-    @NamedQuery(name = "Approval.findByDecisionAt", query = "SELECT a FROM Approval a WHERE a.decisionAt = :decisionAt")})
-public class Approval implements Serializable {
+    @NamedQuery(name = "Approvals.findAll", query = "SELECT a FROM Approvals a"),
+    @NamedQuery(name = "Approvals.findByApprovalId", query = "SELECT a FROM Approvals a WHERE a.approvalId = :approvalId"),
+    @NamedQuery(name = "Approvals.findByEventId", query = "SELECT a FROM Approvals a WHERE a.eventId = :eventId"),
+    @NamedQuery(name = "Approvals.findByUserId", query = "SELECT a FROM Approvals a WHERE a.userId = :userId"),
+    @NamedQuery(name = "Approvals.findByDecision", query = "SELECT a FROM Approvals a WHERE a.decision = :decision"),
+    @NamedQuery(name = "Approvals.findByDecisionAt", query = "SELECT a FROM Approvals a WHERE a.decisionAt = :decisionAt")})
+public class Approvals implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -46,34 +45,24 @@ public class Approval implements Serializable {
     private Long approvalId;
     @Column(name = "event_id")
     private Integer eventId;
-    @Column(name = "admin_id")
-    private Integer adminId;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 20)
+    @Column(name = "user_id")
+    private Integer userId;
+    @Size(max = 20)
     @Column(name = "decision")
     private String decision;
     @Lob
     @Size(max = 65535)
     @Column(name = "remark")
     private String remark;
-    @Basic(optional = false)
-    @NotNull
     @Column(name = "decision_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date decisionAt;
 
-    public Approval() {
+    public Approvals() {
     }
 
-    public Approval(Long approvalId) {
+    public Approvals(Long approvalId) {
         this.approvalId = approvalId;
-    }
-
-    public Approval(Long approvalId, String decision, Date decisionAt) {
-        this.approvalId = approvalId;
-        this.decision = decision;
-        this.decisionAt = decisionAt;
     }
 
     public Long getApprovalId() {
@@ -92,12 +81,12 @@ public class Approval implements Serializable {
         this.eventId = eventId;
     }
 
-    public Integer getAdminId() {
-        return adminId;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public void setAdminId(Integer adminId) {
-        this.adminId = adminId;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
     public String getDecision() {
@@ -134,10 +123,10 @@ public class Approval implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Approval)) {
+        if (!(object instanceof Approvals)) {
             return false;
         }
-        Approval other = (Approval) object;
+        Approvals other = (Approvals) object;
         if ((this.approvalId == null && other.approvalId != null) || (this.approvalId != null && !this.approvalId.equals(other.approvalId))) {
             return false;
         }
@@ -146,7 +135,7 @@ public class Approval implements Serializable {
 
     @Override
     public String toString() {
-        return "Entity.Approval[ approvalId=" + approvalId + " ]";
+        return "Entity.Approvals[ approvalId=" + approvalId + " ]";
     }
     
 }

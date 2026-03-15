@@ -16,7 +16,6 @@ import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
@@ -48,16 +47,12 @@ public class Feedback implements Serializable {
     private Integer eventId;
     @Column(name = "user_id")
     private Integer userId;
-    @Basic(optional = false)
-    @NotNull
     @Column(name = "rating")
-    private int rating;
+    private Integer rating;
     @Lob
     @Size(max = 65535)
     @Column(name = "comment")
     private String comment;
-    @Basic(optional = false)
-    @NotNull
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
@@ -67,12 +62,6 @@ public class Feedback implements Serializable {
 
     public Feedback(Long feedbackId) {
         this.feedbackId = feedbackId;
-    }
-
-    public Feedback(Long feedbackId, int rating, Date createdAt) {
-        this.feedbackId = feedbackId;
-        this.rating = rating;
-        this.createdAt = createdAt;
     }
 
     public Long getFeedbackId() {
@@ -99,11 +88,11 @@ public class Feedback implements Serializable {
         this.userId = userId;
     }
 
-    public int getRating() {
+    public Integer getRating() {
         return rating;
     }
 
-    public void setRating(int rating) {
+    public void setRating(Integer rating) {
         this.rating = rating;
     }
 

@@ -15,7 +15,6 @@ import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
@@ -48,8 +47,6 @@ public class Payments implements Serializable {
     @Column(name = "registration_id")
     private Integer registrationId;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
-    @Basic(optional = false)
-    @NotNull
     @Column(name = "amount")
     private BigDecimal amount;
     @Size(max = 50)
@@ -67,11 +64,6 @@ public class Payments implements Serializable {
 
     public Payments(Long paymentId) {
         this.paymentId = paymentId;
-    }
-
-    public Payments(Long paymentId, BigDecimal amount) {
-        this.paymentId = paymentId;
-        this.amount = amount;
     }
 
     public Long getPaymentId() {

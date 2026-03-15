@@ -30,8 +30,6 @@ import java.util.Date;
 @NamedQueries({
     @NamedQuery(name = "Certificates.findAll", query = "SELECT c FROM Certificates c"),
     @NamedQuery(name = "Certificates.findByCertificateId", query = "SELECT c FROM Certificates c WHERE c.certificateId = :certificateId"),
-    @NamedQuery(name = "Certificates.findByEventId", query = "SELECT c FROM Certificates c WHERE c.eventId = :eventId"),
-    @NamedQuery(name = "Certificates.findByUserId", query = "SELECT c FROM Certificates c WHERE c.userId = :userId"),
     @NamedQuery(name = "Certificates.findByRegistrationId", query = "SELECT c FROM Certificates c WHERE c.registrationId = :registrationId"),
     @NamedQuery(name = "Certificates.findByCertificateNumber", query = "SELECT c FROM Certificates c WHERE c.certificateNumber = :certificateNumber"),
     @NamedQuery(name = "Certificates.findByIssueDate", query = "SELECT c FROM Certificates c WHERE c.issueDate = :issueDate"),
@@ -44,10 +42,6 @@ public class Certificates implements Serializable {
     @Basic(optional = false)
     @Column(name = "certificate_id")
     private Long certificateId;
-    @Column(name = "event_id")
-    private Integer eventId;
-    @Column(name = "user_id")
-    private Integer userId;
     @Column(name = "registration_id")
     private Integer registrationId;
     @Size(max = 100)
@@ -73,22 +67,6 @@ public class Certificates implements Serializable {
 
     public void setCertificateId(Long certificateId) {
         this.certificateId = certificateId;
-    }
-
-    public Integer getEventId() {
-        return eventId;
-    }
-
-    public void setEventId(Integer eventId) {
-        this.eventId = eventId;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
     }
 
     public Integer getRegistrationId() {

@@ -13,27 +13,37 @@ import java.util.Collection;
  * @author OS
  */
 @Local
-public interface UserManagmentLocal {
-     // Register User
+public interface UserManagementLocal {
+    // BASIC FUNCTIONS
+    
     void registerUser(Users user);
-
-    // Login Authentication
+    
     Users loginUser(String email, String password);
-
-    // Get User By ID
+    
     Users getUserById(int userId);
-
-    // Update User
+    
     void updateUser(Users user);
-
-    // Delete User
-    void deleteUser(int userId);
-
-    // Get All Users
-    Collection<Users> getAllUsers();
-
-    // Get Users By Role
-    Collection<Users> getUsersByRole(String role);
     
     void uploadProfilePhoto(int userId, String photoPath);
+    
+    
+    // EXTRA FUNCTIONS
+    
+    void changePassword(int userId, String newPassword);
+    
+    void forgotPassword(String email);
+    
+    void verifyAccount(int userId);
+    
+    Collection<Users> searchUsers(String keyword);
+    
+    void blockUser(int userId);
+    
+    void unblockUser(int userId);
+    
+    Collection<Users> getUsersByRole(int roleId);
+    
+    Collection<Users> getAllUsers();
+    
+    void sendRegistrationEmail(String email);
 }

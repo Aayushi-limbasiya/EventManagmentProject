@@ -15,7 +15,6 @@ import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import jakarta.validation.constraints.NotNull;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.Date;
@@ -34,32 +33,7 @@ import java.util.Date;
     @NamedQuery(name = "EventSchedule.findByVenueId", query = "SELECT e FROM EventSchedule e WHERE e.venueId = :venueId"),
     @NamedQuery(name = "EventSchedule.findByStartTime", query = "SELECT e FROM EventSchedule e WHERE e.startTime = :startTime"),
     @NamedQuery(name = "EventSchedule.findByEndTime", query = "SELECT e FROM EventSchedule e WHERE e.endTime = :endTime"),
-    @NamedQuery(
-        name="EventSchedule.findAll",
-        query="SELECT e FROM EventSchedule e"
-        ),
-
-        @NamedQuery(
-        name="EventSchedule.findByScheduleId",
-        query="SELECT e FROM EventSchedule e WHERE e.scheduleId = :scheduleId"
-        ),
-
-        @NamedQuery(
-        name="EventSchedule.findByEventId",
-        query="SELECT e FROM EventSchedule e WHERE e.eventId = :eventId"
-        ),
-
-        @NamedQuery(
-        name="EventSchedule.findByVenueId",
-        query="SELECT e FROM EventSchedule e WHERE e.venueId = :venueId"
-        ),
-
-        @NamedQuery(
-        name="EventSchedule.checkVenueAvailability",
-        query="SELECT e FROM EventSchedule e WHERE e.venueId = :venueId AND "
-        + "(e.startTime <= :endTime AND e.endTime >= :startTime)"
-        )
-})
+    @NamedQuery(name = "EventSchedule.findByCapacity", query = "SELECT e FROM EventSchedule e WHERE e.capacity = :capacity")})
 public class EventSchedule implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -72,28 +46,20 @@ public class EventSchedule implements Serializable {
     private Integer eventId;
     @Column(name = "venue_id")
     private Integer venueId;
-    @Basic(optional = false)
-    @NotNull
     @Column(name = "start_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date startTime;
-    @Basic(optional = false)
-    @NotNull
     @Column(name = "end_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date endTime;
+    @Column(name = "capacity")
+    private Integer capacity;
 
     public EventSchedule() {
     }
 
     public EventSchedule(Long scheduleId) {
         this.scheduleId = scheduleId;
-    }
-
-    public EventSchedule(Long scheduleId, Date startTime, Date endTime) {
-        this.scheduleId = scheduleId;
-        this.startTime = startTime;
-        this.endTime = endTime;
     }
 
     public Long getScheduleId() {
@@ -134,6 +100,14 @@ public class EventSchedule implements Serializable {
 
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
+    }
+
+    public Integer getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(Integer capacity) {
+        this.capacity = capacity;
     }
 
     @Override

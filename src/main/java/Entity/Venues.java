@@ -30,23 +30,7 @@ import java.io.Serializable;
     @NamedQuery(name = "Venues.findByVenueId", query = "SELECT v FROM Venues v WHERE v.venueId = :venueId"),
     @NamedQuery(name = "Venues.findByName", query = "SELECT v FROM Venues v WHERE v.name = :name"),
     @NamedQuery(name = "Venues.findByCapacity", query = "SELECT v FROM Venues v WHERE v.capacity = :capacity"),
-    @NamedQuery(name = "Venues.findByLocation", query = "SELECT v FROM Venues v WHERE v.location = :location"),
-    @NamedQuery(name = "Venues.findByStatus", query = "SELECT v FROM Venues v WHERE v.status = :status"),
-    @NamedQuery(
-        name="Venues.findAll",
-        query="SELECT v FROM Venues v"
-        ),
-
-        @NamedQuery(
-        name="Venues.findByVenueId",
-        query="SELECT v FROM Venues v WHERE v.venueId = :venueId"
-        ),
-
-        @NamedQuery(
-        name="Venues.findByCapacity",
-        query="SELECT v FROM Venues v WHERE v.capacity >= :capacity"
-        )
-})
+    @NamedQuery(name = "Venues.findByLocation", query = "SELECT v FROM Venues v WHERE v.location = :location")})
 public class Venues implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -64,16 +48,9 @@ public class Venues implements Serializable {
     @NotNull
     @Column(name = "capacity")
     private int capacity;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 200)
+    @Size(max = 200)
     @Column(name = "location")
     private String location;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 30)
-    @Column(name = "status")
-    private String status;
 
     public Venues() {
     }
@@ -82,12 +59,10 @@ public class Venues implements Serializable {
         this.venueId = venueId;
     }
 
-    public Venues(Long venueId, String name, int capacity, String location, String status) {
+    public Venues(Long venueId, String name, int capacity) {
         this.venueId = venueId;
         this.name = name;
         this.capacity = capacity;
-        this.location = location;
-        this.status = status;
     }
 
     public Long getVenueId() {
@@ -120,14 +95,6 @@ public class Venues implements Serializable {
 
     public void setLocation(String location) {
         this.location = location;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 
     @Override

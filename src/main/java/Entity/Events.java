@@ -33,24 +33,9 @@ import java.util.Date;
     @NamedQuery(name = "Events.findAll", query = "SELECT e FROM Events e"),
     @NamedQuery(name = "Events.findByEventId", query = "SELECT e FROM Events e WHERE e.eventId = :eventId"),
     @NamedQuery(name = "Events.findByTitle", query = "SELECT e FROM Events e WHERE e.title = :title"),
-    @NamedQuery(name = "Events.findByOrganizerId", query = "SELECT e FROM Events e WHERE e.organizerId = :organizerId"),
+    @NamedQuery(name = "Events.findByUserId", query = "SELECT e FROM Events e WHERE e.userId = :userId"),
     @NamedQuery(name = "Events.findByStatus", query = "SELECT e FROM Events e WHERE e.status = :status"),
-    @NamedQuery(name = "Events.findByCreatedAt", query = "SELECT e FROM Events e WHERE e.createdAt = :createdAt"),
-    @NamedQuery(
-        name="Events.findAll",
-        query="SELECT e FROM Events e"
-        ),
-
-        @NamedQuery(
-        name="Events.findByEventId",
-        query="SELECT e FROM Events e WHERE e.eventId = :eventId"
-        ),
-
-        @NamedQuery(
-        name="Events.findByOrganizerId",
-        query="SELECT e FROM Events e WHERE e.organizerId = :organizerId"
-        )
-})
+    @NamedQuery(name = "Events.findByCreatedAt", query = "SELECT e FROM Events e WHERE e.createdAt = :createdAt")})
 public class Events implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -64,21 +49,15 @@ public class Events implements Serializable {
     @Size(min = 1, max = 150)
     @Column(name = "title")
     private String title;
-    @Basic(optional = false)
-    @NotNull
     @Lob
-    @Size(min = 1, max = 65535)
+    @Size(max = 65535)
     @Column(name = "description")
     private String description;
-    @Column(name = "organizer_id")
-    private Integer organizerId;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 30)
+    @Column(name = "user_id")
+    private Integer userId;
+    @Size(max = 30)
     @Column(name = "status")
     private String status;
-    @Basic(optional = false)
-    @NotNull
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
@@ -90,12 +69,9 @@ public class Events implements Serializable {
         this.eventId = eventId;
     }
 
-    public Events(Long eventId, String title, String description, String status, Date createdAt) {
+    public Events(Long eventId, String title) {
         this.eventId = eventId;
         this.title = title;
-        this.description = description;
-        this.status = status;
-        this.createdAt = createdAt;
     }
 
     public Long getEventId() {
@@ -122,12 +98,12 @@ public class Events implements Serializable {
         this.description = description;
     }
 
-    public Integer getOrganizerId() {
-        return organizerId;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public void setOrganizerId(Integer organizerId) {
-        this.organizerId = organizerId;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
     public String getStatus() {

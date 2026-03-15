@@ -37,28 +37,46 @@ import java.util.Date;
     @NamedQuery(name = "Users.findByPassword", query = "SELECT u FROM Users u WHERE u.password = :password"),
     @NamedQuery(name = "Users.findByRoleId", query = "SELECT u FROM Users u WHERE u.roleId = :roleId"),
     @NamedQuery(name = "Users.findByPhone", query = "SELECT u FROM Users u WHERE u.phone = :phone"),
-    @NamedQuery(name = "Users.findByDepartment", query = "SELECT u FROM Users u WHERE u.department = :department"),
-    @NamedQuery(name = "Users.findByProfilePhoto", query = "SELECT u FROM Users u WHERE u.profilePhoto = :profilePhoto"),
     @NamedQuery(name = "Users.findByDob", query = "SELECT u FROM Users u WHERE u.dob = :dob"),
     @NamedQuery(name = "Users.findByAge", query = "SELECT u FROM Users u WHERE u.age = :age"),
     @NamedQuery(name = "Users.findByGender", query = "SELECT u FROM Users u WHERE u.gender = :gender"),
+    @NamedQuery(name = "Users.findByProfilePhoto", query = "SELECT u FROM Users u WHERE u.profilePhoto = :profilePhoto"),
     @NamedQuery(name = "Users.findByOrganizationName", query = "SELECT u FROM Users u WHERE u.organizationName = :organizationName"),
     @NamedQuery(name = "Users.findByOrganizationType", query = "SELECT u FROM Users u WHERE u.organizationType = :organizationType"),
     @NamedQuery(name = "Users.findByVerifiedStatus", query = "SELECT u FROM Users u WHERE u.verifiedStatus = :verifiedStatus"),
     @NamedQuery(name = "Users.findByCreatedAt", query = "SELECT u FROM Users u WHERE u.createdAt = :createdAt"),
+    
+    // LOGIN
     @NamedQuery(
-        name="Users.login",
-        query="SELECT u FROM User u WHERE u.email = :email AND u.password = :password"
+        name = "Users.login",
+        query = "SELECT u FROM Users u WHERE u.email = :email AND u.password = :password"
     ),
 
+    // SEARCH USER BY NAME OR EMAIL
     @NamedQuery(
-        name="Users.findByRole",
-        query="SELECT u FROM User u WHERE u.role = :role"
+        name = "Users.searchUsers",
+        query = "SELECT u FROM Users u WHERE u.name LIKE :keyword OR u.email LIKE :keyword"
+    ),
+
+    // GET USERS BY ROLE
+    @NamedQuery(
+        name = "Users.getUsersByRole",
+        query = "SELECT u FROM Users u WHERE u.roleId = :roleId"
+    ),
+
+    // GET VERIFIED USERS
+    @NamedQuery(
+        name = "Users.getVerifiedUsers",
+        query = "SELECT u FROM Users u WHERE u.verifiedStatus = 'Verified'"
+    ),
+
+    // GET BLOCKED USERS
+    @NamedQuery(
+        name = "Users.getBlockedUsers",
+        query = "SELECT u FROM Users u WHERE u.verifiedStatus = 'Blocked'"
     )
 
-    
 })
-    
 public class Users implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -86,17 +104,9 @@ public class Users implements Serializable {
     @Column(name = "role_id")
     private Integer roleId;
     // @Pattern(regexp="^\\(?(\\d{3})\\)?[- ]?(\\d{3})[- ]?(\\d{4})$", message="Invalid phone/fax format, should be as xxx-xxx-xxxx")//if the field contains phone or fax number consider using this annotation to enforce field validation
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 15)
+    @Size(max = 15)
     @Column(name = "phone")
     private String phone;
-    @Size(max = 100)
-    @Column(name = "department")
-    private String department;
-    @Size(max = 255)
-    @Column(name = "profile_photo")
-    private String profilePhoto;
     @Column(name = "dob")
     @Temporal(TemporalType.DATE)
     private Date dob;
@@ -109,6 +119,9 @@ public class Users implements Serializable {
     @Size(max = 65535)
     @Column(name = "address")
     private String address;
+    @Size(max = 255)
+    @Column(name = "profile_photo")
+    private String profilePhoto;
     @Size(max = 150)
     @Column(name = "organization_name")
     private String organizationName;
@@ -133,12 +146,11 @@ public class Users implements Serializable {
         this.userId = userId;
     }
 
-    public Users(Long userId, String name, String email, String password, String phone) {
+    public Users(Long userId, String name, String email, String password) {
         this.userId = userId;
         this.name = name;
         this.email = email;
         this.password = password;
-        this.phone = phone;
     }
 
     public Long getUserId() {
@@ -189,22 +201,6 @@ public class Users implements Serializable {
         this.phone = phone;
     }
 
-    public String getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(String department) {
-        this.department = department;
-    }
-
-    public String getProfilePhoto() {
-        return profilePhoto;
-    }
-
-    public void setProfilePhoto(String profilePhoto) {
-        this.profilePhoto = profilePhoto;
-    }
-
     public Date getDob() {
         return dob;
     }
@@ -235,6 +231,14 @@ public class Users implements Serializable {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getProfilePhoto() {
+        return profilePhoto;
+    }
+
+    public void setProfilePhoto(String profilePhoto) {
+        this.profilePhoto = profilePhoto;
     }
 
     public String getOrganizationName() {
@@ -303,5 +307,3 @@ public class Users implements Serializable {
     }
     
 }
-
-

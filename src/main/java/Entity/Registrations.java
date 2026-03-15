@@ -15,7 +15,6 @@ import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
@@ -26,17 +25,17 @@ import java.util.Date;
  * @author OS
  */
 @Entity
-@Table(name = "registration")
+@Table(name = "registrations")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Registration.findAll", query = "SELECT r FROM Registration r"),
-    @NamedQuery(name = "Registration.findByRegistrationId", query = "SELECT r FROM Registration r WHERE r.registrationId = :registrationId"),
-    @NamedQuery(name = "Registration.findByEventId", query = "SELECT r FROM Registration r WHERE r.eventId = :eventId"),
-    @NamedQuery(name = "Registration.findByStudentId", query = "SELECT r FROM Registration r WHERE r.studentId = :studentId"),
-    @NamedQuery(name = "Registration.findByStatus", query = "SELECT r FROM Registration r WHERE r.status = :status"),
-    @NamedQuery(name = "Registration.findByRegisteredAt", query = "SELECT r FROM Registration r WHERE r.registeredAt = :registeredAt"),
-    @NamedQuery(name = "Registration.findByAttendanceStatus", query = "SELECT r FROM Registration r WHERE r.attendanceStatus = :attendanceStatus")})
-public class Registration implements Serializable {
+    @NamedQuery(name = "Registrations.findAll", query = "SELECT r FROM Registrations r"),
+    @NamedQuery(name = "Registrations.findByRegistrationId", query = "SELECT r FROM Registrations r WHERE r.registrationId = :registrationId"),
+    @NamedQuery(name = "Registrations.findByEventId", query = "SELECT r FROM Registrations r WHERE r.eventId = :eventId"),
+    @NamedQuery(name = "Registrations.findByUserId", query = "SELECT r FROM Registrations r WHERE r.userId = :userId"),
+    @NamedQuery(name = "Registrations.findByStatus", query = "SELECT r FROM Registrations r WHERE r.status = :status"),
+    @NamedQuery(name = "Registrations.findByAttendanceStatus", query = "SELECT r FROM Registrations r WHERE r.attendanceStatus = :attendanceStatus"),
+    @NamedQuery(name = "Registrations.findByRegisteredAt", query = "SELECT r FROM Registrations r WHERE r.registeredAt = :registeredAt")})
+public class Registrations implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -46,33 +45,23 @@ public class Registration implements Serializable {
     private Long registrationId;
     @Column(name = "event_id")
     private Integer eventId;
-    @Column(name = "student_id")
-    private Integer studentId;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 20)
+    @Column(name = "user_id")
+    private Integer userId;
+    @Size(max = 20)
     @Column(name = "status")
     private String status;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "registered_at")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date registeredAt;
     @Size(max = 20)
     @Column(name = "attendance_status")
     private String attendanceStatus;
+    @Column(name = "registered_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date registeredAt;
 
-    public Registration() {
+    public Registrations() {
     }
 
-    public Registration(Long registrationId) {
+    public Registrations(Long registrationId) {
         this.registrationId = registrationId;
-    }
-
-    public Registration(Long registrationId, String status, Date registeredAt) {
-        this.registrationId = registrationId;
-        this.status = status;
-        this.registeredAt = registeredAt;
     }
 
     public Long getRegistrationId() {
@@ -91,12 +80,12 @@ public class Registration implements Serializable {
         this.eventId = eventId;
     }
 
-    public Integer getStudentId() {
-        return studentId;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public void setStudentId(Integer studentId) {
-        this.studentId = studentId;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
     public String getStatus() {
@@ -107,20 +96,20 @@ public class Registration implements Serializable {
         this.status = status;
     }
 
-    public Date getRegisteredAt() {
-        return registeredAt;
-    }
-
-    public void setRegisteredAt(Date registeredAt) {
-        this.registeredAt = registeredAt;
-    }
-
     public String getAttendanceStatus() {
         return attendanceStatus;
     }
 
     public void setAttendanceStatus(String attendanceStatus) {
         this.attendanceStatus = attendanceStatus;
+    }
+
+    public Date getRegisteredAt() {
+        return registeredAt;
+    }
+
+    public void setRegisteredAt(Date registeredAt) {
+        this.registeredAt = registeredAt;
     }
 
     @Override
@@ -133,10 +122,10 @@ public class Registration implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Registration)) {
+        if (!(object instanceof Registrations)) {
             return false;
         }
-        Registration other = (Registration) object;
+        Registrations other = (Registrations) object;
         if ((this.registrationId == null && other.registrationId != null) || (this.registrationId != null && !this.registrationId.equals(other.registrationId))) {
             return false;
         }
@@ -145,7 +134,7 @@ public class Registration implements Serializable {
 
     @Override
     public String toString() {
-        return "Entity.Registration[ registrationId=" + registrationId + " ]";
+        return "Entity.Registrations[ registrationId=" + registrationId + " ]";
     }
     
 }
