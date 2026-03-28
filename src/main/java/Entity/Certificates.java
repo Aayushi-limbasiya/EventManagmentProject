@@ -10,6 +10,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
@@ -30,7 +32,6 @@ import java.util.Date;
 @NamedQueries({
     @NamedQuery(name = "Certificates.findAll", query = "SELECT c FROM Certificates c"),
     @NamedQuery(name = "Certificates.findByCertificateId", query = "SELECT c FROM Certificates c WHERE c.certificateId = :certificateId"),
-    @NamedQuery(name = "Certificates.findByRegistrationId", query = "SELECT c FROM Certificates c WHERE c.registrationId = :registrationId"),
     @NamedQuery(name = "Certificates.findByCertificateNumber", query = "SELECT c FROM Certificates c WHERE c.certificateNumber = :certificateNumber"),
     @NamedQuery(name = "Certificates.findByIssueDate", query = "SELECT c FROM Certificates c WHERE c.issueDate = :issueDate"),
     @NamedQuery(name = "Certificates.findByCertificateFile", query = "SELECT c FROM Certificates c WHERE c.certificateFile = :certificateFile")})
@@ -41,9 +42,7 @@ public class Certificates implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "certificate_id")
-    private Long certificateId;
-    @Column(name = "registration_id")
-    private Integer registrationId;
+    private Integer certificateId;
     @Size(max = 100)
     @Column(name = "certificate_number")
     private String certificateNumber;
@@ -53,28 +52,23 @@ public class Certificates implements Serializable {
     @Size(max = 255)
     @Column(name = "certificate_file")
     private String certificateFile;
+    @JoinColumn(name = "registration_id", referencedColumnName = "registration_id")
+    @ManyToOne
+    private Registrations registrationId;
 
     public Certificates() {
     }
 
-    public Certificates(Long certificateId) {
+    public Certificates(Integer certificateId) {
         this.certificateId = certificateId;
     }
 
-    public Long getCertificateId() {
+    public Integer getCertificateId() {
         return certificateId;
     }
 
-    public void setCertificateId(Long certificateId) {
+    public void setCertificateId(Integer certificateId) {
         this.certificateId = certificateId;
-    }
-
-    public Integer getRegistrationId() {
-        return registrationId;
-    }
-
-    public void setRegistrationId(Integer registrationId) {
-        this.registrationId = registrationId;
     }
 
     public String getCertificateNumber() {
@@ -99,6 +93,14 @@ public class Certificates implements Serializable {
 
     public void setCertificateFile(String certificateFile) {
         this.certificateFile = certificateFile;
+    }
+
+    public Registrations getRegistrationId() {
+        return registrationId;
+    }
+
+    public void setRegistrationId(Registrations registrationId) {
+        this.registrationId = registrationId;
     }
 
     @Override

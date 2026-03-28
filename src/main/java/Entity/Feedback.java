@@ -10,7 +10,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
@@ -31,8 +33,6 @@ import java.util.Date;
 @NamedQueries({
     @NamedQuery(name = "Feedback.findAll", query = "SELECT f FROM Feedback f"),
     @NamedQuery(name = "Feedback.findByFeedbackId", query = "SELECT f FROM Feedback f WHERE f.feedbackId = :feedbackId"),
-    @NamedQuery(name = "Feedback.findByEventId", query = "SELECT f FROM Feedback f WHERE f.eventId = :eventId"),
-    @NamedQuery(name = "Feedback.findByUserId", query = "SELECT f FROM Feedback f WHERE f.userId = :userId"),
     @NamedQuery(name = "Feedback.findByRating", query = "SELECT f FROM Feedback f WHERE f.rating = :rating"),
     @NamedQuery(name = "Feedback.findByCreatedAt", query = "SELECT f FROM Feedback f WHERE f.createdAt = :createdAt")})
 public class Feedback implements Serializable {
@@ -42,11 +42,7 @@ public class Feedback implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "feedback_id")
-    private Long feedbackId;
-    @Column(name = "event_id")
-    private Integer eventId;
-    @Column(name = "user_id")
-    private Integer userId;
+    private Integer feedbackId;
     @Column(name = "rating")
     private Integer rating;
     @Lob
@@ -56,36 +52,26 @@ public class Feedback implements Serializable {
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
+    @JoinColumn(name = "event_id", referencedColumnName = "event_id")
+    @ManyToOne
+    private Events eventId;
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @ManyToOne
+    private Users userId;
 
     public Feedback() {
     }
 
-    public Feedback(Long feedbackId) {
+    public Feedback(Integer feedbackId) {
         this.feedbackId = feedbackId;
     }
 
-    public Long getFeedbackId() {
+    public Integer getFeedbackId() {
         return feedbackId;
     }
 
-    public void setFeedbackId(Long feedbackId) {
+    public void setFeedbackId(Integer feedbackId) {
         this.feedbackId = feedbackId;
-    }
-
-    public Integer getEventId() {
-        return eventId;
-    }
-
-    public void setEventId(Integer eventId) {
-        this.eventId = eventId;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
     }
 
     public Integer getRating() {
@@ -110,6 +96,22 @@ public class Feedback implements Serializable {
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Events getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(Events eventId) {
+        this.eventId = eventId;
+    }
+
+    public Users getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Users userId) {
+        this.userId = userId;
     }
 
     @Override

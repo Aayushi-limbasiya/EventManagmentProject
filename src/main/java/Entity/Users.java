@@ -10,16 +10,21 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
 
 /**
@@ -35,7 +40,6 @@ import java.util.Date;
     @NamedQuery(name = "Users.findByName", query = "SELECT u FROM Users u WHERE u.name = :name"),
     @NamedQuery(name = "Users.findByEmail", query = "SELECT u FROM Users u WHERE u.email = :email"),
     @NamedQuery(name = "Users.findByPassword", query = "SELECT u FROM Users u WHERE u.password = :password"),
-    @NamedQuery(name = "Users.findByRoleId", query = "SELECT u FROM Users u WHERE u.roleId = :roleId"),
     @NamedQuery(name = "Users.findByPhone", query = "SELECT u FROM Users u WHERE u.phone = :phone"),
     @NamedQuery(name = "Users.findByDob", query = "SELECT u FROM Users u WHERE u.dob = :dob"),
     @NamedQuery(name = "Users.findByAge", query = "SELECT u FROM Users u WHERE u.age = :age"),
@@ -45,8 +49,6 @@ import java.util.Date;
     @NamedQuery(name = "Users.findByOrganizationType", query = "SELECT u FROM Users u WHERE u.organizationType = :organizationType"),
     @NamedQuery(name = "Users.findByVerifiedStatus", query = "SELECT u FROM Users u WHERE u.verifiedStatus = :verifiedStatus"),
     @NamedQuery(name = "Users.findByCreatedAt", query = "SELECT u FROM Users u WHERE u.createdAt = :createdAt"),
-    
-    // LOGIN
     @NamedQuery(
         name = "Users.login",
         query = "SELECT u FROM Users u WHERE u.email = :email AND u.password = :password"
@@ -75,7 +77,6 @@ import java.util.Date;
         name = "Users.getBlockedUsers",
         query = "SELECT u FROM Users u WHERE u.verifiedStatus = 'Blocked'"
     )
-
 })
 public class Users implements Serializable {
 
@@ -84,7 +85,7 @@ public class Users implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "user_id")
-    private Long userId;
+    private Integer userId;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 100)
@@ -101,8 +102,6 @@ public class Users implements Serializable {
     @Size(min = 1, max = 255)
     @Column(name = "password")
     private String password;
-    @Column(name = "role_id")
-    private Integer roleId;
     // @Pattern(regexp="^\\(?(\\d{3})\\)?[- ]?(\\d{3})[- ]?(\\d{4})$", message="Invalid phone/fax format, should be as xxx-xxx-xxxx")//if the field contains phone or fax number consider using this annotation to enforce field validation
     @Size(max = 15)
     @Column(name = "phone")
@@ -138,26 +137,39 @@ public class Users implements Serializable {
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
+    @OneToMany(mappedBy = "userId")
+    private Collection<Feedback> feedbackCollection;
+    @OneToMany(mappedBy = "userId")
+    private Collection<Registrations> registrationsCollection;
+    @OneToMany(mappedBy = "userId")
+    private Collection<Approvals> approvalsCollection;
+    @OneToMany(mappedBy = "userId")
+    private Collection<Events> eventsCollection;
+    @OneToMany(mappedBy = "userId")
+    private Collection<Notifications> notificationsCollection;
+    @JoinColumn(name = "role_id", referencedColumnName = "role_id")
+    @ManyToOne
+    private Roles roleId;
 
     public Users() {
     }
 
-    public Users(Long userId) {
+    public Users(Integer userId) {
         this.userId = userId;
     }
 
-    public Users(Long userId, String name, String email, String password) {
+    public Users(Integer userId, String name, String email, String password) {
         this.userId = userId;
         this.name = name;
         this.email = email;
         this.password = password;
     }
 
-    public Long getUserId() {
+    public Integer getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(Integer userId) {
         this.userId = userId;
     }
 
@@ -183,14 +195,6 @@ public class Users implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public Integer getRoleId() {
-        return roleId;
-    }
-
-    public void setRoleId(Integer roleId) {
-        this.roleId = roleId;
     }
 
     public String getPhone() {
@@ -279,6 +283,59 @@ public class Users implements Serializable {
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
+    }
+
+    @XmlTransient
+    public Collection<Feedback> getFeedbackCollection() {
+        return feedbackCollection;
+    }
+
+    public void setFeedbackCollection(Collection<Feedback> feedbackCollection) {
+        this.feedbackCollection = feedbackCollection;
+    }
+
+    @XmlTransient
+    public Collection<Registrations> getRegistrationsCollection() {
+        return registrationsCollection;
+    }
+
+    public void setRegistrationsCollection(Collection<Registrations> registrationsCollection) {
+        this.registrationsCollection = registrationsCollection;
+    }
+
+    @XmlTransient
+    public Collection<Approvals> getApprovalsCollection() {
+        return approvalsCollection;
+    }
+
+    public void setApprovalsCollection(Collection<Approvals> approvalsCollection) {
+        this.approvalsCollection = approvalsCollection;
+    }
+
+    @XmlTransient
+    public Collection<Events> getEventsCollection() {
+        return eventsCollection;
+    }
+
+    public void setEventsCollection(Collection<Events> eventsCollection) {
+        this.eventsCollection = eventsCollection;
+    }
+
+    @XmlTransient
+    public Collection<Notifications> getNotificationsCollection() {
+        return notificationsCollection;
+    }
+
+    public void setNotificationsCollection(Collection<Notifications> notificationsCollection) {
+        this.notificationsCollection = notificationsCollection;
+    }
+
+    public Roles getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(Roles roleId) {
+        this.roleId = roleId;
     }
 
     @Override

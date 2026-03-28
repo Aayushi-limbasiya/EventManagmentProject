@@ -14,20 +14,30 @@ import java.util.Collection;
  */
 @Local
 public interface EventManagmentLocal {
-     void createEvent(Events event);
-
-    // Update Event
+    
+    void createEvent(Events event);
     void updateEvent(Events event);
-
-    // Delete Event
-    void deleteEvent(Long eventId);
-
-    // View Single Event
-    Events getEventById(Long eventId);
-
-    // View All Events
+    void deleteEvent(int eventId);
+    Events getEventById(int eventId);
     Collection<Events> getAllEvents();
 
-    // View Events By Organizer
-    Collection<Events> getEventsByOrganizer(Long organizerId);
+    // Status Management
+    void updateEventStatus(int eventId, String status);
+
+    // Search & Filter
+    Collection<Events> searchEvents(String keyword);
+    Collection<Events> getEventsByStatus(String status);
+    Collection<Events> getEventsByOrganizer(int userId);
+
+    // Upcoming & Past
+    Collection<Events> getUpcomingEvents();
+    Collection<Events> getPastEvents();
+
+    // Extra Features
+    void uploadEventBanner(int eventId, String imagePath);
+    Long getEventRegistrationCount(int eventId);
+    
 }
+
+
+

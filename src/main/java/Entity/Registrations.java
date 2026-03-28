@@ -10,14 +10,19 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.Size;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
 
 /**
@@ -30,8 +35,6 @@ import java.util.Date;
 @NamedQueries({
     @NamedQuery(name = "Registrations.findAll", query = "SELECT r FROM Registrations r"),
     @NamedQuery(name = "Registrations.findByRegistrationId", query = "SELECT r FROM Registrations r WHERE r.registrationId = :registrationId"),
-    @NamedQuery(name = "Registrations.findByEventId", query = "SELECT r FROM Registrations r WHERE r.eventId = :eventId"),
-    @NamedQuery(name = "Registrations.findByUserId", query = "SELECT r FROM Registrations r WHERE r.userId = :userId"),
     @NamedQuery(name = "Registrations.findByStatus", query = "SELECT r FROM Registrations r WHERE r.status = :status"),
     @NamedQuery(name = "Registrations.findByAttendanceStatus", query = "SELECT r FROM Registrations r WHERE r.attendanceStatus = :attendanceStatus"),
     @NamedQuery(name = "Registrations.findByRegisteredAt", query = "SELECT r FROM Registrations r WHERE r.registeredAt = :registeredAt")})
@@ -42,11 +45,7 @@ public class Registrations implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "registration_id")
-    private Long registrationId;
-    @Column(name = "event_id")
-    private Integer eventId;
-    @Column(name = "user_id")
-    private Integer userId;
+    private Integer registrationId;
     @Size(max = 20)
     @Column(name = "status")
     private String status;
@@ -56,36 +55,30 @@ public class Registrations implements Serializable {
     @Column(name = "registered_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date registeredAt;
+    @JoinColumn(name = "event_id", referencedColumnName = "event_id")
+    @ManyToOne
+    private Events eventId;
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @ManyToOne
+    private Users userId;
+    @OneToMany(mappedBy = "registrationId")
+    private Collection<Certificates> certificatesCollection;
+    @OneToMany(mappedBy = "registrationId")
+    private Collection<Payments> paymentsCollection;
 
     public Registrations() {
     }
 
-    public Registrations(Long registrationId) {
+    public Registrations(Integer registrationId) {
         this.registrationId = registrationId;
     }
 
-    public Long getRegistrationId() {
+    public Integer getRegistrationId() {
         return registrationId;
     }
 
-    public void setRegistrationId(Long registrationId) {
+    public void setRegistrationId(Integer registrationId) {
         this.registrationId = registrationId;
-    }
-
-    public Integer getEventId() {
-        return eventId;
-    }
-
-    public void setEventId(Integer eventId) {
-        this.eventId = eventId;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
     }
 
     public String getStatus() {
@@ -110,6 +103,40 @@ public class Registrations implements Serializable {
 
     public void setRegisteredAt(Date registeredAt) {
         this.registeredAt = registeredAt;
+    }
+
+    public Events getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(Events eventId) {
+        this.eventId = eventId;
+    }
+
+    public Users getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Users userId) {
+        this.userId = userId;
+    }
+
+    @XmlTransient
+    public Collection<Certificates> getCertificatesCollection() {
+        return certificatesCollection;
+    }
+
+    public void setCertificatesCollection(Collection<Certificates> certificatesCollection) {
+        this.certificatesCollection = certificatesCollection;
+    }
+
+    @XmlTransient
+    public Collection<Payments> getPaymentsCollection() {
+        return paymentsCollection;
+    }
+
+    public void setPaymentsCollection(Collection<Payments> paymentsCollection) {
+        this.paymentsCollection = paymentsCollection;
     }
 
     @Override

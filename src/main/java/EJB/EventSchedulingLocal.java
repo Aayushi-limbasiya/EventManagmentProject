@@ -16,24 +16,33 @@ import java.util.Date;
  */
 @Local
 public interface EventSchedulingLocal {
-    // Assign venue and schedule event
-    void assignVenue(EventSchedule schedule);
-
-    // Update event schedule
+   void assignVenue(int eventId, int venueId, Date startTime, Date endTime);
+    
     void updateSchedule(EventSchedule schedule);
 
-    // Delete schedule
-    void deleteSchedule(Long scheduleId);
+    EventSchedule getScheduleByEvent(int eventId);
 
-    // Get schedule by event
-    Collection<EventSchedule> getScheduleByEvent(Long eventId);
+    // 🔹 EXTRA FUNCTIONS
+    
+    boolean checkVenueAvailability(int venueId, Date startTime, Date endTime);
+    
+    boolean preventScheduleConflict(int venueId, Date startTime, Date endTime);
+    
+    void updateCapacity(int scheduleId, int capacity);
 
-    // Check venue availability
-    boolean isVenueAvailable(Long venueId, Date startTime, Date endTime);
-
-    // Get all venues
+    // 🔹 VENUE MANAGEMENT (ADMIN)
+    
+    void addVenue(Venues venue);
+    
+    void updateVenue(Venues venue);
+    
+    void deleteVenue(int venueId);
+    
     Collection<Venues> getAllVenues();
 
-    // Get venue by id
-    Venues getVenueById(Long venueId);
+    // 🔹 ANALYTICS
+    
+    Collection<EventSchedule> getVenueUsageHistory(int venueId);
+    
+    Collection<EventSchedule> getCalendarEvents();
 }

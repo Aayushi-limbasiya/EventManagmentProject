@@ -10,7 +10,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
@@ -32,7 +34,6 @@ import java.util.Date;
 @NamedQueries({
     @NamedQuery(name = "Notifications.findAll", query = "SELECT n FROM Notifications n"),
     @NamedQuery(name = "Notifications.findByNotificationId", query = "SELECT n FROM Notifications n WHERE n.notificationId = :notificationId"),
-    @NamedQuery(name = "Notifications.findByUserId", query = "SELECT n FROM Notifications n WHERE n.userId = :userId"),
     @NamedQuery(name = "Notifications.findByType", query = "SELECT n FROM Notifications n WHERE n.type = :type"),
     @NamedQuery(name = "Notifications.findByChannel", query = "SELECT n FROM Notifications n WHERE n.channel = :channel"),
     @NamedQuery(name = "Notifications.findByStatus", query = "SELECT n FROM Notifications n WHERE n.status = :status"),
@@ -44,9 +45,7 @@ public class Notifications implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "notification_id")
-    private Long notificationId;
-    @Column(name = "user_id")
-    private Integer userId;
+    private Integer notificationId;
     @Basic(optional = false)
     @NotNull
     @Lob
@@ -65,33 +64,28 @@ public class Notifications implements Serializable {
     @Column(name = "sent_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date sentAt;
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @ManyToOne
+    private Users userId;
 
     public Notifications() {
     }
 
-    public Notifications(Long notificationId) {
+    public Notifications(Integer notificationId) {
         this.notificationId = notificationId;
     }
 
-    public Notifications(Long notificationId, String message) {
+    public Notifications(Integer notificationId, String message) {
         this.notificationId = notificationId;
         this.message = message;
     }
 
-    public Long getNotificationId() {
+    public Integer getNotificationId() {
         return notificationId;
     }
 
-    public void setNotificationId(Long notificationId) {
+    public void setNotificationId(Integer notificationId) {
         this.notificationId = notificationId;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
     }
 
     public String getMessage() {
@@ -132,6 +126,14 @@ public class Notifications implements Serializable {
 
     public void setSentAt(Date sentAt) {
         this.sentAt = sentAt;
+    }
+
+    public Users getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Users userId) {
+        this.userId = userId;
     }
 
     @Override

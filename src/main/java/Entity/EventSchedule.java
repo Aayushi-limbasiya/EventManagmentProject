@@ -10,6 +10,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
@@ -29,11 +31,53 @@ import java.util.Date;
 @NamedQueries({
     @NamedQuery(name = "EventSchedule.findAll", query = "SELECT e FROM EventSchedule e"),
     @NamedQuery(name = "EventSchedule.findByScheduleId", query = "SELECT e FROM EventSchedule e WHERE e.scheduleId = :scheduleId"),
-    @NamedQuery(name = "EventSchedule.findByEventId", query = "SELECT e FROM EventSchedule e WHERE e.eventId = :eventId"),
-    @NamedQuery(name = "EventSchedule.findByVenueId", query = "SELECT e FROM EventSchedule e WHERE e.venueId = :venueId"),
     @NamedQuery(name = "EventSchedule.findByStartTime", query = "SELECT e FROM EventSchedule e WHERE e.startTime = :startTime"),
     @NamedQuery(name = "EventSchedule.findByEndTime", query = "SELECT e FROM EventSchedule e WHERE e.endTime = :endTime"),
-    @NamedQuery(name = "EventSchedule.findByCapacity", query = "SELECT e FROM EventSchedule e WHERE e.capacity = :capacity")})
+    @NamedQuery(name = "EventSchedule.findByCapacity", query = "SELECT e FROM EventSchedule e WHERE e.capacity = :capacity"),
+    // 🔹 FIND SCHEDULE BY EVENT ID
+        @NamedQuery(
+            name = "EventSchedule.findByEvent",
+            query = "SELECT e FROM EventSchedule e WHERE e.eventId.eventId = :eventId"
+        ),
+
+        // 🔹 FIND SCHEDULE BY VENUE ID
+        @NamedQuery(
+            name = "EventSchedule.findByVenue",
+            query = "SELECT e FROM EventSchedule e WHERE e.venueId.venueId = :venueId"
+        ),
+
+        // 🔹 CHECK VENUE AVAILABILITY (CONFLICT CHECK)
+        @NamedQuery(
+            name = "EventSchedule.checkVenueAvailability",
+            query = "SELECT e FROM EventSchedule e WHERE e.venueId.venueId = :venueId " +
+                    "AND (e.startTime < :endTime AND e.endTime > :startTime)"
+        ),
+
+        // 🔹 FIND UPCOMING EVENTS
+        @NamedQuery(
+            name = "EventSchedule.findUpcoming",
+            query = "SELECT e FROM EventSchedule e WHERE e.startTime > CURRENT_TIMESTAMP ORDER BY e.startTime ASC"
+        ),
+
+        // 🔹 FIND PAST EVENTS
+        @NamedQuery(
+            name = "EventSchedule.findPast",
+            query = "SELECT e FROM EventSchedule e WHERE e.endTime < CURRENT_TIMESTAMP ORDER BY e.startTime DESC"
+        ),
+
+        // 🔹 GET VENUE USAGE HISTORY
+        @NamedQuery(
+            name = "EventSchedule.venueUsageHistory",
+            query = "SELECT e FROM EventSchedule e WHERE e.venueId.venueId = :venueId ORDER BY e.startTime DESC"
+        ),
+
+        // 🔹 CALENDAR VIEW (ALL EVENTS SORTED)
+        @NamedQuery(
+            name = "EventSchedule.calendarView",
+            query = "SELECT e FROM EventSchedule e ORDER BY e.startTime ASC"
+        )
+
+})
 public class EventSchedule implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -41,11 +85,7 @@ public class EventSchedule implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "schedule_id")
-    private Long scheduleId;
-    @Column(name = "event_id")
-    private Integer eventId;
-    @Column(name = "venue_id")
-    private Integer venueId;
+    private Integer scheduleId;
     @Column(name = "start_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date startTime;
@@ -54,36 +94,26 @@ public class EventSchedule implements Serializable {
     private Date endTime;
     @Column(name = "capacity")
     private Integer capacity;
+    @JoinColumn(name = "event_id", referencedColumnName = "event_id")
+    @ManyToOne
+    private Events eventId;
+    @JoinColumn(name = "venue_id", referencedColumnName = "venue_id")
+    @ManyToOne
+    private Venues venueId;
 
     public EventSchedule() {
     }
 
-    public EventSchedule(Long scheduleId) {
+    public EventSchedule(Integer scheduleId) {
         this.scheduleId = scheduleId;
     }
 
-    public Long getScheduleId() {
+    public Integer getScheduleId() {
         return scheduleId;
     }
 
-    public void setScheduleId(Long scheduleId) {
+    public void setScheduleId(Integer scheduleId) {
         this.scheduleId = scheduleId;
-    }
-
-    public Integer getEventId() {
-        return eventId;
-    }
-
-    public void setEventId(Integer eventId) {
-        this.eventId = eventId;
-    }
-
-    public Integer getVenueId() {
-        return venueId;
-    }
-
-    public void setVenueId(Integer venueId) {
-        this.venueId = venueId;
     }
 
     public Date getStartTime() {
@@ -108,6 +138,22 @@ public class EventSchedule implements Serializable {
 
     public void setCapacity(Integer capacity) {
         this.capacity = capacity;
+    }
+
+    public Events getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(Events eventId) {
+        this.eventId = eventId;
+    }
+
+    public Venues getVenueId() {
+        return venueId;
+    }
+
+    public void setVenueId(Venues venueId) {
+        this.venueId = venueId;
     }
 
     @Override

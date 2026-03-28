@@ -12,11 +12,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  *
@@ -30,7 +33,32 @@ import java.io.Serializable;
     @NamedQuery(name = "Venues.findByVenueId", query = "SELECT v FROM Venues v WHERE v.venueId = :venueId"),
     @NamedQuery(name = "Venues.findByName", query = "SELECT v FROM Venues v WHERE v.name = :name"),
     @NamedQuery(name = "Venues.findByCapacity", query = "SELECT v FROM Venues v WHERE v.capacity = :capacity"),
-    @NamedQuery(name = "Venues.findByLocation", query = "SELECT v FROM Venues v WHERE v.location = :location")})
+    @NamedQuery(name = "Venues.findByLocation", query = "SELECT v FROM Venues v WHERE v.location = :location"),
+    // 🔹 FIND VENUE BY NAME
+        @NamedQuery(
+            name = "Venues.findByName",
+            query = "SELECT v FROM Venues v WHERE v.name = :name"
+        ),
+
+        // 🔹 FIND VENUE BY LOCATION
+        @NamedQuery(
+            name = "Venues.findByLocation",
+            query = "SELECT v FROM Venues v WHERE v.location = :location"
+        ),
+
+        // 🔹 FIND VENUE BY CAPACITY GREATER THAN
+        @NamedQuery(
+            name = "Venues.findByCapacityGreater",
+            query = "SELECT v FROM Venues v WHERE v.capacity >= :capacity"
+        ),
+
+        // 🔹 SEARCH VENUE (NAME OR LOCATION)
+        @NamedQuery(
+            name = "Venues.searchVenue",
+            query = "SELECT v FROM Venues v WHERE v.name LIKE :keyword OR v.location LIKE :keyword"
+        )
+
+})
 public class Venues implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -38,7 +66,7 @@ public class Venues implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "venue_id")
-    private Long venueId;
+    private Integer venueId;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 100)
@@ -51,25 +79,27 @@ public class Venues implements Serializable {
     @Size(max = 200)
     @Column(name = "location")
     private String location;
+    @OneToMany(mappedBy = "venueId")
+    private Collection<EventSchedule> eventScheduleCollection;
 
     public Venues() {
     }
 
-    public Venues(Long venueId) {
+    public Venues(Integer venueId) {
         this.venueId = venueId;
     }
 
-    public Venues(Long venueId, String name, int capacity) {
+    public Venues(Integer venueId, String name, int capacity) {
         this.venueId = venueId;
         this.name = name;
         this.capacity = capacity;
     }
 
-    public Long getVenueId() {
+    public Integer getVenueId() {
         return venueId;
     }
 
-    public void setVenueId(Long venueId) {
+    public void setVenueId(Integer venueId) {
         this.venueId = venueId;
     }
 
@@ -95,6 +125,15 @@ public class Venues implements Serializable {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    @XmlTransient
+    public Collection<EventSchedule> getEventScheduleCollection() {
+        return eventScheduleCollection;
+    }
+
+    public void setEventScheduleCollection(Collection<EventSchedule> eventScheduleCollection) {
+        this.eventScheduleCollection = eventScheduleCollection;
     }
 
     @Override

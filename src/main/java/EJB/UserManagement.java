@@ -132,6 +132,7 @@ public class UserManagement implements UserManagementLocal {
     public Collection<Users> getUsersByRole(int roleId) {
         TypedQuery<Users> q = em.createNamedQuery("Users.findByRole", Users.class);
         q.setParameter("roleId", roleId);
+//        em.createNamedQuery("Users.getUsersByRole", Users.class);
 
         return q.getResultList();
     }

@@ -10,6 +10,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
@@ -31,7 +33,6 @@ import java.util.Date;
 @NamedQueries({
     @NamedQuery(name = "Payments.findAll", query = "SELECT p FROM Payments p"),
     @NamedQuery(name = "Payments.findByPaymentId", query = "SELECT p FROM Payments p WHERE p.paymentId = :paymentId"),
-    @NamedQuery(name = "Payments.findByRegistrationId", query = "SELECT p FROM Payments p WHERE p.registrationId = :registrationId"),
     @NamedQuery(name = "Payments.findByAmount", query = "SELECT p FROM Payments p WHERE p.amount = :amount"),
     @NamedQuery(name = "Payments.findByPaymentMethod", query = "SELECT p FROM Payments p WHERE p.paymentMethod = :paymentMethod"),
     @NamedQuery(name = "Payments.findByPaymentStatus", query = "SELECT p FROM Payments p WHERE p.paymentStatus = :paymentStatus"),
@@ -43,9 +44,7 @@ public class Payments implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "payment_id")
-    private Long paymentId;
-    @Column(name = "registration_id")
-    private Integer registrationId;
+    private Integer paymentId;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "amount")
     private BigDecimal amount;
@@ -58,28 +57,23 @@ public class Payments implements Serializable {
     @Column(name = "payment_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date paymentDate;
+    @JoinColumn(name = "registration_id", referencedColumnName = "registration_id")
+    @ManyToOne
+    private Registrations registrationId;
 
     public Payments() {
     }
 
-    public Payments(Long paymentId) {
+    public Payments(Integer paymentId) {
         this.paymentId = paymentId;
     }
 
-    public Long getPaymentId() {
+    public Integer getPaymentId() {
         return paymentId;
     }
 
-    public void setPaymentId(Long paymentId) {
+    public void setPaymentId(Integer paymentId) {
         this.paymentId = paymentId;
-    }
-
-    public Integer getRegistrationId() {
-        return registrationId;
-    }
-
-    public void setRegistrationId(Integer registrationId) {
-        this.registrationId = registrationId;
     }
 
     public BigDecimal getAmount() {
@@ -112,6 +106,14 @@ public class Payments implements Serializable {
 
     public void setPaymentDate(Date paymentDate) {
         this.paymentDate = paymentDate;
+    }
+
+    public Registrations getRegistrationId() {
+        return registrationId;
+    }
+
+    public void setRegistrationId(Registrations registrationId) {
+        this.registrationId = registrationId;
     }
 
     @Override

@@ -21,3 +21,5 @@ import jakarta.ws.rs.core.Application;
 public class JakartaRestConfiguration extends Application {
 
 }
+
+

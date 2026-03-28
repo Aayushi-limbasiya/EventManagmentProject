@@ -9,7 +9,9 @@ import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 import java.util.Collection;
+import java.util.Date;
 
 /**
  *
@@ -23,43 +25,111 @@ public class EventManagment implements EventManagmentLocal {
 
     @Override
     public void createEvent(Events event) {
-         em.persist(event);
+        event.setStatus("Draft");
+        event.setCreatedAt(new Date());
+        em.persist(event);
     }
 
     @Override
     public void updateEvent(Events event) {
-                em.merge(event);
+         em.merge(event);
     }
 
     @Override
-    public void deleteEvent(Long eventId) {
-       Events event = em.find(Events.class, eventId);
-        if(event != null){
-            em.remove(event);
+    public void deleteEvent(int eventId) {
+        Events e = em.find(Events.class, eventId);
+        if (e != null) {
+            em.remove(e);
         }
     }
 
     @Override
-    public Events getEventById(Long eventId) {
-       Query q = em.createNamedQuery("Events.findByEventId");
-        q.setParameter("eventId", eventId);
-
-        return (Events) q.getSingleResult();
+    public Events getEventById(int eventId) {
+       return em.find(Events.class, eventId);
     }
 
     @Override
     public Collection<Events> getAllEvents() {
-         Query q = em.createNamedQuery("Events.findAll");
-
+         TypedQuery<Events> q = em.createNamedQuery("Events.findAll", Events.class);
         return q.getResultList();
     }
 
     @Override
-    public Collection<Events> getEventsByOrganizer(Long organizerId) {
-         Query q = em.createNamedQuery("Events.findByOrganizerId");
-        q.setParameter("organizerId", organizerId);
+    public void updateEventStatus(int eventId, String status) {
+         Events e = em.find(Events.class, eventId);
+        if (e != null) {
+            e.setStatus(status);
+            em.merge(e);
+        }
+    }
 
+    @Override
+    public Collection<Events> searchEvents(String keyword) {
+         TypedQuery<Events> q = em.createQuery(
+            "SELECT e FROM Events e WHERE e.title LIKE :kw OR e.description LIKE :kw",
+            Events.class
+        );
+        q.setParameter("kw", "%" + keyword + "%");
         return q.getResultList();
     }
 
+    @Override
+    public Collection<Events> getEventsByStatus(String status) {
+        TypedQuery<Events> q = em.createNamedQuery("Events.findByStatus", Events.class);
+        q.setParameter("status", status);
+        return q.getResultList();
+    }
+
+    @Override
+    public Collection<Events> getEventsByOrganizer(int userId) {
+        TypedQuery<Events> q = em.createQuery(
+            "SELECT e FROM Events e WHERE e.userId.userId = :uid",
+            Events.class
+        );
+        q.setParameter("uid", userId);
+        return q.getResultList();
+    }
+
+    @Override
+    public Collection<Events> getUpcomingEvents() {
+       TypedQuery<Events> q = em.createQuery(
+            "SELECT e FROM Events e WHERE e.createdAt >= :today",
+            Events.class
+        );
+        q.setParameter("today", new Date());
+        return q.getResultList();
+    }
+
+    @Override
+    public Collection<Events> getPastEvents() {
+        TypedQuery<Events> q = em.createQuery(
+            "SELECT e FROM Events e WHERE e.createdAt < :today",
+            Events.class
+        );
+        q.setParameter("today", new Date());
+        return q.getResultList();
+    }
+
+    @Override
+    public void uploadEventBanner(int eventId, String imagePath) {
+         Events e = em.find(Events.class, eventId);
+        if (e != null) {
+            // You can add column in DB later if needed
+            // e.setBanner(imagePath);
+            em.merge(e);
+        }
+    }
+
+    @Override
+    public Long getEventRegistrationCount(int eventId) {
+         Long count = em.createQuery(
+            "SELECT COUNT(r) FROM Registrations r WHERE r.eventId.eventId = :eid",
+            Long.class
+        ).setParameter("eid", eventId)
+         .getSingleResult();
+
+        return count;
+    }
+
+    
 }

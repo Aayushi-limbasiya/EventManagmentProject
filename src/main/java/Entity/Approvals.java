@@ -10,7 +10,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
@@ -31,8 +33,6 @@ import java.util.Date;
 @NamedQueries({
     @NamedQuery(name = "Approvals.findAll", query = "SELECT a FROM Approvals a"),
     @NamedQuery(name = "Approvals.findByApprovalId", query = "SELECT a FROM Approvals a WHERE a.approvalId = :approvalId"),
-    @NamedQuery(name = "Approvals.findByEventId", query = "SELECT a FROM Approvals a WHERE a.eventId = :eventId"),
-    @NamedQuery(name = "Approvals.findByUserId", query = "SELECT a FROM Approvals a WHERE a.userId = :userId"),
     @NamedQuery(name = "Approvals.findByDecision", query = "SELECT a FROM Approvals a WHERE a.decision = :decision"),
     @NamedQuery(name = "Approvals.findByDecisionAt", query = "SELECT a FROM Approvals a WHERE a.decisionAt = :decisionAt")})
 public class Approvals implements Serializable {
@@ -42,11 +42,7 @@ public class Approvals implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "approval_id")
-    private Long approvalId;
-    @Column(name = "event_id")
-    private Integer eventId;
-    @Column(name = "user_id")
-    private Integer userId;
+    private Integer approvalId;
     @Size(max = 20)
     @Column(name = "decision")
     private String decision;
@@ -57,36 +53,26 @@ public class Approvals implements Serializable {
     @Column(name = "decision_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date decisionAt;
+    @JoinColumn(name = "event_id", referencedColumnName = "event_id")
+    @ManyToOne
+    private Events eventId;
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @ManyToOne
+    private Users userId;
 
     public Approvals() {
     }
 
-    public Approvals(Long approvalId) {
+    public Approvals(Integer approvalId) {
         this.approvalId = approvalId;
     }
 
-    public Long getApprovalId() {
+    public Integer getApprovalId() {
         return approvalId;
     }
 
-    public void setApprovalId(Long approvalId) {
+    public void setApprovalId(Integer approvalId) {
         this.approvalId = approvalId;
-    }
-
-    public Integer getEventId() {
-        return eventId;
-    }
-
-    public void setEventId(Integer eventId) {
-        this.eventId = eventId;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
     }
 
     public String getDecision() {
@@ -111,6 +97,22 @@ public class Approvals implements Serializable {
 
     public void setDecisionAt(Date decisionAt) {
         this.decisionAt = decisionAt;
+    }
+
+    public Events getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(Events eventId) {
+        this.eventId = eventId;
+    }
+
+    public Users getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Users userId) {
+        this.userId = userId;
     }
 
     @Override
