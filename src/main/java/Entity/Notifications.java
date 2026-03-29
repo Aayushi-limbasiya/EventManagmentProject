@@ -37,7 +37,50 @@ import java.util.Date;
     @NamedQuery(name = "Notifications.findByType", query = "SELECT n FROM Notifications n WHERE n.type = :type"),
     @NamedQuery(name = "Notifications.findByChannel", query = "SELECT n FROM Notifications n WHERE n.channel = :channel"),
     @NamedQuery(name = "Notifications.findByStatus", query = "SELECT n FROM Notifications n WHERE n.status = :status"),
-    @NamedQuery(name = "Notifications.findBySentAt", query = "SELECT n FROM Notifications n WHERE n.sentAt = :sentAt")})
+    @NamedQuery(name = "Notifications.findBySentAt", query = "SELECT n FROM Notifications n WHERE n.sentAt = :sentAt"),
+      // Get all notifications for a specific user
+    @NamedQuery(name = "Notifications.findByUser",
+        query = "SELECT n FROM Notifications n WHERE n.userId.userId = :userId ORDER BY n.sentAt DESC"),
+
+    // Get unread notifications for a user (status = Unread)
+    @NamedQuery(name = "Notifications.getUnreadByUser",
+        query = "SELECT n FROM Notifications n WHERE n.userId.userId = :userId AND n.status = 'Unread' ORDER BY n.sentAt DESC"),
+
+    // Get read notifications for a user (status = Read)
+    @NamedQuery(name = "Notifications.getReadByUser",
+        query = "SELECT n FROM Notifications n WHERE n.userId.userId = :userId AND n.status = 'Read' ORDER BY n.sentAt DESC"),
+
+    // Get notifications by user and type
+    // type values: Registration / Payment / Approval / Reminder / Broadcast
+    @NamedQuery(name = "Notifications.findByUserAndType",
+        query = "SELECT n FROM Notifications n WHERE n.userId.userId = :userId AND n.type = :type ORDER BY n.sentAt DESC"),
+
+    // Get notifications by user and channel
+    // channel values: Email / System / SMS
+    @NamedQuery(name = "Notifications.findByUserAndChannel",
+        query = "SELECT n FROM Notifications n WHERE n.userId.userId = :userId AND n.channel = :channel ORDER BY n.sentAt DESC"),
+
+    // Count unread notifications for a user (badge count)
+    @NamedQuery(name = "Notifications.countUnreadByUser",
+        query = "SELECT COUNT(n) FROM Notifications n WHERE n.userId.userId = :userId AND n.status = 'Unread'"),
+
+    // Get all broadcast notifications (type = Broadcast)
+    @NamedQuery(name = "Notifications.getBroadcasts",
+        query = "SELECT n FROM Notifications n WHERE n.type = 'Broadcast' ORDER BY n.sentAt DESC"),
+
+    // Get all event reminder notifications (type = Reminder)
+    @NamedQuery(name = "Notifications.getReminders",
+        query = "SELECT n FROM Notifications n WHERE n.type = 'Reminder' ORDER BY n.sentAt DESC"),
+
+    // Mark all notifications as Read for a user (bulk update)
+    @NamedQuery(name = "Notifications.markAllReadByUser",
+        query = "UPDATE Notifications n SET n.status = 'Read' WHERE n.userId.userId = :userId AND n.status = 'Unread'"),
+
+    // Get latest N notifications for a user
+    @NamedQuery(name = "Notifications.getLatestByUser",
+        query = "SELECT n FROM Notifications n WHERE n.userId.userId = :userId ORDER BY n.sentAt DESC")
+})
+
 public class Notifications implements Serializable {
 
     private static final long serialVersionUID = 1L;

@@ -5,11 +5,13 @@
 package EJB;
 
 import Entity.EventSchedule;
+import Entity.Events;
 import Entity.Venues;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 import java.util.Collection;
 import java.util.Date;
 
@@ -24,38 +26,48 @@ public class EventScheduling implements EventSchedulingLocal {
     EntityManager em;
 
     @Override
-    public void assignVenue(EventSchedule schedule) {
-         em.persist(schedule);
+    public void assignVenue(int eventId, int venueId, Date startTime, Date endTime) {
+         if (!checkVenueAvailability(venueId, startTime, endTime)) {
+            throw new RuntimeException("Venue not available!");
+        }
+
+        EventSchedule schedule = new EventSchedule();
+
+        Events event = em.find(Events.class, eventId);
+        Venues venue = em.find(Venues.class, venueId);
+
+        schedule.setEventId(event);
+        schedule.setVenueId(venue);
+        schedule.setStartTime(startTime);
+        schedule.setEndTime(endTime);
+
+        em.persist(schedule);
     }
 
     @Override
     public void updateSchedule(EventSchedule schedule) {
-          em.merge(schedule);
+        em.merge(schedule);
     }
 
     @Override
-    public void deleteSchedule(Long scheduleId) {
-         EventSchedule schedule = em.find(EventSchedule.class, scheduleId);
+    public EventSchedule getScheduleByEvent(int eventId) {
+        TypedQuery<EventSchedule> q = em.createQuery(
+                "SELECT s FROM EventSchedule s WHERE s.eventId.eventId = :eid",
+                EventSchedule.class);
 
-        if(schedule != null){
-            em.remove(schedule);
-        }
+        q.setParameter("eid", eventId);
+
+        return q.getResultList().isEmpty() ? null : q.getResultList().get(0);
     }
 
     @Override
-    public Collection<EventSchedule> getScheduleByEvent(Long eventId) {
-        
-        Query q = em.createNamedQuery("EventSchedule.findByEventId");
-        q.setParameter("eventId", eventId);
+    public boolean checkVenueAvailability(int venueId, Date startTime, Date endTime) {
+          TypedQuery<EventSchedule> q = em.createQuery(
+            "SELECT s FROM EventSchedule s WHERE s.venueId.venueId = :vid " +
+            "AND (s.startTime < :endTime AND s.endTime > :startTime)",
+            EventSchedule.class);
 
-        return q.getResultList();
-    }
-
-    @Override
-    public boolean isVenueAvailable(Long venueId, Date startTime, Date endTime) {
-       Query q = em.createNamedQuery("EventSchedule.checkVenueAvailability");
-
-        q.setParameter("venueId", venueId);
+        q.setParameter("vid", venueId);
         q.setParameter("startTime", startTime);
         q.setParameter("endTime", endTime);
 
@@ -63,18 +75,66 @@ public class EventScheduling implements EventSchedulingLocal {
     }
 
     @Override
+    public boolean preventScheduleConflict(int venueId, Date startTime, Date endTime) {
+                return checkVenueAvailability(venueId, startTime, endTime);
+    }
+
+    @Override
+    public void updateCapacity(int scheduleId, int capacity) {
+          EventSchedule schedule = em.find(EventSchedule.class, scheduleId);
+
+        if (schedule != null) {
+            schedule.setCapacity(capacity);
+            em.merge(schedule);
+        }
+    }
+
+    @Override
+    public void addVenue(Venues venue) {
+        em.persist(venue);
+    }
+
+    @Override
+    public void updateVenue(Venues venue) {
+        em.merge(venue);
+    }
+
+    @Override
+    public void deleteVenue(int venueId) {
+        Venues v = em.find(Venues.class, venueId);
+
+        if (v != null) {
+            em.remove(v);
+        }
+    }
+
+    @Override
     public Collection<Venues> getAllVenues() {
-        Query q = em.createNamedQuery("Venues.findAll");
+         TypedQuery<Venues> q = em.createQuery(
+                "SELECT v FROM Venues v", Venues.class);
 
         return q.getResultList();
     }
 
     @Override
-    public Venues getVenueById(Long venueId) {
-       Query q = em.createNamedQuery("Venues.findByVenueId");
-        q.setParameter("venueId", venueId);
+    public Collection<EventSchedule> getVenueUsageHistory(int venueId) {
+           TypedQuery<EventSchedule> q = em.createQuery(
+            "SELECT s FROM EventSchedule s WHERE s.venueId.venueId = :vid",
+            EventSchedule.class);
 
-        return (Venues) q.getSingleResult();
+        q.setParameter("vid", venueId);
+
+        return q.getResultList();
     }
 
+    @Override
+    public Collection<EventSchedule> getCalendarEvents() {
+         TypedQuery<EventSchedule> q = em.createQuery(
+                "SELECT s FROM EventSchedule s ORDER BY s.startTime",
+                EventSchedule.class);
+
+        return q.getResultList();
+    }
+
+   
 }

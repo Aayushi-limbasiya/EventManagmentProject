@@ -36,7 +36,49 @@ import java.util.Date;
     @NamedQuery(name = "Payments.findByAmount", query = "SELECT p FROM Payments p WHERE p.amount = :amount"),
     @NamedQuery(name = "Payments.findByPaymentMethod", query = "SELECT p FROM Payments p WHERE p.paymentMethod = :paymentMethod"),
     @NamedQuery(name = "Payments.findByPaymentStatus", query = "SELECT p FROM Payments p WHERE p.paymentStatus = :paymentStatus"),
-    @NamedQuery(name = "Payments.findByPaymentDate", query = "SELECT p FROM Payments p WHERE p.paymentDate = :paymentDate")})
+    @NamedQuery(name = "Payments.findByPaymentDate", query = "SELECT p FROM Payments p WHERE p.paymentDate = :paymentDate"),
+    // Get payment by registration ID
+    @NamedQuery(name = "Payments.findByRegistration",
+        query = "SELECT p FROM Payments p WHERE p.registrationId.registrationId = :registrationId"),
+
+    // Get all payments made by a specific user (via registration → user)
+    @NamedQuery(name = "Payments.findByUser",
+        query = "SELECT p FROM Payments p WHERE p.registrationId.userId.userId = :userId ORDER BY p.paymentDate DESC"),
+
+    // Get all payments for a specific event (via registration → event)
+    @NamedQuery(name = "Payments.findByEvent",
+        query = "SELECT p FROM Payments p WHERE p.registrationId.eventId.eventId = :eventId"),
+
+    // Get all Pending payments for admin verification
+    @NamedQuery(name = "Payments.getPendingVerification",
+        query = "SELECT p FROM Payments p WHERE p.paymentStatus = 'Pending' ORDER BY p.paymentDate ASC"),
+
+    // Get all Refunded payments
+    @NamedQuery(name = "Payments.getRefundedPayments",
+        query = "SELECT p FROM Payments p WHERE p.paymentStatus = 'Refunded'"),
+
+    // Get refunded payments for a specific event
+    @NamedQuery(name = "Payments.getRefundedByEvent",
+        query = "SELECT p FROM Payments p WHERE p.registrationId.eventId.eventId = :eventId AND p.paymentStatus = 'Refunded'"),
+
+    // Get total revenue for a specific event (sum of Paid payments)
+    @NamedQuery(name = "Payments.getTotalRevenueByEvent",
+        query = "SELECT SUM(p.amount) FROM Payments p WHERE p.registrationId.eventId.eventId = :eventId AND p.paymentStatus = 'Paid'"),
+
+    // Get total overall revenue
+    @NamedQuery(name = "Payments.getTotalRevenue",
+        query = "SELECT SUM(p.amount) FROM Payments p WHERE p.paymentStatus = 'Paid'"),
+
+    // Count payments by status (for dashboard)
+    @NamedQuery(name = "Payments.countByStatus",
+        query = "SELECT COUNT(p) FROM Payments p WHERE p.paymentStatus = :paymentStatus"),
+
+    // Get payments by event and method (report filter)
+    @NamedQuery(name = "Payments.findByEventAndMethod",
+        query = "SELECT p FROM Payments p WHERE p.registrationId.eventId.eventId = :eventId AND p.paymentMethod = :paymentMethod")
+
+
+})
 public class Payments implements Serializable {
 
     private static final long serialVersionUID = 1L;

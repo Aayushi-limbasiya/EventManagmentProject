@@ -37,7 +37,42 @@ import java.util.Date;
     @NamedQuery(name = "Registrations.findByRegistrationId", query = "SELECT r FROM Registrations r WHERE r.registrationId = :registrationId"),
     @NamedQuery(name = "Registrations.findByStatus", query = "SELECT r FROM Registrations r WHERE r.status = :status"),
     @NamedQuery(name = "Registrations.findByAttendanceStatus", query = "SELECT r FROM Registrations r WHERE r.attendanceStatus = :attendanceStatus"),
-    @NamedQuery(name = "Registrations.findByRegisteredAt", query = "SELECT r FROM Registrations r WHERE r.registeredAt = :registeredAt")})
+    @NamedQuery(name = "Registrations.findByRegisteredAt", query = "SELECT r FROM Registrations r WHERE r.registeredAt = :registeredAt"),
+     @NamedQuery(name = "Registrations.findByEvent",
+        query = "SELECT r FROM Registrations r WHERE r.eventId.eventId = :eventId"),
+
+    // Get all registrations by a specific user
+    @NamedQuery(name = "Registrations.findByUser",
+        query = "SELECT r FROM Registrations r WHERE r.userId.userId = :userId"),
+    
+     @NamedQuery(name = "Registrations.checkAlreadyRegistered",
+        query = "SELECT r FROM Registrations r WHERE r.userId.userId = :userId AND r.eventId.eventId = :eventId"),
+
+    // Count confirmed registrations for an event (for capacity check)
+    @NamedQuery(name = "Registrations.countConfirmedByEvent",
+        query = "SELECT COUNT(r) FROM Registrations r WHERE r.eventId.eventId = :eventId AND r.status = 'Confirmed'"),
+
+    // Get waitlisted registrations for an event
+    @NamedQuery(name = "Registrations.getWaitlistByEvent",
+        query = "SELECT r FROM Registrations r WHERE r.eventId.eventId = :eventId AND r.status = 'Waitlist' ORDER BY r.registeredAt ASC"),
+
+    // Get participant list for an event (organizer view)
+    @NamedQuery(name = "Registrations.getParticipantsByEvent",
+        query = "SELECT r FROM Registrations r WHERE r.eventId.eventId = :eventId AND r.status = 'Confirmed'"),
+
+    // Get pending approval registrations for an event
+    @NamedQuery(name = "Registrations.getPendingApprovalByEvent",
+        query = "SELECT r FROM Registrations r WHERE r.eventId.eventId = :eventId AND r.status = 'Pending'"),
+
+    // Get registrations by event and attendance status
+    @NamedQuery(name = "Registrations.findByEventAndAttendance",
+        query = "SELECT r FROM Registrations r WHERE r.eventId.eventId = :eventId AND r.attendanceStatus = :attendanceStatus"),
+
+    // Get registration by QR / registration ID for check-in
+    @NamedQuery(name = "Registrations.findForCheckIn",
+        query = "SELECT r FROM Registrations r WHERE r.registrationId = :registrationId AND r.eventId.eventId = :eventId")
+
+})
 public class Registrations implements Serializable {
 
     private static final long serialVersionUID = 1L;

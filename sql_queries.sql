@@ -14,7 +14,9 @@
 
 
 CREATE DATABASE EventManagement;
-USE EventManagement;
+USE eventmanagment;
+SHOW DATABASES;
+
 
 CREATE TABLE roles (
     role_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
@@ -132,7 +134,20 @@ CREATE TABLE certificates (
     CONSTRAINT fk_cert_reg FOREIGN KEY (registration_id) REFERENCES registrations(registration_id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS auth_tokens (
+    token_id     INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    user_id      INT UNSIGNED NOT NULL,
+    token        TEXT NOT NULL,
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at   TIMESTAMP NOT NULL,
+    is_revoked   TINYINT(1) DEFAULT 0,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
 
+-- Add reset token columns to users table for forgot password
+ALTER TABLE users
+    ADD COLUMN reset_token VARCHAR(255) DEFAULT NULL,
+    ADD COLUMN reset_token_expiry TIMESTAMP DEFAULT NULL;
 
 
 

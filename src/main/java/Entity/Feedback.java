@@ -34,7 +34,46 @@ import java.util.Date;
     @NamedQuery(name = "Feedback.findAll", query = "SELECT f FROM Feedback f"),
     @NamedQuery(name = "Feedback.findByFeedbackId", query = "SELECT f FROM Feedback f WHERE f.feedbackId = :feedbackId"),
     @NamedQuery(name = "Feedback.findByRating", query = "SELECT f FROM Feedback f WHERE f.rating = :rating"),
-    @NamedQuery(name = "Feedback.findByCreatedAt", query = "SELECT f FROM Feedback f WHERE f.createdAt = :createdAt")})
+    @NamedQuery(name = "Feedback.findByCreatedAt", query = "SELECT f FROM Feedback f WHERE f.createdAt = :createdAt"),
+    // Get all feedback for a specific event
+    @NamedQuery(name = "Feedback.findByEvent",
+        query = "SELECT f FROM Feedback f WHERE f.eventId.eventId = :eventId ORDER BY f.createdAt DESC"),
+
+    // Get all feedback submitted by a specific user
+    @NamedQuery(name = "Feedback.findByUser",
+        query = "SELECT f FROM Feedback f WHERE f.userId.userId = :userId ORDER BY f.createdAt DESC"),
+
+    // Check if user already submitted feedback for an event
+    @NamedQuery(name = "Feedback.checkAlreadySubmitted",
+        query = "SELECT f FROM Feedback f WHERE f.userId.userId = :userId AND f.eventId.eventId = :eventId"),
+
+    // Get average rating for an event (analytics)
+    @NamedQuery(name = "Feedback.getAverageRatingByEvent",
+        query = "SELECT AVG(f.rating) FROM Feedback f WHERE f.eventId.eventId = :eventId"),
+
+    // Get total feedback count for an event
+    @NamedQuery(name = "Feedback.countByEvent",
+        query = "SELECT COUNT(f) FROM Feedback f WHERE f.eventId.eventId = :eventId"),
+
+    // Get feedback for an event filtered by rating
+    @NamedQuery(name = "Feedback.findByEventAndRating",
+        query = "SELECT f FROM Feedback f WHERE f.eventId.eventId = :eventId AND f.rating = :rating"),
+
+    // Get top rated events (average rating DESC) - for report
+    @NamedQuery(name = "Feedback.getTopRatedEvents",
+        query = "SELECT f.eventId.eventId, AVG(f.rating) AS avgRating FROM Feedback f GROUP BY f.eventId.eventId ORDER BY avgRating DESC"),
+
+    // Get feedback for all events by a specific organizer
+    @NamedQuery(name = "Feedback.findByOrganizer",
+        query = "SELECT f FROM Feedback f WHERE f.eventId.userId.userId = :organizerId ORDER BY f.createdAt DESC"),
+
+    // Get count of each rating (1-5) for an event - rating distribution
+    @NamedQuery(name = "Feedback.getRatingDistribution",
+        query = "SELECT f.rating, COUNT(f) FROM Feedback f WHERE f.eventId.eventId = :eventId GROUP BY f.rating ORDER BY f.rating ASC")
+
+
+
+})
 public class Feedback implements Serializable {
 
     private static final long serialVersionUID = 1L;

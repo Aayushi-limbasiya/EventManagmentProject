@@ -5,6 +5,7 @@
 package Entity;
 
 import jakarta.persistence.Basic;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -80,12 +81,6 @@ import java.util.Date;
 })
 public class Users implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
-    @Column(name = "user_id")
-    private Integer userId;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 100)
@@ -106,11 +101,6 @@ public class Users implements Serializable {
     @Size(max = 15)
     @Column(name = "phone")
     private String phone;
-    @Column(name = "dob")
-    @Temporal(TemporalType.DATE)
-    private Date dob;
-    @Column(name = "age")
-    private Integer age;
     @Size(max = 10)
     @Column(name = "gender")
     private String gender;
@@ -134,6 +124,26 @@ public class Users implements Serializable {
     @Size(max = 20)
     @Column(name = "verified_status")
     private String verifiedStatus;
+    @Size(max = 255)
+    @Column(name = "reset_token")
+    private String resetToken;
+    @Column(name = "reset_token_expiry")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date resetTokenExpiry;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "userId")
+    private Collection<AuthTokens> authTokensCollection;
+
+    private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "user_id")
+    private Integer userId;
+    @Column(name = "dob")
+    @Temporal(TemporalType.DATE)
+    private Date dob;
+    @Column(name = "age")
+    private Integer age;
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
@@ -173,37 +183,6 @@ public class Users implements Serializable {
         this.userId = userId;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
 
     public Date getDob() {
         return dob;
@@ -221,21 +200,6 @@ public class Users implements Serializable {
         this.age = age;
     }
 
-    public String getGender() {
-        return gender;
-    }
-
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
 
     public String getProfilePhoto() {
         return profilePhoto;
@@ -361,6 +325,80 @@ public class Users implements Serializable {
     @Override
     public String toString() {
         return "Entity.Users[ userId=" + userId + " ]";
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+
+    public String getResetToken() {
+        return resetToken;
+    }
+
+    public void setResetToken(String resetToken) {
+        this.resetToken = resetToken;
+    }
+
+    public Date getResetTokenExpiry() {
+        return resetTokenExpiry;
+    }
+
+    public void setResetTokenExpiry(Date resetTokenExpiry) {
+        this.resetTokenExpiry = resetTokenExpiry;
+    }
+
+    @XmlTransient
+    public Collection<AuthTokens> getAuthTokensCollection() {
+        return authTokensCollection;
+    }
+
+    public void setAuthTokensCollection(Collection<AuthTokens> authTokensCollection) {
+        this.authTokensCollection = authTokensCollection;
     }
     
 }

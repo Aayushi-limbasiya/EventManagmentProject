@@ -34,7 +34,49 @@ import java.util.Date;
     @NamedQuery(name = "Approvals.findAll", query = "SELECT a FROM Approvals a"),
     @NamedQuery(name = "Approvals.findByApprovalId", query = "SELECT a FROM Approvals a WHERE a.approvalId = :approvalId"),
     @NamedQuery(name = "Approvals.findByDecision", query = "SELECT a FROM Approvals a WHERE a.decision = :decision"),
-    @NamedQuery(name = "Approvals.findByDecisionAt", query = "SELECT a FROM Approvals a WHERE a.decisionAt = :decisionAt")})
+    @NamedQuery(name = "Approvals.findByDecisionAt", query = "SELECT a FROM Approvals a WHERE a.decisionAt = :decisionAt"),
+    // Get approval record for a specific event
+    @NamedQuery(name = "Approvals.findByEvent",
+        query = "SELECT a FROM Approvals a WHERE a.eventId.eventId = :eventId"),
+
+    // Get all approvals done by a specific admin
+    @NamedQuery(name = "Approvals.findByAdmin",
+        query = "SELECT a FROM Approvals a WHERE a.userId.userId = :userId"),
+    
+    // Get all pending event approvals (events submitted but not yet decided)
+    @NamedQuery(name = "Approvals.getPendingApprovals",
+        query = "SELECT a FROM Approvals a WHERE a.decision = 'Pending' ORDER BY a.decisionAt ASC"),
+
+    // Get approval history for a specific event
+    @NamedQuery(name = "Approvals.getHistoryByEvent",
+        query = "SELECT a FROM Approvals a WHERE a.eventId.eventId = :eventId ORDER BY a.decisionAt DESC"),
+
+    // Get all approved events approvals
+    @NamedQuery(name = "Approvals.getApprovedApprovals",
+        query = "SELECT a FROM Approvals a WHERE a.decision = 'Approved' ORDER BY a.decisionAt DESC"),
+
+    // Get all rejected event approvals
+    @NamedQuery(name = "Approvals.getRejectedApprovals",
+        query = "SELECT a FROM Approvals a WHERE a.decision = 'Rejected' ORDER BY a.decisionAt DESC"),
+
+    // Count total pending approvals (admin dashboard)
+    @NamedQuery(name = "Approvals.countPending",
+        query = "SELECT COUNT(a) FROM Approvals a WHERE a.decision = 'Pending'"),
+
+    // Count total approved approvals (admin dashboard)
+    @NamedQuery(name = "Approvals.countApproved",
+        query = "SELECT COUNT(a) FROM Approvals a WHERE a.decision = 'Approved'"),
+
+    // Count total rejected approvals (admin dashboard)
+    @NamedQuery(name = "Approvals.countRejected",
+        query = "SELECT COUNT(a) FROM Approvals a WHERE a.decision = 'Rejected'"),
+
+    // Get latest approval record for an event
+    @NamedQuery(name = "Approvals.getLatestByEvent",
+        query = "SELECT a FROM Approvals a WHERE a.eventId.eventId = :eventId ORDER BY a.decisionAt DESC")
+
+
+})
 public class Approvals implements Serializable {
 
     private static final long serialVersionUID = 1L;

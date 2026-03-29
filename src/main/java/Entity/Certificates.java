@@ -34,7 +34,32 @@ import java.util.Date;
     @NamedQuery(name = "Certificates.findByCertificateId", query = "SELECT c FROM Certificates c WHERE c.certificateId = :certificateId"),
     @NamedQuery(name = "Certificates.findByCertificateNumber", query = "SELECT c FROM Certificates c WHERE c.certificateNumber = :certificateNumber"),
     @NamedQuery(name = "Certificates.findByIssueDate", query = "SELECT c FROM Certificates c WHERE c.issueDate = :issueDate"),
-    @NamedQuery(name = "Certificates.findByCertificateFile", query = "SELECT c FROM Certificates c WHERE c.certificateFile = :certificateFile")})
+    @NamedQuery(name = "Certificates.findByCertificateFile", query = "SELECT c FROM Certificates c WHERE c.certificateFile = :certificateFile"),
+     @NamedQuery(name = "Certificates.findByRegistration",
+        query = "SELECT c FROM Certificates c WHERE c.registrationId.registrationId = :registrationId"),
+
+    // Get all certificates for a specific user (via registration → user)
+    @NamedQuery(name = "Certificates.findByUser",
+        query = "SELECT c FROM Certificates c WHERE c.registrationId.userId.userId = :userId ORDER BY c.issueDate DESC"),
+
+    // Get all certificates for a specific event (via registration → event)
+    @NamedQuery(name = "Certificates.findByEvent",
+        query = "SELECT c FROM Certificates c WHERE c.registrationId.eventId.eventId = :eventId"),
+
+    // Verify certificate using certificate number (public verification)
+    @NamedQuery(name = "Certificates.verifyCertificate",
+        query = "SELECT c FROM Certificates c WHERE c.certificateNumber = :certificateNumber"),
+
+    // Check if certificate already issued for a registration
+    @NamedQuery(name = "Certificates.checkAlreadyIssued",
+        query = "SELECT c FROM Certificates c WHERE c.registrationId.registrationId = :registrationId"),
+
+    // Count certificates issued for an event
+    @NamedQuery(name = "Certificates.countByEvent",
+        query = "SELECT COUNT(c) FROM Certificates c WHERE c.registrationId.eventId.eventId = :eventId")
+})
+
+
 public class Certificates implements Serializable {
 
     private static final long serialVersionUID = 1L;

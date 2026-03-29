@@ -1,7 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence version="3.0" xmlns="https://jakarta.ee/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
-  <!-- Define Persistence Unit -->
-  <persistence-unit name="jpu" transaction-type="JTA">
-    <jta-data-source>jdbc/event</jta-data-source>
-  </persistence-unit>
+<persistence version="3.0"
+    xmlns="https://jakarta.ee/xml/ns/persistence"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence
+        https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
+
+    <persistence-unit name="jpu" transaction-type="JTA">
+        <jta-data-source>jdbc/event</jta-data-source>
+
+        <class>Entity.Users</class>
+        <class>Entity.Roles</class>
+        <class>Entity.Events</class>
+        <class>Entity.Venues</class>
+        <class>Entity.EventSchedule</class>
+        <class>Entity.Registrations</class>
+        <class>Entity.Approvals</class>
+        <class>Entity.Feedback</class>
+        <class>Entity.Notifications</class>
+        <class>Entity.Payments</class>
+        <class>Entity.Certificates</class>
+        <class>Entity.AuthTokens</class>
+
+        <properties>
+            <property name="eclipselink.logging.level" value="FINE"/>
+            <property name="jakarta.persistence.schema-generation.database.action" value="none"/>
+        </properties>
+    </persistence-unit>
 </persistence>

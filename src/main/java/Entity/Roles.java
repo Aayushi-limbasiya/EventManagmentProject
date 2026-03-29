@@ -34,17 +34,18 @@ import java.util.Collection;
     @NamedQuery(name = "Roles.findByRoleName", query = "SELECT r FROM Roles r WHERE r.roleName = :roleName")})
 public class Roles implements Serializable {
 
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 50)
+    @Column(name = "role_name")
+    private String roleName;
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "role_id")
     private Integer roleId;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 50)
-    @Column(name = "role_name")
-    private String roleName;
     @OneToMany(mappedBy = "roleId")
     private Collection<Users> usersCollection;
 
@@ -109,5 +110,7 @@ public class Roles implements Serializable {
     public String toString() {
         return "Entity.Roles[ roleId=" + roleId + " ]";
     }
+
+   
     
 }

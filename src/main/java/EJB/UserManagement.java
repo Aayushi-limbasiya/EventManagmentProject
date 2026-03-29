@@ -24,23 +24,8 @@ public class UserManagement implements UserManagementLocal {
     @Override
     public void registerUser(Users user) {
          em.persist(user);
-        sendRegistrationEmail(user.getEmail());
     }
 
-    @Override
-    public Users loginUser(String email, String password) {
-        TypedQuery<Users> q = em.createNamedQuery("Users.login", Users.class);
-        q.setParameter("email", email);
-        q.setParameter("password", password);
-
-        Collection<Users> users = q.getResultList();
-
-        if (users.isEmpty()) {
-            return null;
-        }
-
-        return users.iterator().next();
-    }
 
     @Override
     public Users getUserById(int userId) {
@@ -62,31 +47,15 @@ public class UserManagement implements UserManagementLocal {
         }
     }
 
-    @Override
-    public void changePassword(int userId, String newPassword) {
-        Users u = em.find(Users.class, userId);
-
-        if (u != null) {
-            u.setPassword(newPassword);
-            em.merge(u);
-        }
-    }
-
-    @Override
-    public void forgotPassword(String email) {
-          TypedQuery<Users> q = em.createNamedQuery("Users.findByEmail", Users.class);
-        q.setParameter("email", email);
-
-        Collection<Users> users = q.getResultList();
-
-        if (!users.isEmpty()) {
-
-            Users u = users.iterator().next();
-
-            // here you can generate reset link
-            System.out.println("Reset password link sent to: " + u.getEmail());
-        }
-    }
+//    @Override
+//    public void changePassword(int userId, String newPassword) {
+//        Users u = em.find(Users.class, userId);
+//
+//        if (u != null) {
+//            u.setPassword(newPassword);
+//            em.merge(u);
+//        }
+//    }
 
     @Override
     public void verifyAccount(int userId) {
@@ -130,7 +99,7 @@ public class UserManagement implements UserManagementLocal {
 
     @Override
     public Collection<Users> getUsersByRole(int roleId) {
-        TypedQuery<Users> q = em.createNamedQuery("Users.findByRole", Users.class);
+        TypedQuery<Users> q = em.createNamedQuery("Users.getUsersByRole", Users.class);
         q.setParameter("roleId", roleId);
 //        em.createNamedQuery("Users.getUsersByRole", Users.class);
 
@@ -143,11 +112,5 @@ public class UserManagement implements UserManagementLocal {
         return q.getResultList();
     }
 
-    @Override
-    public void sendRegistrationEmail(String email) {
-          System.out.println("Registration email sent to: " + email);
-    }
-
-    // Add business logic below. (Right-click in editor and choose
-    // "Insert Code > Add Business Method")
+    
 }

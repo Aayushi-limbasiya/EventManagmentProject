@@ -15,25 +15,5 @@ package com.mycompany.eventmanagmentsystem.resources;
  */
 //@Path("jakartaee10")
 public class JakartaEE10Resource {
-    
-//    @EJB UserManagmentLocal ejb;
-//    
-//    @GET
-//    public Response ping(){
-//        return Response
-//                .ok("ping Jakarta EE")
-//                .build();
-//    }
-//    
-//    @GET
-//    @Path("getUserById")
-//    @Produces("application/json")
-//     public Users getUserById(@QueryParam("userId") int userId) {
-//         try{
-//             return ejb.getUserById(userId);
-//         }catch(Exception e){
-//             return null;
-//         }
-//         
-//    }
+
 }
