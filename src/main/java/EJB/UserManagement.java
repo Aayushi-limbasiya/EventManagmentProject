@@ -17,24 +17,54 @@ import java.util.Collection;
  */
 @Stateless
 public class UserManagement implements UserManagementLocal {
-    
+
     @PersistenceContext(unitName = "jpu")
     EntityManager em;
 
-    @Override
+        @Override
     public void registerUser(Users user) {
-         em.persist(user);
+
+        // Smart auto-verification based on role
+        // roleId 1 = Admin, roleId 2 = Organizer, roleId 3 = Participant
+
+        if (user.getRoleId() != null) {
+            int roleId = user.getRoleId().getRoleId();
+
+            if (roleId == 3) {
+                // Participant → auto verify immediately → can login right away
+                user.setVerifiedStatus("Verified");
+
+            } else if (roleId == 2) {
+                // Organizer → keep Pending → Admin must verify manually
+                // Admin checks organization details before approving
+                user.setVerifiedStatus("Pending");
+
+            } else if (roleId == 1) {
+                // Admin → should not be created via API
+                // Throw error to prevent unauthorized admin creation
+                throw new RuntimeException(
+                    "Admin accounts cannot be created via registration."
+                );
+            }
+        } else {
+            // No role provided → default to Participant + Verified
+            user.setVerifiedStatus("Verified");
+        }
+
+        // Set registration timestamp
+        user.setCreatedAt(new java.util.Date());
+
+        em.persist(user);
     }
-
-
+    
     @Override
     public Users getUserById(int userId) {
-         return em.find(Users.class, userId);
+        return em.find(Users.class, userId);
     }
 
     @Override
     public void updateUser(Users user) {
-          em.merge(user);
+        em.merge(user);
     }
 
     @Override
@@ -47,19 +77,9 @@ public class UserManagement implements UserManagementLocal {
         }
     }
 
-//    @Override
-//    public void changePassword(int userId, String newPassword) {
-//        Users u = em.find(Users.class, userId);
-//
-//        if (u != null) {
-//            u.setPassword(newPassword);
-//            em.merge(u);
-//        }
-//    }
-
     @Override
     public void verifyAccount(int userId) {
-         Users u = em.find(Users.class, userId);
+        Users u = em.find(Users.class, userId);
 
         if (u != null) {
             u.setVerifiedStatus("Verified");
@@ -69,17 +89,16 @@ public class UserManagement implements UserManagementLocal {
 
     @Override
     public Collection<Users> searchUsers(String keyword) {
-         TypedQuery<Users> q = em.createQuery(
-        "SELECT u FROM Users u WHERE u.name LIKE :k OR u.email LIKE :k", Users.class);
+        TypedQuery<Users> q = em.createNamedQuery("Users.searchUsers", Users.class);
 
-        q.setParameter("k", "%" + keyword + "%");
+        q.setParameter("keyword", "%" + keyword + "%");
 
         return q.getResultList();
     }
 
     @Override
     public void blockUser(int userId) {
-         Users u = em.find(Users.class, userId);
+        Users u = em.find(Users.class, userId);
 
         if (u != null) {
             u.setVerifiedStatus("Blocked");
@@ -89,28 +108,36 @@ public class UserManagement implements UserManagementLocal {
 
     @Override
     public void unblockUser(int userId) {
-          Users u = em.find(Users.class, userId);
+        Users u = em.find(Users.class, userId);
 
         if (u != null) {
             u.setVerifiedStatus("Verified");
             em.merge(u);
         }
     }
-
+    
     @Override
     public Collection<Users> getUsersByRole(int roleId) {
+        // 1. Find the Role entity first
+        Entity.Roles role = em.find(Entity.Roles.class, roleId);
+
+        if (role == null) {
+            return java.util.Collections.emptyList();
+        }
+
+        // 2. Execute query
         TypedQuery<Users> q = em.createNamedQuery("Users.getUsersByRole", Users.class);
-        q.setParameter("roleId", roleId);
-//        em.createNamedQuery("Users.getUsersByRole", Users.class);
+
+        // CRITICAL: The string "roleId" here must match the :roleId in your Entity's @NamedQuery
+        q.setParameter("roleId", role);
 
         return q.getResultList();
     }
 
     @Override
     public Collection<Users> getAllUsers() {
-         TypedQuery<Users> q = em.createNamedQuery("Users.findAll", Users.class);
-        return q.getResultList();
+
+        return em.createNamedQuery("Users.findAll", Users.class).getResultList();
     }
 
-    
 }

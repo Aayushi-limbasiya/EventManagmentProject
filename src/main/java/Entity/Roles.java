@@ -4,6 +4,7 @@
  */
 package Entity;
 
+import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -78,6 +79,7 @@ public class Roles implements Serializable {
     }
 
     @XmlTransient
+    @JsonbTransient
     public Collection<Users> getUsersCollection() {
         return usersCollection;
     }

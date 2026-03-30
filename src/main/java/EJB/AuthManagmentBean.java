@@ -44,8 +44,8 @@ public class AuthManagmentBean implements AuthManagmentBeanLocal {
 
     // ── EMAIL CONFIG 
     
-    private static final String EMAIL_FROM     = "your_email@gmail.com";
-    private static final String EMAIL_PASSWORD = "your_app_password";   // Gmail App Password
+    private static final String EMAIL_FROM     = "eventportal57@gmail.com";
+    private static final String EMAIL_PASSWORD = "oltu rrxo jbhd tqmy";
     private static final String SMTP_HOST      = "smtp.gmail.com";
     private static final String SMTP_PORT      = "587";
 
@@ -67,12 +67,27 @@ public class AuthManagmentBean implements AuthManagmentBeanLocal {
 
         Users user = result.iterator().next();
 
-        // Step 2: Check account status
         if ("Blocked".equals(user.getVerifiedStatus())) {
-            throw new RuntimeException("Your account has been blocked. Contact admin.");
+            throw new RuntimeException(
+                "Your account has been blocked. Please contact admin."
+            );
         }
+
         if ("Pending".equals(user.getVerifiedStatus())) {
-            throw new RuntimeException("Your account is pending verification.");
+            // Check role to give specific message
+            String roleName = (user.getRoleId() != null)
+                ? user.getRoleId().getRoleName() : "User";
+
+            if ("Organizer".equals(roleName)) {
+                throw new RuntimeException(
+                    "Your organizer account is pending admin verification. " +
+                    "Admin will review your organization details and approve your account."
+                );
+            } else {
+                throw new RuntimeException(
+                    "Your account is pending verification. Please contact admin."
+                );
+            }
         }
 
         // Step 3: Generate JWT token

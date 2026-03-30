@@ -4,6 +4,7 @@
  */
 package Entity;
 
+import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -250,6 +251,7 @@ public class Users implements Serializable {
     }
 
     @XmlTransient
+    @JsonbTransient
     public Collection<Feedback> getFeedbackCollection() {
         return feedbackCollection;
     }
@@ -259,6 +261,7 @@ public class Users implements Serializable {
     }
 
     @XmlTransient
+    @JsonbTransient
     public Collection<Registrations> getRegistrationsCollection() {
         return registrationsCollection;
     }
@@ -268,6 +271,7 @@ public class Users implements Serializable {
     }
 
     @XmlTransient
+    @JsonbTransient
     public Collection<Approvals> getApprovalsCollection() {
         return approvalsCollection;
     }
@@ -277,6 +281,7 @@ public class Users implements Serializable {
     }
 
     @XmlTransient
+    @JsonbTransient
     public Collection<Events> getEventsCollection() {
         return eventsCollection;
     }
@@ -286,6 +291,7 @@ public class Users implements Serializable {
     }
 
     @XmlTransient
+    @JsonbTransient
     public Collection<Notifications> getNotificationsCollection() {
         return notificationsCollection;
     }
@@ -393,6 +399,7 @@ public class Users implements Serializable {
     }
 
     @XmlTransient
+    @JsonbTransient
     public Collection<AuthTokens> getAuthTokensCollection() {
         return authTokensCollection;
     }

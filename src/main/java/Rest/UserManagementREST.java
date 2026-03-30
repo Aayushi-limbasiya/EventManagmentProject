@@ -1,13 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
 package Rest;
 
 import EJB.UserManagementLocal;
+import Entity.Roles;
 import Entity.Users;
 import jakarta.ejb.EJB;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -20,13 +18,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.Collection;
 
-/**
- * UserManagementREST
- * REST API for User Management Module
- * Base URL: http://localhost:8080/EventManagmentSystem/api/users
- * Methods match your exact UserManagementLocal interface
- */
-@Path("/users")
+@Path("users")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class UserManagementREST {
@@ -34,12 +26,87 @@ public class UserManagementREST {
     @EJB
     private UserManagementLocal userBean;
 
-    // ── BASIC FUNCTIONS ───────────────────────────────────────
+    @PersistenceContext(unitName = "jpu")
+    private EntityManager em;
 
-    /**
-     * POST /api/users/register
-     * Register a new user
-     */
+    // ══════════════════════════════════════════════════════════
+    // ✅ STATIC GET PATHS — MUST BE FIRST IN FILE
+    // ══════════════════════════════════════════════════════════
+    @GET
+    @Path("all")
+    public Response getAllUsers() {
+        try {
+
+            return Response.ok(userBean.getAllUsers()).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\":\"" + e.getMessage() + "\"}")
+                    .build();
+        }
+    }
+
+    @GET
+    @Path("search")
+    public Response searchUsers(@QueryParam("keyword") String keyword) {
+        try {
+            if (keyword == null || keyword.trim().isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("{\"error\":\"keyword parameter is required\"}")
+                        .build();
+            }
+
+            Collection<Users> users = userBean.searchUsers(keyword);
+            return Response.ok(users).build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\":\"" + e.getMessage() + "\"}")
+                    .build();
+        }
+    }
+    
+    @GET
+    @Path("role/{roleId}")
+    public Response getUsersByRole(@PathParam("roleId") int roleId) {
+        try {
+        // Call the EJB method instead of using 'em' here
+        Collection<Users> users = userBean.getUsersByRole(roleId);
+        
+        if (users == null || users.isEmpty()) {
+            return Response.status(Response.Status.NO_CONTENT).build(); // Or empty array []
+        }
+        return Response.ok(users).build();
+    } catch (Exception e) {
+        return Response.serverError().entity(e.getMessage()).build();
+    }
+    }
+
+    @GET
+    @Path("id/{id}")
+    public Response getUserById(@PathParam("id") int userId) {
+        try {
+
+            Users user = userBean.getUserById(userId);
+
+            if (user != null) {
+                return Response.ok(user).build();
+            }
+
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("{\"error\":\"User not found\"}")
+                    .build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\":\"" + e.getMessage() + "\"}")
+                    .build();
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // POST + PUT METHODS
+    // ══════════════════════════════════════════════════════════
+    // POST /api/users/register
     @POST
     @Path("/register")
     public Response registerUser(Users user) {
@@ -55,32 +122,7 @@ public class UserManagementREST {
         }
     }
 
-    /**
-     * GET /api/users/{id}
-     * Get user by ID
-     */
-    @GET
-    @Path("/{id}")
-    public Response getUserById(@PathParam("id") int userId) {
-        try {
-            Users user = userBean.getUserById(userId);
-            if (user != null) {
-                return Response.ok(user).build();
-            }
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("{\"error\":\"User not found with ID: " + userId + "\"}")
-                    .build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"error\":\"" + e.getMessage() + "\"}")
-                    .build();
-        }
-    }
-
-    /**
-     * PUT /api/users/update
-     * Update user profile
-     */
+    // PUT /api/users/update
     @PUT
     @Path("/update")
     public Response updateUser(Users user) {
@@ -94,17 +136,19 @@ public class UserManagementREST {
         }
     }
 
-    /**
-     * PUT /api/users/{id}/photo?path=uploads/photo.jpg
-     * Upload profile photo path
-     */
+    // PUT /api/users/1/photo?path=default.jpg
     @PUT
     @Path("/{id}/photo")
     public Response uploadProfilePhoto(@PathParam("id") int userId,
-                                       @QueryParam("path") String photoPath) {
+            @QueryParam("path") String photoPath) {
         try {
+            if (photoPath == null || photoPath.trim().isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("{\"error\":\"path parameter is required\"}")
+                        .build();
+            }
             userBean.uploadProfilePhoto(userId, photoPath);
-            return Response.ok("{\"message\":\"Profile photo updated successfully\"}").build();
+            return Response.ok("{\"message\":\"Profile photo saved: " + photoPath + "\"}").build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("{\"error\":\"" + e.getMessage() + "\"}")
@@ -112,12 +156,7 @@ public class UserManagementREST {
         }
     }
 
-    // ── EXTRA FUNCTIONS ───────────────────────────────────────
-
-    /**
-     * PUT /api/users/{id}/verify
-     * Admin verifies a user account
-     */
+    // PUT /api/users/1/verify
     @PUT
     @Path("/{id}/verify")
     public Response verifyAccount(@PathParam("id") int userId) {
@@ -131,32 +170,7 @@ public class UserManagementREST {
         }
     }
 
-    /**
-     * GET /api/users/search?keyword=john
-     * Search users by name or email
-     */
-    @GET
-    @Path("/search")
-    public Response searchUsers(@QueryParam("keyword") String keyword) {
-        try {
-            if (keyword == null || keyword.trim().isEmpty()) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("{\"error\":\"keyword parameter is required\"}")
-                        .build();
-            }
-            Collection<Users> users = userBean.searchUsers(keyword);
-            return Response.ok(users).build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"error\":\"" + e.getMessage() + "\"}")
-                    .build();
-        }
-    }
-
-    /**
-     * PUT /api/users/{id}/block
-     * Admin blocks a user
-     */
+    // PUT /api/users/1/block
     @PUT
     @Path("/{id}/block")
     public Response blockUser(@PathParam("id") int userId) {
@@ -170,50 +184,13 @@ public class UserManagementREST {
         }
     }
 
-    /**
-     * PUT /api/users/{id}/unblock
-     * Admin unblocks a user
-     */
+    // PUT /api/users/1/unblock
     @PUT
     @Path("/{id}/unblock")
     public Response unblockUser(@PathParam("id") int userId) {
         try {
             userBean.unblockUser(userId);
             return Response.ok("{\"message\":\"User unblocked successfully\"}").build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"error\":\"" + e.getMessage() + "\"}")
-                    .build();
-        }
-    }
-
-    /**
-     * GET /api/users/role/{roleId}
-     * Get users by role ID (1=Admin, 2=Organizer, 3=Participant)
-     */
-    @GET
-    @Path("/role/{roleId}")
-    public Response getUsersByRole(@PathParam("roleId") int roleId) {
-        try {
-            Collection<Users> users = userBean.getUsersByRole(roleId);
-            return Response.ok(users).build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"error\":\"" + e.getMessage() + "\"}")
-                    .build();
-        }
-    }
-
-    /**
-     * GET /api/users/all
-     * Get all users (Admin only)
-     */
-    @GET
-    @Path("/all")
-    public Response getAllUsers() {
-        try {
-            Collection<Users> users = userBean.getAllUsers();
-            return Response.ok(users).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("{\"error\":\"" + e.getMessage() + "\"}")
