@@ -1,5 +1,4 @@
 package Rest;
-
 import EJB.UserManagementLocal;
 import Entity.Roles;
 import Entity.Users;

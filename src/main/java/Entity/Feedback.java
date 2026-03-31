@@ -1,9 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,10 +20,6 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.Date;
 
-/**
- *
- * @author OS
- */
 @Entity
 @Table(name = "feedback")
 @XmlRootElement
@@ -35,123 +28,91 @@ import java.util.Date;
     @NamedQuery(name = "Feedback.findByFeedbackId", query = "SELECT f FROM Feedback f WHERE f.feedbackId = :feedbackId"),
     @NamedQuery(name = "Feedback.findByRating", query = "SELECT f FROM Feedback f WHERE f.rating = :rating"),
     @NamedQuery(name = "Feedback.findByCreatedAt", query = "SELECT f FROM Feedback f WHERE f.createdAt = :createdAt"),
-    // Get all feedback for a specific event
     @NamedQuery(name = "Feedback.findByEvent",
         query = "SELECT f FROM Feedback f WHERE f.eventId.eventId = :eventId ORDER BY f.createdAt DESC"),
-
-    // Get all feedback submitted by a specific user
     @NamedQuery(name = "Feedback.findByUser",
         query = "SELECT f FROM Feedback f WHERE f.userId.userId = :userId ORDER BY f.createdAt DESC"),
-
-    // Check if user already submitted feedback for an event
     @NamedQuery(name = "Feedback.checkAlreadySubmitted",
         query = "SELECT f FROM Feedback f WHERE f.userId.userId = :userId AND f.eventId.eventId = :eventId"),
-
-    // Get average rating for an event (analytics)
     @NamedQuery(name = "Feedback.getAverageRatingByEvent",
         query = "SELECT AVG(f.rating) FROM Feedback f WHERE f.eventId.eventId = :eventId"),
-
-    // Get total feedback count for an event
     @NamedQuery(name = "Feedback.countByEvent",
         query = "SELECT COUNT(f) FROM Feedback f WHERE f.eventId.eventId = :eventId"),
-
-    // Get feedback for an event filtered by rating
     @NamedQuery(name = "Feedback.findByEventAndRating",
         query = "SELECT f FROM Feedback f WHERE f.eventId.eventId = :eventId AND f.rating = :rating"),
-
-    // Get top rated events (average rating DESC) - for report
     @NamedQuery(name = "Feedback.getTopRatedEvents",
         query = "SELECT f.eventId.eventId, AVG(f.rating) AS avgRating FROM Feedback f GROUP BY f.eventId.eventId ORDER BY avgRating DESC"),
-
-    // Get feedback for all events by a specific organizer
     @NamedQuery(name = "Feedback.findByOrganizer",
         query = "SELECT f FROM Feedback f WHERE f.eventId.userId.userId = :organizerId ORDER BY f.createdAt DESC"),
-
-    // Get count of each rating (1-5) for an event - rating distribution
     @NamedQuery(name = "Feedback.getRatingDistribution",
         query = "SELECT f.rating, COUNT(f) FROM Feedback f WHERE f.eventId.eventId = :eventId GROUP BY f.rating ORDER BY f.rating ASC")
-
-
-
 })
 public class Feedback implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "feedback_id")
     private Integer feedbackId;
+
     @Column(name = "rating")
     private Integer rating;
+
     @Lob
     @Size(max = 65535)
     @Column(name = "comment")
     private String comment;
+
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
+
+    // ── FIXES circular JSON loop ──────────────────────────────────
+    @JsonIgnoreProperties({
+        "feedbackCollection", "registrationCollection",
+        "approvalCollection", "notificationCollection",
+        "eventScheduleCollection", "password",
+        "resetToken", "resetTokenExpiry", "userId"
+    })
     @JoinColumn(name = "event_id", referencedColumnName = "event_id")
     @ManyToOne
     private Events eventId;
+
+    // ── FIXES circular JSON loop ──────────────────────────────────
+    @JsonIgnoreProperties({
+        "feedbackCollection", "registrationCollection",
+        "approvalCollection", "notificationCollection",
+        "password", "resetToken", "resetTokenExpiry"
+    })
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     @ManyToOne
     private Users userId;
 
-    public Feedback() {
-    }
+    public Feedback() {}
 
     public Feedback(Integer feedbackId) {
         this.feedbackId = feedbackId;
     }
 
-    public Integer getFeedbackId() {
-        return feedbackId;
-    }
+    public Integer getFeedbackId() { return feedbackId; }
+    public void setFeedbackId(Integer feedbackId) { this.feedbackId = feedbackId; }
 
-    public void setFeedbackId(Integer feedbackId) {
-        this.feedbackId = feedbackId;
-    }
+    public Integer getRating() { return rating; }
+    public void setRating(Integer rating) { this.rating = rating; }
 
-    public Integer getRating() {
-        return rating;
-    }
+    public String getComment() { return comment; }
+    public void setComment(String comment) { this.comment = comment; }
 
-    public void setRating(Integer rating) {
-        this.rating = rating;
-    }
+    public Date getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
 
-    public String getComment() {
-        return comment;
-    }
+    public Events getEventId() { return eventId; }
+    public void setEventId(Events eventId) { this.eventId = eventId; }
 
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Events getEventId() {
-        return eventId;
-    }
-
-    public void setEventId(Events eventId) {
-        this.eventId = eventId;
-    }
-
-    public Users getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Users userId) {
-        this.userId = userId;
-    }
+    public Users getUserId() { return userId; }
+    public void setUserId(Users userId) { this.userId = userId; }
 
     @Override
     public int hashCode() {
@@ -162,20 +123,14 @@ public class Feedback implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Feedback)) {
-            return false;
-        }
+        if (!(object instanceof Feedback)) return false;
         Feedback other = (Feedback) object;
-        if ((this.feedbackId == null && other.feedbackId != null) || (this.feedbackId != null && !this.feedbackId.equals(other.feedbackId))) {
-            return false;
-        }
-        return true;
+        return !((this.feedbackId == null && other.feedbackId != null) ||
+                 (this.feedbackId != null && !this.feedbackId.equals(other.feedbackId)));
     }
 
     @Override
     public String toString() {
         return "Entity.Feedback[ feedbackId=" + feedbackId + " ]";
     }
-    
 }
