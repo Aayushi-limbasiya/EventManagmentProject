@@ -1,9 +1,10 @@
-
-
 package com.mycompany.eventmanagmentsystem;
 
 import Rest.AuthManagmentREST;
+import Rest.EventApprovalREST;
 import Rest.EventManagmentREST;
+import Rest.EventSchedulingREST;
+import Rest.PaymentRest;
 import Rest.UserManagementREST;
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
@@ -18,6 +19,10 @@ public class JakartaRestConfiguration extends Application {
         classes.add(UserManagementREST.class);
         classes.add(AuthManagmentREST.class);  // ← ADD THIS
         classes.add(EventManagmentREST.class);  // ← ADD THIS
+        classes.add(EventSchedulingREST.class);  // ← ADD THIS
+        classes.add(EventApprovalREST.class);  // ← ADD THIS
+        classes.add(PaymentRest.class);
+
 
         return classes;
     }

@@ -149,16 +149,28 @@ ALTER TABLE users
     ADD COLUMN reset_token VARCHAR(255) DEFAULT NULL,
     ADD COLUMN reset_token_expiry TIMESTAMP DEFAULT NULL;
 
+desc roles;
 
+insert into roles(role_name) values
+('Admin'),
+('Organizer'),
+('Participant');
 
+select * from roles;
 
+select * from users;
 
+	select * from events;
 
+select * from auth_tokens;
 
+select * from venues;
 
+select * from event_schedule;
 
+select *  from approvals;
 
+select * from payments;
 
-
-
+select * from registrations;
 
