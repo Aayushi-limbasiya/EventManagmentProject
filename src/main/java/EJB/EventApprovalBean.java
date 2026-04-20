@@ -147,19 +147,34 @@ public class EventApprovalBean implements EventApprovalBeanLocal {
         return stats;
     }
 
+       // ── REPLACE sendApprovalNotification() ───────────────────
+    // Was using System.out.println — now sends real email via EmailUtil
     @Override
-    public void sendApprovalNotification(String organizerEmail, String eventTitle, String decision, String remark) {
-         String message = "Dear Organizer,\n\n"
-            + "Your event \"" + eventTitle + "\" has been " + decision + ".\n"
-            + "Remark: " + (remark != null ? remark : "No remarks provided") + "\n\n"
-            + "Thank you,\nEvent Management Team";
+    public void sendApprovalNotification(String organizerEmail, String eventTitle,
+                                          String decision, String remark) {
+        try {
+            String subject = "Event " + decision + " - " + eventTitle;
+            String body;
 
-        // TODO: Integrate real email service here
-        System.out.println("=== EMAIL NOTIFICATION ===");
-        System.out.println("To: " + organizerEmail);
-        System.out.println("Subject: Event " + decision + " - " + eventTitle);
-        System.out.println(message);
-        System.out.println("==========================");
+            if ("Approved".equals(decision)) {
+                body = "Dear Organizer,\n\n"
+                    + "Great news! Your event \"" + eventTitle + "\" has been APPROVED.\n\n"
+                    + "Admin Remark: " + (remark != null ? remark : "No remarks") + "\n\n"
+                    + "Your event is now live. Participants can now register for it.\n\n"
+                    + "Regards,\nEvent Management Team";
+            } else {
+                body = "Dear Organizer,\n\n"
+                    + "We regret to inform you that your event \"" + eventTitle
+                    + "\" has been REJECTED.\n\n"
+                    + "Reason: " + (remark != null ? remark : "No reason provided") + "\n\n"
+                    + "Please review the feedback, make the necessary changes, and resubmit.\n\n"
+                    + "Regards,\nEvent Management Team";
+            }
+
+            EmailUtil.sendEmail(organizerEmail, subject, body);
+        } catch (Exception e) {
+            System.out.println("Approval notification email failed: " + e.getMessage());
+        }
     }
 
     @Override

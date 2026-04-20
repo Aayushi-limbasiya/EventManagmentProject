@@ -52,9 +52,10 @@ public class AuthManagmentBean implements AuthManagmentBeanLocal {
     // ── APP CONFIG
     private static final String APP_BASE_URL   = "http://localhost:8080/EventManagement";
 
+        // ── REPLACE login() — remove sendLoginSuccessEmail call ──
     @Override
     public String login(String email, String password) {
-        
+
         // Step 1: Find user
         TypedQuery<Users> q = em.createNamedQuery("Users.login", Users.class);
         q.setParameter("email", email);
@@ -67,26 +68,20 @@ public class AuthManagmentBean implements AuthManagmentBeanLocal {
 
         Users user = result.iterator().next();
 
+        // Step 2: Check account status with helpful messages
         if ("Blocked".equals(user.getVerifiedStatus())) {
-            throw new RuntimeException(
-                "Your account has been blocked. Please contact admin."
-            );
+            throw new RuntimeException("Your account has been blocked. Please contact admin.");
         }
 
         if ("Pending".equals(user.getVerifiedStatus())) {
-            // Check role to give specific message
             String roleName = (user.getRoleId() != null)
                 ? user.getRoleId().getRoleName() : "User";
-
             if ("Organizer".equals(roleName)) {
                 throw new RuntimeException(
-                    "Your organizer account is pending admin verification. " +
-                    "Admin will review your organization details and approve your account."
+                    "Your organizer account is pending admin verification."
                 );
             } else {
-                throw new RuntimeException(
-                    "Your account is pending verification. Please contact admin."
-                );
+                throw new RuntimeException("Your account is pending verification.");
             }
         }
 
@@ -96,16 +91,23 @@ public class AuthManagmentBean implements AuthManagmentBeanLocal {
         // Step 4: Save token to DB
         saveTokenToDB(user, jwtToken);
 
-        // Step 5: Send login success email (async-safe via System.out fallback)
-        try {
-            sendLoginSuccessEmail(user);
-        } catch (Exception e) {
-            // Do not fail login if email fails
-            System.out.println("Login email failed for: " + user.getEmail() + " | " + e.getMessage());
-        }
+        // NOTE: No login email — welcome email is sent at registration time
 
-        // Step 6: Return token
         return jwtToken;
+    }
+
+    // ── REPLACE sendEmail() — use EmailUtil instead ───────────
+    @Override
+    public void sendEmail(String toEmail, String subject, String body) {
+        EmailUtil.sendEmail(toEmail, subject, body);
+    }
+
+    // ── sendLoginSuccessEmail — keep method but make it empty ─
+    // Kept to satisfy interface — no longer called
+    @Override
+    public void sendLoginSuccessEmail(Users user) {
+        // Login email removed — welcome email sent at registration instead
+        System.out.println("[INFO] Login email suppressed for: " + user.getEmail());
     }
 
     @Override
@@ -276,52 +278,52 @@ public class AuthManagmentBean implements AuthManagmentBeanLocal {
         sendEmail(user.getEmail(), subject, body);
     }
 
-    @Override
-    public void sendEmail(String toEmail, String subject, String body) {
-         Properties props = new Properties();
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.host", SMTP_HOST);
-        props.put("mail.smtp.port", SMTP_PORT);
-        props.put("mail.smtp.ssl.trust", SMTP_HOST);
-
-        Session session = Session.getInstance(props, new jakarta.mail.Authenticator() {
-            @Override
-            protected jakarta.mail.PasswordAuthentication getPasswordAuthentication() {
-                return new jakarta.mail.PasswordAuthentication(EMAIL_FROM, EMAIL_PASSWORD);
-            }
-        });
-
-        try {
-            MimeMessage message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(EMAIL_FROM));
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
-            message.setSubject(subject);
-            message.setText(body);
-            Transport.send(message);
-            System.out.println("Email sent successfully to: " + toEmail);
-        } catch (MessagingException e) {
-            System.out.println("Email sending FAILED to: " + toEmail + " | Error: " + e.getMessage());
-            throw new RuntimeException("Email sending failed: " + e.getMessage());
-        }
-    }
-
-    @Override
-    public void sendLoginSuccessEmail(Users user) {
-         String roleName = (user.getRoleId() != null) ? user.getRoleId().getRoleName() : "User";
-        String subject = "Login Successful - Event Management System";
-        String body = "Dear " + user.getName() + ",\n\n"
-            + "You have successfully logged in to the Event Management System.\n\n"
-            + "Account Details:\n"
-            + "  Name  : " + user.getName() + "\n"
-            + "  Email : " + user.getEmail() + "\n"
-            + "  Role  : " + roleName + "\n"
-            + "  Time  : " + new Date().toString() + "\n\n"
-            + "If this was not you, please reset your password immediately.\n\n"
-            + "Regards,\nEvent Management Team";
-
-        sendEmail(user.getEmail(), subject, body);
-    }
+//    @Override
+//    public void sendEmail(String toEmail, String subject, String body) {
+//         Properties props = new Properties();
+//        props.put("mail.smtp.auth", "true");
+//        props.put("mail.smtp.starttls.enable", "true");
+//        props.put("mail.smtp.host", SMTP_HOST);
+//        props.put("mail.smtp.port", SMTP_PORT);
+//        props.put("mail.smtp.ssl.trust", SMTP_HOST);
+//
+//        Session session = Session.getInstance(props, new jakarta.mail.Authenticator() {
+//            @Override
+//            protected jakarta.mail.PasswordAuthentication getPasswordAuthentication() {
+//                return new jakarta.mail.PasswordAuthentication(EMAIL_FROM, EMAIL_PASSWORD);
+//            }
+//        });
+//
+//        try {
+//            MimeMessage message = new MimeMessage(session);
+//            message.setFrom(new InternetAddress(EMAIL_FROM));
+//            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
+//            message.setSubject(subject);
+//            message.setText(body);
+//            Transport.send(message);
+//            System.out.println("Email sent successfully to: " + toEmail);
+//        } catch (MessagingException e) {
+//            System.out.println("Email sending FAILED to: " + toEmail + " | Error: " + e.getMessage());
+//            throw new RuntimeException("Email sending failed: " + e.getMessage());
+//        }
+//    }
+//
+//    @Override
+//    public void sendLoginSuccessEmail(Users user) {
+//         String roleName = (user.getRoleId() != null) ? user.getRoleId().getRoleName() : "User";
+//        String subject = "Login Successful - Event Management System";
+//        String body = "Dear " + user.getName() + ",\n\n"
+//            + "You have successfully logged in to the Event Management System.\n\n"
+//            + "Account Details:\n"
+//            + "  Name  : " + user.getName() + "\n"
+//            + "  Email : " + user.getEmail() + "\n"
+//            + "  Role  : " + roleName + "\n"
+//            + "  Time  : " + new Date().toString() + "\n\n"
+//            + "If this was not you, please reset your password immediately.\n\n"
+//            + "Regards,\nEvent Management Team";
+//
+//        sendEmail(user.getEmail(), subject, body);
+//    }
     
     private String generateJwtToken(Users user) {
         Key key = Keys.hmacShaKeyFor(JWT_SECRET.getBytes());

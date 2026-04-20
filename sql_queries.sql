@@ -174,3 +174,5 @@ select * from payments;
 
 select * from registrations;
 
+select * from notifications;
+

@@ -26,7 +26,10 @@ public class RegistrationBean implements RegistrationBeanLocal {
      EntityManager em;
 
     @Override
+        // ── REPLACE registerForEvent() ────────────────────────────
+   
     public String registerForEvent(int userId, int eventId) {
+
         // Step 1: Check duplicate registration
         if (isAlreadyRegistered(userId, eventId)) {
             throw new RuntimeException("User is already registered for this event.");
@@ -38,38 +41,68 @@ public class RegistrationBean implements RegistrationBeanLocal {
             throw new RuntimeException("Event not found with ID: " + eventId);
         }
 
-        // Step 3: Get event capacity from event_schedule
+        // Step 3: Get user
+        Users user = em.find(Users.class, userId);
+        if (user == null) {
+            throw new RuntimeException("User not found with ID: " + userId);
+        }
+
+        // Step 4: Get event capacity from event_schedule
         TypedQuery<EventSchedule> scheduleQuery = em.createQuery(
-            "SELECT s FROM EventSchedule s WHERE s.eventId.eventId = :eventId", EventSchedule.class);
+            "SELECT s FROM EventSchedule s WHERE s.eventId.eventId = :eventId",
+            EventSchedule.class);
         scheduleQuery.setParameter("eventId", eventId);
         Collection<EventSchedule> schedules = scheduleQuery.getResultList();
 
         int capacity = 0;
         if (!schedules.isEmpty()) {
-            capacity = schedules.iterator().next().getCapacity();
+            Integer cap = schedules.iterator().next().getCapacity();
+            capacity = (cap != null) ? cap : 0;
         }
 
-        // Step 4: Count current confirmed registrations
+        // Step 5: Decide status — Confirmed or Waitlist
         long confirmed = getConfirmedCount(eventId);
+        String status = (capacity == 0 || confirmed < capacity) ? "Confirmed" : "Waitlist";
 
-        // Step 5: Decide status
-        String status;
-        if (capacity == 0 || confirmed < capacity) {
-            status = "Confirmed";
-        } else {
-            status = "Waitlist";
-        }
-
-        // Step 6: Create registration
+        // Step 6: Create registration record
         Registrations reg = new Registrations();
         reg.setEventId(event);
-        reg.setUserId(em.find(Users.class, userId));
+        reg.setUserId(user);
         reg.setStatus(status);
         reg.setAttendanceStatus(null);
-        reg.setRegisteredAt(new Date());
+        reg.setRegisteredAt(new java.util.Date());
         em.persist(reg);
 
-        return status; // Return status so REST can inform the user
+        // Step 7: Send confirmation email to participant
+        try {
+            String subject;
+            String body;
+
+            if ("Confirmed".equals(status)) {
+                subject = "Registration Confirmed - " + event.getTitle();
+                body = "Dear " + user.getName() + ",\n\n"
+                    + "Your registration for the following event has been CONFIRMED!\n\n"
+                    + "Event Details:\n"
+                    + "  Event : " + event.getTitle() + "\n"
+                    + "  Status: Confirmed\n\n"
+                    + "Please keep this email as your registration confirmation.\n\n"
+                    + "Regards,\nEvent Management Team";
+            } else {
+                subject = "Added to Waitlist - " + event.getTitle();
+                body = "Dear " + user.getName() + ",\n\n"
+                    + "The event \"" + event.getTitle() + "\" is currently full.\n\n"
+                    + "You have been added to the WAITLIST.\n"
+                    + "You will be automatically confirmed if a spot becomes available.\n"
+                    + "We will notify you by email if you get confirmed.\n\n"
+                    + "Regards,\nEvent Management Team";
+            }
+
+            EmailUtil.sendEmail(user.getEmail(), subject, body);
+        } catch (Exception e) {
+            System.out.println("Event registration email failed: " + e.getMessage());
+        }
+
+        return status;
     }
 
     @Override
