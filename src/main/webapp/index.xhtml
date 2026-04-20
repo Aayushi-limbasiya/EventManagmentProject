@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EventMS — Modern Event Management Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&amp;family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&amp;display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --brand:       #2D5BE3;
+            --brand-dark:  #1A3DA8;
+            --brand-light: #EEF3FF;
+            --accent:      #F5A623;
+            --ink:         #0D1117;
+            --ink-2:       #3B4455;
+            --ink-3:       #7A859A;
+            --surface:     #FFFFFF;
+            --surface-2:   #F7F9FC;
+            --surface-3:   #EEF2F8;
+            --border:      #DDE3EE;
+            --radius-sm:   8px;
+            --radius-md:   14px;
+            --radius-lg:   22px;
+            --radius-xl:   32px;
+            --shadow-sm:   0 1px 3px rgba(13,17,23,0.07), 0 1px 2px rgba(13,17,23,0.04);
+            --shadow-md:   0 4px 16px rgba(13,17,23,0.10), 0 2px 6px rgba(13,17,23,0.06);
+            --shadow-lg:   0 16px 48px rgba(13,17,23,0.12), 0 6px 18px rgba(13,17,23,0.07);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            color: var(--ink);
+            background: var(--surface);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── NAV ─────────────────────────────────────────────────── */
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 5%;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 66px;
+        }
+        .nav-logo {
+            display: flex; align-items: center; gap: 10px;
+            font-family: 'Sora', sans-serif;
+            font-size: 20px; font-weight: 700;
+            color: var(--ink); text-decoration: none;
+        }
+        .nav-logo-icon {
+            width: 34px; height: 34px; border-radius: 9px;
+            background: var(--brand);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .nav-logo-icon svg { width: 18px; height: 18px; fill: white; }
+        .nav-links { display: flex; gap: 6px; list-style: none; }
+        .nav-links a {
+            padding: 6px 14px; border-radius: var(--radius-sm);
+            font-size: 14px; font-weight: 500; color: var(--ink-2);
+            text-decoration: none; transition: background 0.15s, color 0.15s;
+        }
+        .nav-links a:hover { background: var(--surface-2); color: var(--ink); }
+        .nav-cta { display: flex; gap: 10px; align-items: center; }
+        .btn-ghost {
+            padding: 8px 18px; border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            font-size: 14px; font-weight: 500; color: var(--ink-2);
+            background: transparent; cursor: pointer;
+            text-decoration: none; transition: all 0.15s;
+        }
+        .btn-ghost:hover { background: var(--surface-2); border-color: #c4cbdb; }
+        .btn-primary {
+            padding: 8px 20px; border-radius: var(--radius-sm);
+            border: none; background: var(--brand);
+            font-size: 14px; font-weight: 600; color: white;
+            cursor: pointer; text-decoration: none;
+            transition: background 0.15s, box-shadow 0.15s;
+            box-shadow: 0 2px 8px rgba(45,91,227,0.30);
+        }
+        .btn-primary:hover { background: var(--brand-dark); box-shadow: 0 4px 14px rgba(45,91,227,0.40); }
+
+        /* ── HERO ────────────────────────────────────────────────── */
+        .hero {
+            padding: 90px 5% 80px;
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 60px; align-items: center;
+            max-width: 1200px; margin: 0 auto;
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: var(--brand-light); color: var(--brand);
+            font-size: 12px; font-weight: 600; letter-spacing: 0.04em;
+            padding: 5px 12px; border-radius: 20px;
+            border: 1px solid #d0dcf7;
+            margin-bottom: 22px;
+            text-transform: uppercase;
+        }
+        .hero-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand); }
+        h1 {
+            font-family: 'Sora', sans-serif;
+            font-size: clamp(32px, 4vw, 52px);
+            font-weight: 700; line-height: 1.15;
+            color: var(--ink); margin-bottom: 20px;
+            letter-spacing: -0.02em;
+        }
+        h1 .highlight {
+            color: var(--brand);
+            position: relative;
+        }
+        h1 .highlight::after {
+            content: '';
+            position: absolute; left: 0; bottom: -2px;
+            width: 100%; height: 3px;
+            background: var(--brand); border-radius: 2px;
+            opacity: 0.3;
+        }
+        .hero-sub {
+            font-size: 17px; color: var(--ink-2);
+            line-height: 1.7; margin-bottom: 34px;
+            max-width: 480px;
+        }
+        .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 40px; }
+        .btn-hero {
+            padding: 13px 28px; border-radius: var(--radius-md);
+            font-size: 15px; font-weight: 600;
+            border: none; cursor: pointer; text-decoration: none;
+            transition: all 0.18s;
+        }
+        .btn-hero-primary {
+            background: var(--brand); color: white;
+            box-shadow: 0 4px 18px rgba(45,91,227,0.35);
+        }
+        .btn-hero-primary:hover { background: var(--brand-dark); transform: translateY(-1px); box-shadow: 0 6px 24px rgba(45,91,227,0.45); }
+        .btn-hero-secondary {
+            background: var(--surface); color: var(--ink);
+            border: 1.5px solid var(--border);
+        }
+        .btn-hero-secondary:hover { background: var(--surface-2); border-color: #c4cbdb; }
+        .hero-trust { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-3); }
+        .hero-avatars { display: flex; }
+        .hero-avatars span {
+            width: 28px; height: 28px; border-radius: 50%;
+            border: 2px solid white; margin-left: -8px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 600; color: white;
+        }
+        .hero-avatars span:first-child { margin-left: 0; }
+
+        /* Hero visual */
+        .hero-visual {
+            position: relative;
+        }
+        .hero-card {
+            background: white; border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+        .hero-card-header {
+            background: var(--brand); padding: 18px 22px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .hero-card-header-title { color: white; font-weight: 600; font-size: 15px; }
+        .hero-card-header-badge {
+            background: rgba(255,255,255,0.2); color: white;
+            font-size: 11px; font-weight: 600; padding: 3px 10px;
+            border-radius: 20px;
+        }
+        .hero-card-body { padding: 22px; }
+        .hero-event-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 0; border-bottom: 1px solid var(--surface-3);
+        }
+        .hero-event-row:last-child { border-bottom: none; }
+        .hero-event-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            margin-right: 12px; flex-shrink: 0;
+        }
+        .hero-event-info { flex: 1; }
+        .hero-event-name { font-size: 13px; font-weight: 500; color: var(--ink); }
+        .hero-event-date { font-size: 11px; color: var(--ink-3); margin-top: 1px; }
+        .hero-event-status {
+            font-size: 11px; font-weight: 600; padding: 3px 9px;
+            border-radius: 20px;
+        }
+        .status-approved { background: #E6F5EF; color: #1B7A4E; }
+        .status-pending  { background: #FEF3E2; color: #B05A00; }
+        .status-draft    { background: var(--surface-3); color: var(--ink-3); }
+
+        .hero-stats-row {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 12px; margin-top: 16px;
+        }
+        .mini-stat {
+            background: var(--surface-2); border-radius: var(--radius-sm);
+            padding: 12px; text-align: center;
+        }
+        .mini-stat-num { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 700; color: var(--ink); }
+        .mini-stat-label { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+
+        /* Floating badge */
+        .float-badge {
+            position: absolute;
+            background: white; border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            padding: 10px 14px;
+            display: flex; align-items: center; gap: 10px;
+            font-size: 12px;
+        }
+        .float-badge-left { left: -38px; top: 60px; }
+        .float-badge-right { right: -30px; bottom: 70px; }
+        .float-badge-icon {
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+        .float-badge-text { font-weight: 500; color: var(--ink); }
+        .float-badge-sub  { color: var(--ink-3); font-size: 11px; }
+
+        /* ── STATS BAR ────────────────────────────────────────────── */
+        .stats-bar {
+            background: var(--ink);
+            padding: 36px 5%;
+        }
+        .stats-inner {
+            max-width: 1100px; margin: 0 auto;
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 10px; text-align: center;
+        }
+        .stat-item { padding: 10px; }
+        .stat-num {
+            font-family: 'Sora', sans-serif;
+            font-size: 36px; font-weight: 700; color: white;
+            line-height: 1.1;
+        }
+        .stat-num span { color: var(--accent); }
+        .stat-label { font-size: 13px; color: #9AAABB; margin-top: 6px; }
+
+        /* ── FEATURES ────────────────────────────────────────────── */
+        .section {
+            padding: 80px 5%;
+            max-width: 1200px; margin: 0 auto;
+        }
+        .section-tag {
+            display: inline-block;
+            font-size: 12px; font-weight: 600;
+            color: var(--brand); letter-spacing: 0.07em; text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+        h2 {
+            font-family: 'Sora', sans-serif;
+            font-size: clamp(26px, 3vw, 40px);
+            font-weight: 700; line-height: 1.2;
+            letter-spacing: -0.02em; color: var(--ink);
+            margin-bottom: 14px;
+        }
+        .section-sub {
+            font-size: 16px; color: var(--ink-2);
+            max-width: 520px; line-height: 1.7;
+            margin-bottom: 50px;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+        }
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .feature-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-3px);
+        }
+        .feature-icon {
+            width: 48px; height: 48px; border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; margin-bottom: 18px;
+        }
+        .feature-card h3 {
+            font-family: 'Sora', sans-serif;
+            font-size: 16px; font-weight: 600;
+            color: var(--ink); margin-bottom: 8px;
+        }
+        .feature-card p { font-size: 14px; color: var(--ink-3); line-height: 1.65; }
+
+        /* ── HOW IT WORKS ─────────────────────────────────────────── */
+        .how-section {
+            padding: 80px 5%;
+            background: var(--surface-2);
+        }
+        .how-inner { max-width: 1100px; margin: 0 auto; }
+        .steps-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 24px; position: relative;
+        }
+        .steps-grid::before {
+            content: '';
+            position: absolute; top: 28px; left: 14%; right: 14%;
+            height: 1px; background: var(--border);
+        }
+        .step { text-align: center; padding: 0 10px; }
+        .step-num {
+            width: 56px; height: 56px; border-radius: 50%;
+            background: white; border: 1.5px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Sora', sans-serif;
+            font-size: 18px; font-weight: 700; color: var(--brand);
+            margin: 0 auto 18px; position: relative; z-index: 1;
+            box-shadow: var(--shadow-sm);
+        }
+        .step-title {
+            font-family: 'Sora', sans-serif;
+            font-size: 15px; font-weight: 600; color: var(--ink);
+            margin-bottom: 8px;
+        }
+        .step-desc { font-size: 13px; color: var(--ink-3); line-height: 1.6; }
+
+        /* ── ROLES SECTION ───────────────────────────────────────── */
+        .roles-section { padding: 80px 5%; }
+        .roles-inner { max-width: 1100px; margin: 0 auto; }
+        .roles-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 22px; margin-top: 48px;
+        }
+        .role-card {
+            border-radius: var(--radius-lg); padding: 32px;
+            border: 1.5px solid var(--border);
+        }
+        .role-card.admin    { background: #F0F4FF; border-color: #C8D5F7; }
+        .role-card.organizer{ background: #FFF5E6; border-color: #F7DEBB; }
+        .role-card.participant { background: #EDFBF4; border-color: #B6EDD4; }
+        .role-icon { font-size: 32px; margin-bottom: 14px; }
+        .role-card h3 {
+            font-family: 'Sora', sans-serif;
+            font-size: 17px; font-weight: 700;
+            color: var(--ink); margin-bottom: 8px;
+        }
+        .role-card p { font-size: 13px; color: var(--ink-2); line-height: 1.65; margin-bottom: 18px; }
+        .role-features { list-style: none; }
+        .role-features li {
+            font-size: 13px; color: var(--ink-2);
+            padding: 4px 0;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .role-features li::before {
+            content: '✓';
+            font-weight: 700; font-size: 11px;
+            width: 16px; height: 16px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .role-card.admin     .role-features li::before { background: #D0DCFB; color: var(--brand); }
+        .role-card.organizer .role-features li::before { background: #F7DEB5; color: #A05A00; }
+        .role-card.participant .role-features li::before { background: #B6EDD4; color: #1B7A4E; }
+
+        /* ── CTA SECTION ─────────────────────────────────────────── */
+        .cta-section {
+            margin: 0 5% 80px;
+            background: var(--brand);
+            border-radius: var(--radius-xl);
+            padding: 64px 60px;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 40px; flex-wrap: wrap;
+            position: relative; overflow: hidden;
+        }
+        .cta-section::before {
+            content: '';
+            position: absolute; right: -60px; top: -60px;
+            width: 300px; height: 300px; border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+        }
+        .cta-section::after {
+            content: '';
+            position: absolute; right: 60px; bottom: -80px;
+            width: 200px; height: 200px; border-radius: 50%;
+            background: rgba(255,255,255,0.04);
+        }
+        .cta-text h2 { color: white; margin-bottom: 10px; }
+        .cta-text p  { color: rgba(255,255,255,0.75); font-size: 15px; }
+        .btn-cta-white {
+            padding: 13px 30px; border-radius: var(--radius-md);
+            background: white; color: var(--brand);
+            font-size: 15px; font-weight: 700;
+            border: none; cursor: pointer;
+            text-decoration: none; white-space: nowrap;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.15);
+            transition: transform 0.15s, box-shadow 0.15s;
+            flex-shrink: 0;
+        }
+        .btn-cta-white:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,0,0,0.20); }
+
+        /* ── FOOTER ──────────────────────────────────────────────── */
+        footer {
+            background: var(--ink);
+            padding: 48px 5% 32px;
+        }
+        .footer-inner {
+            max-width: 1100px; margin: 0 auto;
+        }
+        .footer-top {
+            display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px; margin-bottom: 40px;
+        }
+        .footer-brand p { font-size: 13px; color: #6B7A8D; line-height: 1.7; margin-top: 12px; max-width: 260px; }
+        .footer-col h4 {
+            font-family: 'Sora', sans-serif;
+            font-size: 12px; font-weight: 600;
+            color: #9AAABB; text-transform: uppercase;
+            letter-spacing: 0.06em; margin-bottom: 16px;
+        }
+        .footer-col a {
+            display: block; font-size: 13px; color: #6B7A8D;
+            text-decoration: none; padding: 4px 0;
+            transition: color 0.15s;
+        }
+        .footer-col a:hover { color: white; }
+        .footer-divider { border: none; border-top: 1px solid #1E2838; margin-bottom: 24px; }
+        .footer-bottom {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 12px; color: #4A5568;
+        }
+        .footer-logo-text {
+            font-family: 'Sora', sans-serif;
+            font-size: 18px; font-weight: 700; color: white;
+        }
+
+        /* ── ANIMATIONS ──────────────────────────────────────────── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .hero-left  { animation: fadeUp 0.6s ease both; }
+        .hero-right { animation: fadeUp 0.6s 0.15s ease both; }
+
+        /* ── RESPONSIVE ──────────────────────────────────────────── */
+        @media (max-width: 900px) {
+            .hero { grid-template-columns: 1fr; gap: 40px; padding: 60px 5%; }
+            .features-grid, .roles-grid { grid-template-columns: 1fr; }
+            .steps-grid { grid-template-columns: repeat(2, 1fr); }
+            .steps-grid::before { display: none; }
+            .stats-inner { grid-template-columns: repeat(2, 1fr); }
+            .footer-top { grid-template-columns: 1fr 1fr; }
+            .float-badge-left, .float-badge-right { display: none; }
+            .nav-links { display: none; }
+            .cta-section { padding: 40px 28px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══ NAV ══════════════════════════════════════════════════════ -->
+<nav>
+    <a href="#" class="nav-logo">
+        <div class="nav-logo-icon">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+        </div>
+        EventMS
+    </a>
+    <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#roles">For you</a></li>
+    </ul>
+    <div class="nav-cta">
+        <a href="login.xhtml" class="btn-ghost">Sign in</a>
+        <a href="register.xhtml" class="btn-primary">Get started free</a>
+    </div>
+</nav>
+
+<!-- ═══ HERO ══════════════════════════════════════════════════════ -->
+<div class="hero">
+    <div class="hero-left">
+        <div class="hero-badge">
+            <span class="hero-badge-dot"></span>
+            Complete Event Platform
+        </div>
+        <h1>
+            Manage Events<br/>
+            That People<br/>
+            <span class="highlight">Remember</span>
+        </h1>
+        <p class="hero-sub">
+            From creating and scheduling to approvals, registrations, payments and certificates — everything your events need, in one place.
+        </p>
+        <div class="hero-actions">
+            <a href="register.xhtml" class="btn-hero btn-hero-primary">Start for free</a>
+            <a href="#features"      class="btn-hero btn-hero-secondary">Explore features</a>
+        </div>
+        <div class="hero-trust">
+            <div class="hero-avatars">
+                <span style="background:#534AB7;">AY</span>
+                <span style="background:#1D9E75;">NI</span>
+                <span style="background:#D85A30;">RK</span>
+                <span style="background:#378ADD;">ML</span>
+            </div>
+            <span>Join organizers already using EventMS</span>
+        </div>
+    </div>
+
+    <div class="hero-right">
+        <div class="hero-visual">
+            <div class="float-badge float-badge-left">
+                <div class="float-badge-icon" style="background:#EEF3FF;">📋</div>
+                <div>
+                    <div class="float-badge-text">12 registrations</div>
+                    <div class="float-badge-sub">in last hour</div>
+                </div>
+            </div>
+            <div class="hero-card">
+                <div class="hero-card-header">
+                    <span class="hero-card-header-title">Event dashboard</span>
+                    <span class="hero-card-header-badge">Live</span>
+                </div>
+                <div class="hero-card-body">
+                    <div class="hero-event-row">
+                        <div class="hero-event-dot" style="background:#1D9E75;"></div>
+                        <div class="hero-event-info">
+                            <div class="hero-event-name">Tech Summit 2026</div>
+                            <div class="hero-event-date">May 5 · City Auditorium</div>
+                        </div>
+                        <span class="hero-event-status status-approved">Approved</span>
+                    </div>
+                    <div class="hero-event-row">
+                        <div class="hero-event-dot" style="background:#F5A623;"></div>
+                        <div class="hero-event-info">
+                            <div class="hero-event-name">Design Workshop</div>
+                            <div class="hero-event-date">May 12 · Hall B</div>
+                        </div>
+                        <span class="hero-event-status status-pending">Pending</span>
+                    </div>
+                    <div class="hero-event-row">
+                        <div class="hero-event-dot" style="background:#7A859A;"></div>
+                        <div class="hero-event-info">
+                            <div class="hero-event-name">Startup Expo</div>
+                            <div class="hero-event-date">Jun 1 · Main Campus</div>
+                        </div>
+                        <span class="hero-event-status status-draft">Draft</span>
+                    </div>
+                    <div class="hero-stats-row">
+                        <div class="mini-stat">
+                            <div class="mini-stat-num">248</div>
+                            <div class="mini-stat-label">Attendees</div>
+                        </div>
+                        <div class="mini-stat">
+                            <div class="mini-stat-num">34</div>
+                            <div class="mini-stat-label">Events</div>
+                        </div>
+                        <div class="mini-stat">
+                            <div class="mini-stat-num">189</div>
+                            <div class="mini-stat-label">Certificates</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="float-badge float-badge-right">
+                <div class="float-badge-icon" style="background:#EDFBF4;">🎓</div>
+                <div>
+                    <div class="float-badge-text">Certificate issued</div>
+                    <div class="float-badge-sub">Auto-generated</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ STATS BAR ══════════════════════════════════════════════════ -->
+<div class="stats-bar">
+    <div class="stats-inner">
+        <div class="stat-item">
+            <div class="stat-num">500<span>+</span></div>
+            <div class="stat-label">Events managed</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num">10<span>k+</span></div>
+            <div class="stat-label">Registrations processed</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num">98<span>%</span></div>
+            <div class="stat-label">Organizer satisfaction</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num">3</div>
+            <div class="stat-label">User roles supported</div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ FEATURES ══════════════════════════════════════════════════ -->
+<div id="features" class="section">
+    <span class="section-tag">Features</span>
+    <h2>Everything you need,<br/>nothing you don't</h2>
+    <p class="section-sub">A complete backend-powered platform with 8 modules working seamlessly together.</p>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon" style="background:#EEF3FF;">👤</div>
+            <h3>User Management</h3>
+            <p>Role-based access for Admins, Organizers and Participants. Account verification, profile management, and secure authentication.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:#EDFBF4;">📅</div>
+            <h3>Event Scheduling</h3>
+            <p>Assign venues, set dates, check availability automatically, and prevent scheduling conflicts across all your events.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:#FFF5E6;">✅</div>
+            <h3>Approval Workflow</h3>
+            <p>Admin-controlled approval pipeline. Events move from Draft to Pending to Approved with email notifications at every step.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:#F0F4FF;">🎟️</div>
+            <h3>Smart Registration</h3>
+            <p>Capacity-aware registration with automatic waitlisting. Track attendance, send confirmations, and export participant lists.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:#FEF0F0;">💳</div>
+            <h3>Payment Processing</h3>
+            <p>Support for multiple payment methods. Track payment status, generate receipts, and process refunds when events are cancelled.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon" style="background:#F5EEFF;">🎓</div>
+            <h3>Auto Certificates</h3>
+            <p>Certificates are generated automatically after event completion. Participants can download and verify using their certificate number.</p>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ HOW IT WORKS ══════════════════════════════════════════════ -->
+<div id="how" class="how-section">
+    <div class="how-inner">
+        <div style="text-align:center; margin-bottom: 50px;">
+            <span class="section-tag">How it works</span>
+            <h2>From idea to event in 4 steps</h2>
+        </div>
+        <div class="steps-grid">
+            <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-title">Create your event</div>
+                <p class="step-desc">Organizers fill in event details, set venue, date, capacity and submit for review.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-title">Admin approves</div>
+                <p class="step-desc">Admin reviews the event, adds remarks if needed, and approves or rejects with one click.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-title">Participants register</div>
+                <p class="step-desc">Approved events go live. Participants browse, register, and pay. Waitlisting is automatic.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">4</div>
+                <div class="step-title">Certificates issued</div>
+                <p class="step-desc">After the event, attendees receive feedback prompts and downloadable certificates automatically.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ ROLES SECTION ═════════════════════════════════════════════ -->
+<div id="roles" class="roles-section">
+    <div class="roles-inner">
+        <span class="section-tag">Built for everyone</span>
+        <h2>One platform, three roles</h2>
+        <p class="section-sub">Every user gets a tailored experience designed for exactly what they need to do.</p>
+
+        <div class="roles-grid">
+            <div class="role-card admin">
+                <div class="role-icon">🛡️</div>
+                <h3>Admin</h3>
+                <p>Full control over the platform — manage users, approve events, verify organizers, and monitor everything.</p>
+                <ul class="role-features">
+                    <li>Approve or reject events</li>
+                    <li>Manage all users and roles</li>
+                    <li>Verify organizer accounts</li>
+                    <li>Broadcast notifications</li>
+                    <li>View payment reports</li>
+                </ul>
+            </div>
+            <div class="role-card organizer">
+                <div class="role-icon">🎯</div>
+                <h3>Organizer</h3>
+                <p>Create and manage events end-to-end, from scheduling venues to viewing participant lists and feedback.</p>
+                <ul class="role-features">
+                    <li>Create and manage events</li>
+                    <li>Schedule venues and timings</li>
+                    <li>View participant list</li>
+                    <li>Analyze event feedback</li>
+                    <li>Track registrations</li>
+                </ul>
+            </div>
+            <div class="role-card participant">
+                <div class="role-icon">🙋</div>
+                <h3>Participant</h3>
+                <p>Discover events, register instantly, pay securely, and collect certificates — all from one dashboard.</p>
+                <ul class="role-features">
+                    <li>Browse and register for events</li>
+                    <li>Auto waitlist when full</li>
+                    <li>Secure payment checkout</li>
+                    <li>Download certificates</li>
+                    <li>Submit event feedback</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ CTA ════════════════════════════════════════════════════════ -->
+<div class="cta-section">
+    <div class="cta-text">
+        <h2 style="font-size:clamp(22px,3vw,34px);">Ready to run your first event?</h2>
+        <p>Join in seconds. No credit card required.</p>
+    </div>
+    <a href="register.xhtml" class="btn-cta-white">Create free account</a>
+</div>
+
+<!-- ═══ FOOTER ════════════════════════════════════════════════════ -->
+<footer>
+    <div class="footer-inner">
+        <div class="footer-top">
+            <div class="footer-brand">
+                <span class="footer-logo-text">EventMS</span>
+                <p>A full-stack Jakarta EE event management platform built with EJB, JPA, REST and JSF.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Platform</h4>
+                <a href="#features">Features</a>
+                <a href="#how">How it works</a>
+                <a href="#roles">For organizers</a>
+            </div>
+            <div class="footer-col">
+                <h4>Account</h4>
+                <a href="login.xhtml">Sign in</a>
+                <a href="register.xhtml">Register</a>
+                <a href="login.xhtml">Forgot password</a>
+            </div>
+            <div class="footer-col">
+                <h4>Modules</h4>
+                <a href="#">Event management</a>
+                <a href="#">Registration</a>
+                <a href="#">Payments</a>
+                <a href="#">Certificates</a>
+            </div>
+        </div>
+        <hr class="footer-divider" />
+        <div class="footer-bottom">
+            <span>© 2026 EventMS. All rights reserved.</span>
+            <span>Built with Jakarta EE 10 · Payara Server</span>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>
