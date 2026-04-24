@@ -50,7 +50,7 @@ public class AuthManagmentBean implements AuthManagmentBeanLocal {
     private static final String SMTP_PORT      = "587";
 
     // ── APP CONFIG
-    private static final String APP_BASE_URL   = "http://localhost:8080/EventManagement";
+    private static final String APP_BASE_URL   = "http://localhost:8080/EventManagmentProject";
 
         // ── REPLACE login() — remove sendLoginSuccessEmail call ──
     @Override
@@ -215,14 +215,20 @@ public class AuthManagmentBean implements AuthManagmentBeanLocal {
             .setParameter(3, user.getUserId())
             .executeUpdate();
 
-        // Step 5: Send reset email
-        String resetLink = APP_BASE_URL + "/reset-password?token=" + resetToken;
-        String subject = "Password Reset Request - Event Management System";
+        // Step 5: Send reset email — plain token for copy-paste
+        String subject = "Your Password Reset Token - Event Management System";
         String body = "Dear " + user.getName() + ",\n\n"
-            + "We received a request to reset your password.\n\n"
-            + "Click the link below to reset your password:\n"
-            + resetLink + "\n\n"
-            + "This link will expire in 1 hour.\n\n"
+            + "We received a request to reset your EventMS password.\n\n"
+            + "Your password reset token is:\n\n"
+            + "----------------------------------------\n"
+            + resetToken + "\n"
+            + "----------------------------------------\n\n"
+            + "How to use:\n"
+            + "1. Go to the Forgot Password page on EventMS\n"
+            + "2. Click 'Already have a token? Enter it below'\n"
+            + "3. Copy and paste the token above\n"
+            + "4. Enter your new password\n\n"
+            + "This token expires in 1 hour.\n\n"
             + "If you did not request this, please ignore this email.\n\n"
             + "Regards,\nEvent Management Team";
 

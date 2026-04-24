@@ -28,6 +28,10 @@ public class AuthBean implements Serializable {
     private Users loggedInUser;
     private String role;
 
+    // For forgot/reset password flow
+    private String resetToken;
+    private String newPassword;
+
     // ================================
     // 🔐 LOGIN
     // ================================
@@ -83,31 +87,43 @@ public class AuthBean implements Serializable {
     public void forgotPassword() {
         try {
             authEJB.forgotPassword(email);
-
-            FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage("Reset link sent to email"));
-
+            // Redirect with ?step=2 in URL — survives tab switching unlike ViewScope
+            FacesContext.getCurrentInstance().getExternalContext()
+                .redirect("forgot-password.xhtml?step=2");
         } catch (Exception e) {
             FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                e.getMessage(), null));
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, e.getMessage(), null));
         }
     }
 
     // ================================
-    // 🔁 RESET PASSWORD
+    // 🔁 RESET PASSWORD (CDI-callable)
+    // ================================
+    public String doResetPassword() {
+        try {
+            authEJB.resetPassword(resetToken, newPassword);
+            // Redirect to login with success toast trigger
+            FacesContext.getCurrentInstance().getExternalContext()
+                .redirect("login.xhtml?pwdreset=success");
+            return null;
+        } catch (Exception e) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, e.getMessage(), null));
+            return null;
+        }
+    }
+
+    // ================================
+    // 🔁 RESET PASSWORD (legacy - keep for compatibility)
     // ================================
     public void resetPassword(String token, String newPassword) {
         try {
             authEJB.resetPassword(token, newPassword);
-
             FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage("Password reset successful"));
-
         } catch (Exception e) {
             FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                e.getMessage(), null));
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, e.getMessage(), null));
         }
     }
 
@@ -141,7 +157,11 @@ public class AuthBean implements Serializable {
         return loggedInUser;
     }
 
-    public String getRole() {
-        return role;
-    }
+    public String getRole() { return role; }
+
+    public String getResetToken() { return resetToken; }
+    public void setResetToken(String resetToken) { this.resetToken = resetToken; }
+
+    public String getNewPassword() { return newPassword; }
+    public void setNewPassword(String newPassword) { this.newPassword = newPassword; }
 }

@@ -142,7 +142,7 @@
 
                 <div class="frow">
                     <label class="rem"><input type="checkbox" /> Remember me</label>
-                    <a href="#" class="fgt" onclick="document.getElementById('fgtModal').className='overlay open'; return false;">Forgot password?</a>
+                    <a href="forgot-password.xhtml" class="fgt">Forgot password?</a>
                 </div>
 
                 <h:commandButton value="Sign in →"
@@ -183,11 +183,113 @@
     </div>
 </div>
 
+<style>
+/* ── TOAST POPUP ─────────────────────────────────────── */
+.toast {
+    position: fixed; top: 24px; right: 24px; z-index: 999;
+    display: flex; align-items: flex-start; gap: 13px;
+    background: #FFFFFF;
+    border-radius: 14px;
+    padding: 16px 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08);
+    border-left: 4px solid #22C55E;
+    min-width: 300px; max-width: 380px;
+    transform: translateX(120%);
+    transition: transform 0.38s cubic-bezier(0.34,1.56,0.64,1);
+    pointer-events: none;
+}
+.toast.show { transform: translateX(0); pointer-events: auto; }
+.toast-icon {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #F0FDF4;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 17px;
+}
+.toast-title { font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; color: #111827; margin-bottom: 3px; }
+.toast-msg   { font-size: 12px; color: #6B7280; line-height: 1.5; }
+.toast-close {
+    position: absolute; top: 10px; right: 12px;
+    background: none; border: none; cursor: pointer;
+    font-size: 18px; color: #9CA3AF; line-height: 1;
+}
+.toast-close:hover { color: #374151; }
+.toast-progress {
+    position: absolute; bottom: 0; left: 0;
+    height: 3px; background: #22C55E; border-radius: 0 0 0 14px;
+    width: 100%;
+    animation: shrink 3.5s linear forwards;
+}
+@keyframes shrink { from { width: 100%; } to { width: 0%; } }
+
+/* Error toast variant */
+.toast.toast-error { border-left-color: #EF4444; }
+.toast.toast-error .toast-icon  { background: #FEF2F2; }
+.toast.toast-error .toast-progress { background: #EF4444; }
+</style>
+
+<!-- ══ TOAST POPUP ════════════════════════════════════════ -->
+<div class="toast" id="toast">
+    <div class="toast-icon" id="toastIcon">✅</div>
+    <div>
+        <div class="toast-title" id="toastTitle">Success!</div>
+        <div class="toast-msg"   id="toastMsg">You have signed in successfully.</div>
+    </div>
+    <button class="toast-close" onclick="hideToast()">×</button>
+    <div class="toast-progress" id="toastProgress"></div>
+</div>
+
 <script type="text/javascript">
+//<![CDATA[
 function togglePwd(id) {
     var f = document.getElementById(id);
     if (f) f.type = (f.type === 'password') ? 'text' : 'password';
 }
+
+function showToast(title, msg, isError) {
+    var t  = document.getElementById('toast');
+    var ti = document.getElementById('toastIcon');
+    var tt = document.getElementById('toastTitle');
+    var tm = document.getElementById('toastMsg');
+    var tp = document.getElementById('toastProgress');
+
+    tt.textContent = title;
+    tm.textContent = msg;
+
+    if (isError) {
+        t.classList.add('toast-error');
+        ti.textContent = '❌';
+    } else {
+        t.classList.remove('toast-error');
+        ti.textContent = '✅';
+    }
+
+    // Reset progress bar animation
+    tp.style.animation = 'none';
+    tp.offsetHeight; // reflow
+    tp.style.animation = '';
+
+    t.classList.add('show');
+    setTimeout(function() { hideToast(); }, 3500);
+}
+
+function hideToast() {
+    document.getElementById('toast').classList.remove('show');
+}
+
+// Show "Account created!" toast if redirected from register page
+window.addEventListener('DOMContentLoaded', function() {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('registered') === 'true') {
+        showToast('Account created! 🎉', 'Your account is ready. Please sign in.', false);
+    }
+    if (params.get('registered') === 'organizer') {
+        showToast('Account submitted!', 'Organizer account pending admin approval. Check your email.', false);
+    }
+    if (params.get('pwdreset') === 'success') {
+        showToast('Password changed! 🔐', 'Your new password is set. Please sign in.', false);
+    }
+});
+//]]>
 </script>
 </h:body>
 </html>

@@ -126,11 +126,15 @@ public class UserBean implements Serializable {
             FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_INFO, successMsg, null));
 
-            // Reset form state
-            selectedUser = new Users();
+            // Navigate to login page with popup trigger param
+            String redirectParam = "Participant".equalsIgnoreCase(selectedRoleName)
+                ? "login?faces-redirect=true&registered=true"
+                : "login?faces-redirect=true&registered=organizer";
+
+            selectedUser    = new Users();
             selectedRoleName = "Participant";
 
-            return "login?faces-redirect=true";
+            return redirectParam;
 
         } catch (Exception e) {
             showMessage("Registration failed: " + e.getMessage());
