@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:pt="jakarta.faces.passthrough"
+      lang="en">
+<h:head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Account — EventMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&amp;family=DM+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --brand:      #2D5BE3;
+            --brand-dark: #1A3DA8;
+            --brand-light:#EEF3FF;
+            --ink:        #111827;
+            --ink-2:      #374151;
+            --ink-3:      #6B7280;
+            --radius:     10px;
+        }
+
+        html, body { min-height: 100%; font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+
+        .page { min-height: 100vh; display: grid; grid-template-columns: 42% 58%; }
+
+        /* ── LEFT — SAME navy as login ── */
+        .left {
+            background: linear-gradient(160deg, #0A1535 0%, #0F1E45 45%, #162756 100%);
+            display: flex; flex-direction: column;
+            justify-content: space-between;
+            padding: 36px 44px; position: relative; overflow: hidden;
+            min-height: 100vh;
+        }
+        .left::before { content: ''; position: absolute; width: 360px; height: 360px; border-radius: 50%; top: -110px; right: -110px; background: rgba(45,91,227,0.12); }
+        .left::after  { content: ''; position: absolute; width: 240px; height: 240px; border-radius: 50%; bottom: -80px; left: -60px; background: rgba(45,91,227,0.08); }
+        .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; position: relative; z-index: 1; }
+        .logo-box { width: 38px; height: 38px; border-radius: 10px; background: rgba(45,91,227,0.30); border: 1px solid rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; }
+        .logo-box svg { width: 20px; height: 20px; fill: white; }
+        .logo-name { font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 700; color: white; }
+        .left-body { position: relative; z-index: 1; }
+        .left-body h2 { font-family: 'Sora', sans-serif; font-size: 30px; font-weight: 700; color: white; line-height: 1.25; margin-bottom: 14px; letter-spacing: -0.02em; }
+        .left-body p  { font-size: 14px; color: rgba(255,255,255,0.58); line-height: 1.7; margin-bottom: 28px; }
+        .role-cards { display: flex; flex-direction: column; gap: 10px; }
+        .rcard { display: flex; align-items: flex-start; gap: 12px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.10); border-radius: 12px; padding: 13px 16px; }
+        .rcard-ico { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+        .rcard-t { font-size: 13px; font-weight: 600; color: white; margin-bottom: 2px; }
+        .rcard-s { font-size: 11px; color: rgba(255,255,255,0.45); line-height: 1.5; }
+        .left-foot { font-size: 11px; color: rgba(255,255,255,0.22); position: relative; z-index: 1; }
+
+        /* ── RIGHT — pure white ── */
+        .right { background: #FFFFFF; display: flex; align-items: flex-start; justify-content: center; padding: 36px 52px; overflow-y: auto; }
+        .form-box { width: 100%; max-width: 420px; padding-bottom: 40px; }
+
+        .fhead { margin-bottom: 22px; }
+        .fhead h1 { font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 700; color: var(--ink); letter-spacing: -0.02em; margin-bottom: 5px; }
+        .fhead p  { font-size: 14px; color: var(--ink-3); }
+        .fhead a  { color: var(--brand); font-weight: 500; text-decoration: none; }
+        .fhead a:hover { text-decoration: underline; }
+
+        .progress { display: flex; gap: 6px; margin-bottom: 22px; }
+        .dot { height: 4px; border-radius: 2px; background: #E5E7EB; flex: 1; transition: background 0.3s; }
+        .dot.on { background: var(--brand); }
+
+        /* JSF messages */
+        .msg-err { background: #FEF2F2; border: 1px solid #FECACA; border-radius: var(--radius); padding: 10px 14px; font-size: 13px; color: #B91C1C; margin-bottom: 16px; }
+
+        /* ───── ROLE CHOOSER ──────
+           Uses onclick on the labels directly — no hidden radios.
+           Selected card gets `.selected` class. */
+        .role-sel { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .role-lbl {
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+            padding: 14px 10px; border: 1.5px solid #D1D5DB;
+            border-radius: var(--radius); background: white;
+            cursor: pointer; text-align: center;
+            transition: all 0.15s;
+            user-select: none;
+        }
+        .role-lbl:hover { border-color: var(--brand); background: var(--brand-light); }
+        .role-lbl.selected {
+            border-color: var(--brand); background: var(--brand-light);
+            box-shadow: 0 0 0 3px rgba(45,91,227,0.10);
+        }
+        .role-lbl-ico { font-size: 22px; }
+        .role-lbl-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+        .role-lbl-desc { font-size: 11px; color: var(--ink-3); }
+
+        /* Section heading */
+        .sec-label { font-size: 11px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; margin: 18px 0 13px; display: flex; align-items: center; gap: 8px; }
+        .sec-label::after { content: ''; flex: 1; height: 1px; background: #E5E7EB; }
+
+        /* Form fields */
+        .fg { margin-bottom: 14px; }
+        .fl { display: block; font-size: 13px; font-weight: 500; color: var(--ink-2); margin-bottom: 5px; }
+        .fl em { color: #DC2626; font-style: normal; margin-left: 2px; }
+
+        .iw { position: relative; }
+        .iico { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9CA3AF; pointer-events: none; display: flex; align-items: center; }
+        .iico svg { width: 15px; height: 15px; }
+        .iico-top { position: absolute; left: 12px; top: 13px; color: #9CA3AF; pointer-events: none; display: flex; }
+
+        /* INPUTS — covers every type JSF renders */
+        input.fi,
+        input[type="text"].fi,
+        input[type="password"].fi,
+        input[type="email"].fi,
+        input[type="tel"].fi,
+        select.fi {
+            display: block !important; width: 100% !important;
+            padding: 10px 14px 10px 38px !important;
+            border: 1.5px solid #D1D5DB !important;
+            border-radius: var(--radius) !important;
+            font-size: 14px !important; font-family: 'DM Sans', sans-serif !important;
+            color: #111827 !important; background: #FFFFFF !important;
+            outline: none !important; -webkit-appearance: none !important;
+            box-sizing: border-box !important;
+            transition: border-color 0.15s, box-shadow 0.15s !important;
+        }
+        input.fi:focus, input[type="text"].fi:focus, input[type="password"].fi:focus, select.fi:focus {
+            border-color: #2D5BE3 !important; box-shadow: 0 0 0 3px rgba(45,91,227,0.10) !important;
+        }
+        textarea.fi {
+            display: block !important; width: 100% !important;
+            padding: 10px 14px 10px 38px !important;
+            border: 1.5px solid #D1D5DB !important;
+            border-radius: var(--radius) !important;
+            font-size: 14px !important; font-family: 'DM Sans', sans-serif !important;
+            color: #111827 !important; background: #FFFFFF !important;
+            outline: none !important; resize: vertical !important;
+            min-height: 72px !important; box-sizing: border-box !important;
+        }
+        textarea.fi:focus { border-color: #2D5BE3 !important; box-shadow: 0 0 0 3px rgba(45,91,227,0.10) !important; }
+
+        .eye { position: absolute; right: 11px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #9CA3AF; padding: 2px; display: flex; }
+        .eye:hover { color: #6B7280; }
+
+        /* ── ORGANIZER SECTION — hidden unless .show ── */
+        .org-sec { display: none; }
+        .org-sec.show { display: block; }
+
+        .warn-box {
+            background: #FFFBEB; border: 1px solid #FCD34D;
+            border-radius: var(--radius); padding: 10px 13px;
+            font-size: 12px; color: #92400E; margin-bottom: 14px; line-height: 1.6;
+        }
+
+        /* Terms */
+        .terms { display: flex; align-items: flex-start; gap: 9px; margin: 16px 0 18px; font-size: 13px; color: var(--ink-2); }
+        .terms input { width: 15px; height: 15px; flex-shrink: 0; margin-top: 2px; accent-color: var(--brand); }
+        .terms a { color: var(--brand); text-decoration: none; }
+        .terms a:hover { text-decoration: underline; }
+
+        /* BUTTON */
+        input[type="submit"].fbtn, button.fbtn {
+            display: block !important; width: 100% !important;
+            padding: 12px 20px !important;
+            background: var(--brand) !important; color: #FFFFFF !important;
+            font-size: 15px !important; font-weight: 600 !important;
+            font-family: 'DM Sans', sans-serif !important;
+            border: none !important; border-radius: var(--radius) !important;
+            cursor: pointer !important;
+            box-shadow: 0 3px 14px rgba(45,91,227,0.30) !important;
+            transition: background 0.15s, transform 0.1s !important;
+            -webkit-appearance: none !important;
+            letter-spacing: 0.01em !important;
+        }
+        input[type="submit"].fbtn:hover, button.fbtn:hover {
+            background: var(--brand-dark) !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 5px 20px rgba(45,91,227,0.40) !important;
+        }
+
+        @media (max-width: 900px) { .page { grid-template-columns: 1fr; } .left { display: none; } .right { padding: 28px 20px; } }
+    </style>
+</h:head>
+
+<h:body>
+<div class="page">
+
+    <!-- LEFT -->
+    <div class="left">
+        <a href="index.xhtml" class="logo">
+            <div class="logo-box">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+            </div>
+            <span class="logo-name">EventMS</span>
+        </a>
+        <div class="left-body">
+            <h2>Join thousands of event creators</h2>
+            <p>Choose your role and get started with EventMS. It only takes 2 minutes.</p>
+            <div class="role-cards">
+                <div class="rcard"><div class="rcard-ico">🙋</div><div><div class="rcard-t">Participant</div><div class="rcard-s">Browse events, register instantly, pay securely and collect certificates.</div></div></div>
+                <div class="rcard"><div class="rcard-ico">🎯</div><div><div class="rcard-t">Organizer</div><div class="rcard-s">Create and manage events, venues and participants. Requires admin approval.</div></div></div>
+            </div>
+        </div>
+        <div class="left-foot">© 2026 EventMS · Jakarta EE 10</div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right">
+        <div class="form-box">
+
+            <div class="fhead">
+                <h1>Create account</h1>
+                <p>Already have an account? <a href="login.xhtml">Sign in</a></p>
+            </div>
+
+            <div class="progress">
+                <div class="dot on"></div>
+                <div class="dot on"></div>
+                <div class="dot" id="dot3"></div>
+            </div>
+
+            <h:messages globalOnly="true" styleClass="msg-err" layout="list" showSummary="true" showDetail="false" />
+
+            <h:form id="regForm">
+
+                <!-- Role selector (visible labels, onclick-driven) -->
+                <div class="sec-label">Choose your role</div>
+                <div class="role-sel">
+                    <div class="role-lbl selected" id="lblPart" onclick="pickRole('Participant')">
+                        <span class="role-lbl-ico">🙋</span>
+                        <span class="role-lbl-name">Participant</span>
+                        <span class="role-lbl-desc">Attend events</span>
+                    </div>
+                    <div class="role-lbl" id="lblOrg" onclick="pickRole('Organizer')">
+                        <span class="role-lbl-ico">🎯</span>
+                        <span class="role-lbl-name">Organizer</span>
+                        <span class="role-lbl-desc">Create events</span>
+                    </div>
+                </div>
+
+                <!-- Hidden field bound to userBean.selectedRoleName -->
+                <h:inputHidden id="roleName" value="#{userBean.selectedRoleName}" />
+
+                <!-- Personal details -->
+                <div class="sec-label">Personal details</div>
+
+                <!-- Full name -->
+                <div class="fg">
+                    <label class="fl">Full name <em>*</em></label>
+                    <div class="iw">
+                        <span class="iico">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </span>
+                        <h:inputText value="#{userBean.selectedUser.name}"
+                                     styleClass="fi"
+                                     pt:placeholder="Your full name"
+                                     required="true" requiredMessage="Name is required" />
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="fg">
+                    <label class="fl">Email address <em>*</em></label>
+                    <div class="iw">
+                        <span class="iico">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        </span>
+                        <h:inputText value="#{userBean.selectedUser.email}"
+                                     styleClass="fi"
+                                     pt:placeholder="you@example.com"
+                                     required="true" requiredMessage="Email is required" />
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="fg">
+                    <label class="fl">Password <em>*</em></label>
+                    <div class="iw">
+                        <span class="iico">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        </span>
+                        <h:inputSecret id="regPwd" value="#{userBean.selectedUser.password}"
+                                       styleClass="fi"
+                                       pt:placeholder="Min 6 characters"
+                                       required="true" requiredMessage="Password is required" />
+                        <button type="button" class="eye" onclick="togglePwd('regForm:regPwd')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Phone -->
+                <div class="fg">
+                    <label class="fl">Phone number</label>
+                    <div class="iw">
+                        <span class="iico">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.58 1H6.6a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.96-.96a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        </span>
+                        <h:inputText value="#{userBean.selectedUser.phone}"
+                                     styleClass="fi"
+                                     pt:placeholder="+91 99999 99999" />
+                    </div>
+                </div>
+
+                <!-- Gender -->
+                <div class="fg">
+                    <label class="fl">Gender</label>
+                    <div class="iw">
+                        <span class="iico">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M12 12v10M8 18h8"/></svg>
+                        </span>
+                        <h:selectOneMenu value="#{userBean.selectedUser.gender}" styleClass="fi">
+                            <f:selectItem itemValue=""       itemLabel="Select gender..." />
+                            <f:selectItem itemValue="Male"   itemLabel="Male" />
+                            <f:selectItem itemValue="Female" itemLabel="Female" />
+                            <f:selectItem itemValue="Other"  itemLabel="Other" />
+                        </h:selectOneMenu>
+                    </div>
+                </div>
+
+                <!-- ═══ ORGANIZER ONLY FIELDS ═══════════════════════ -->
+                <div class="org-sec" id="orgSec">
+
+                    <div class="warn-box">
+                        ⚠️ Organizer accounts require admin verification before you can log in. You'll receive an email once approved.
+                    </div>
+
+                    <div class="sec-label">Organization details</div>
+
+                    <div class="fg">
+                        <label class="fl">Organization name</label>
+                        <div class="iw">
+                            <span class="iico">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                            </span>
+                            <h:inputText value="#{userBean.selectedUser.organizationName}"
+                                         styleClass="fi"
+                                         pt:placeholder="Your organization name" />
+                        </div>
+                    </div>
+
+                    <div class="fg">
+                        <label class="fl">Organization type</label>
+                        <div class="iw">
+                            <span class="iico">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                            </span>
+                            <h:selectOneMenu value="#{userBean.selectedUser.organizationType}" styleClass="fi">
+                                <f:selectItem itemValue=""           itemLabel="Select type..." />
+                                <f:selectItem itemValue="University" itemLabel="University / College" />
+                                <f:selectItem itemValue="Corporate"  itemLabel="Corporate" />
+                                <f:selectItem itemValue="NGO"        itemLabel="NGO / Non-Profit" />
+                                <f:selectItem itemValue="Government" itemLabel="Government" />
+                                <f:selectItem itemValue="Individual" itemLabel="Individual" />
+                                <f:selectItem itemValue="Other"      itemLabel="Other" />
+                            </h:selectOneMenu>
+                        </div>
+                    </div>
+
+                    <div class="fg">
+                        <label class="fl">Organization address</label>
+                        <div class="iw">
+                            <span class="iico-top">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            </span>
+                            <h:inputTextarea value="#{userBean.selectedUser.organizationAddress}"
+                                             styleClass="fi"
+                                             pt:placeholder="Full address of your organization" />
+                        </div>
+                    </div>
+
+                </div>
+                <!-- end organizer fields -->
+
+                <!-- Terms -->
+                <div class="terms">
+                    <input type="checkbox" id="terms" required="required" />
+                    <label for="terms">
+                        I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                    </label>
+                </div>
+
+                <!-- Submit -->
+                <h:commandButton value="Create account →"
+                                 action="#{userBean.registerUser()}"
+                                 styleClass="fbtn" />
+
+            </h:form>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+//<![CDATA[
+    // Switch role selection — called by onclick on visible cards
+    function pickRole(roleName) {
+        const lblPart = document.getElementById('lblPart');
+        const lblOrg  = document.getElementById('lblOrg');
+        const orgSec  = document.getElementById('orgSec');
+        const dot3    = document.getElementById('dot3');
+        const hidden  = document.getElementById('regForm:roleName');
+
+        // Toggle visual selection
+        if (roleName === 'Organizer') {
+            lblOrg.classList.add('selected');
+            lblPart.classList.remove('selected');
+            orgSec.classList.add('show');
+            dot3.classList.add('on');
+        } else {
+            lblPart.classList.add('selected');
+            lblOrg.classList.remove('selected');
+            orgSec.classList.remove('show');
+            dot3.classList.remove('on');
+        }
+
+        // Update the hidden field so JSF picks it up on submit
+        if (hidden) hidden.value = roleName;
+    }
+
+    function togglePwd(id) {
+        const f = document.getElementById(id);
+        if (f) f.type = (f.type === 'password') ? 'text' : 'password';
+    }
+
+    // Ensure the hidden field has the default value on load
+    document.addEventListener('DOMContentLoaded', function() {
+        const h = document.getElementById('regForm:roleName');
+        if (h) { if (!h.value) h.value = 'Participant'; }
+    });
+//]]>
+</script>
+</h:body>
+</html>
