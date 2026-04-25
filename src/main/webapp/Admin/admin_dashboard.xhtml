@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      lang="en">
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Admin Dashboard — EventMS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&amp;family=Geist:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+    <style>
+    /* ═══════════════════════════════════════════════════════════
+       ADMIN DASHBOARD  ·  Warm Stone Professional
+       Cormorant Garamond (display)  +  Geist (body)
+       Palette: warm parchment · charcoal ink · sage accent
+    ═══════════════════════════════════════════════════════════ */
+
+    :root {
+        /* Warm stone palette — no cold blue-grays */
+        --stone-50:   #FAFAF7;
+        --stone-100:  #F5F4EF;
+        --stone-200:  #EAE8E0;
+        --stone-300:  #D6D3C8;
+        --stone-400:  #B8B4A4;
+        --stone-500:  #8A8675;
+        --stone-600:  #605D50;
+        --stone-700:  #3D3B31;
+        --stone-800:  #1C1A14;
+        --stone-900:  #0F0E0A;
+
+        /* Sage accent — the one deliberate color */
+        --sage:       #4A7058;
+        --sage-light: #EBF2ED;
+        --sage-mid:   #C2D9CA;
+
+        /* Warm amber for warnings */
+        --amber:      #8B5E1A;
+        --amber-lt:   #FAF0DC;
+        --amber-mid:  #E8C87A;
+
+        /* Status colors — desaturated, natural */
+        --green:      #3A6B4A;
+        --green-lt:   #EAF3EC;
+        --red:        #8B2E2E;
+        --red-lt:     #F5EAEA;
+
+        /* Typography */
+        --display:    'Cormorant Garamond', Georgia, serif;
+        --body:       'Geist', system-ui, sans-serif;
+
+        /* Layout */
+        --sidebar-w:  256px;
+        --radius-sm:  6px;
+        --radius:     10px;
+        --radius-lg:  14px;
+
+        /* Shadows — warm, not blue-tinted */
+        --shadow-sm:  0 1px 3px rgba(15,14,10,0.06), 0 1px 2px rgba(15,14,10,0.04);
+        --shadow:     0 2px 8px rgba(15,14,10,0.08), 0 4px 16px rgba(15,14,10,0.05);
+        --shadow-lg:  0 8px 32px rgba(15,14,10,0.10), 0 2px 8px rgba(15,14,10,0.06);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        font-family: var(--body);
+        background: var(--stone-100);
+        color: var(--stone-800);
+        -webkit-font-smoothing: antialiased;
+        font-size: 14px;
+        line-height: 1.55;
+    }
+
+    /* Subtle grain texture overlay */
+    body::before {
+        content: '';
+        position: fixed; inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+        pointer-events: none; z-index: 0; opacity: 0.4;
+    }
+
+    /* ── LAYOUT ─────────────────────────────────────────────── */
+    .shell { display: flex; min-height: 100vh; position: relative; z-index: 1; }
+    .main  { flex: 1; min-width: 0; padding-left: var(--sidebar-w); display: flex; flex-direction: column; }
+
+    /* ── SIDEBAR ─────────────────────────────────────────────── */
+    .sidebar {
+        position: fixed; inset-block: 0; left: 0;
+        width: var(--sidebar-w);
+        background: var(--stone-800);
+        display: flex; flex-direction: column;
+        z-index: 100;
+        overflow-y: auto;
+    }
+    .sidebar::-webkit-scrollbar { width: 0; }
+
+    /* Top accent stripe */
+    .sidebar-stripe {
+        height: 2px;
+        background: linear-gradient(90deg, var(--sage) 0%, var(--amber-mid) 100%);
+    }
+
+    /* Logo */
+    .sb-logo {
+        display: flex; align-items: center; gap: 11px;
+        padding: 20px 18px 18px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        text-decoration: none;
+    }
+    .sb-logo-mark {
+        width: 34px; height: 34px; border-radius: var(--radius-sm);
+        background: var(--sage);
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+    .sb-logo-mark svg { width: 17px; height: 17px; fill: white; }
+    .sb-logo-text {
+        font-family: var(--display);
+        font-size: 20px; font-weight: 600;
+        color: var(--stone-50); letter-spacing: 0.01em;
+    }
+    .sb-logo-role {
+        margin-left: auto;
+        font-size: 9px; font-weight: 500; letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--stone-500);
+        border: 1px solid rgba(255,255,255,0.08);
+        padding: 2px 7px; border-radius: 20px;
+    }
+
+    /* User identity */
+    .sb-identity {
+        margin: 12px 14px 6px;
+        padding: 11px 13px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: var(--radius);
+        display: flex; align-items: center; gap: 10px;
+    }
+    .sb-av {
+        width: 30px; height: 30px; border-radius: 50%;
+        background: var(--sage);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 11px; font-weight: 600; color: white; flex-shrink: 0;
+        font-family: var(--body);
+    }
+    .sb-name { font-size: 13px; font-weight: 500; color: var(--stone-200); }
+    .sb-tag  { font-size: 10px; color: var(--stone-500); margin-top: 1px; letter-spacing: 0.04em; }
+
+    /* Nav sections */
+    .sb-section {
+        padding: 16px 18px 5px;
+        font-size: 9px; font-weight: 600;
+        letter-spacing: 0.14em; text-transform: uppercase;
+        color: var(--stone-600);
+        font-family: var(--body);
+    }
+    .sb-link {
+        display: flex; align-items: center; gap: 9px;
+        padding: 8px 15px; margin: 1px 8px;
+        border-radius: var(--radius-sm);
+        font-size: 13px; font-weight: 400;
+        color: var(--stone-400);
+        text-decoration: none; cursor: pointer;
+        transition: all 0.14s;
+        position: relative;
+    }
+    .sb-link:hover { background: rgba(255,255,255,0.05); color: var(--stone-100); }
+    .sb-link.active {
+        background: rgba(74,112,88,0.18);
+        color: var(--stone-50);
+        font-weight: 500;
+    }
+    .sb-link.active::before {
+        content: '';
+        position: absolute; left: 0; top: 22%; bottom: 22%;
+        width: 2px; border-radius: 0 2px 2px 0;
+        background: var(--sage);
+    }
+    .sb-link svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.6; }
+    .sb-link.active svg, .sb-link:hover svg { opacity: 1; }
+    .sb-count {
+        margin-left: auto;
+        font-size: 10px; font-weight: 600;
+        background: var(--amber); color: white;
+        padding: 1px 7px; border-radius: 20px;
+    }
+    .sb-count.green { background: var(--green); }
+
+    .sb-sep { height: 1px; background: rgba(255,255,255,0.05); margin: 8px 14px; }
+
+    /* Footer */
+    .sb-footer { margin-top: auto; border-top: 1px solid rgba(255,255,255,0.05); padding: 10px 8px 14px; }
+    .sb-foot-link {
+        display: flex; align-items: center; gap: 9px;
+        padding: 8px 15px; border-radius: var(--radius-sm);
+        font-size: 13px; color: var(--stone-500);
+        text-decoration: none; cursor: pointer;
+        transition: all 0.14s;
+    }
+    .sb-foot-link:hover { background: rgba(255,255,255,0.04); color: var(--stone-300); }
+    .sb-foot-link.out:hover { background: rgba(139,46,46,0.12); color: #D47878; }
+    .sb-foot-link svg { width: 14px; height: 14px; opacity: 0.5; }
+
+    /* ── TOPBAR ──────────────────────────────────────────────── */
+    .topbar {
+        height: 58px;
+        background: var(--stone-50);
+        border-bottom: 1px solid var(--stone-200);
+        padding: 0 28px;
+        display: flex; align-items: center; justify-content: space-between;
+        position: sticky; top: 0; z-index: 50;
+        box-shadow: var(--shadow-sm);
+    }
+    .topbar-title {
+        font-family: var(--display);
+        font-size: 20px; font-weight: 600;
+        color: var(--stone-800); letter-spacing: -0.01em;
+    }
+    .topbar-sub {
+        font-size: 11px; color: var(--stone-400);
+        letter-spacing: 0.02em; margin-top: 1px;
+    }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .topbar-date {
+        font-size: 12px; color: var(--stone-400);
+        font-weight: 400; letter-spacing: 0.01em;
+    }
+    .icon-btn {
+        width: 34px; height: 34px; border-radius: var(--radius-sm);
+        border: 1px solid var(--stone-200);
+        background: white;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; color: var(--stone-500);
+        transition: all 0.14s; position: relative;
+    }
+    .icon-btn:hover { border-color: var(--stone-300); color: var(--stone-700); }
+    .icon-btn svg { width: 14px; height: 14px; }
+    .notif-pip {
+        width: 6px; height: 6px; border-radius: 50%;
+        background: var(--red); border: 1.5px solid white;
+        position: absolute; top: 7px; right: 7px;
+    }
+
+    /* ── CONTENT ─────────────────────────────────────────────── */
+    .content { padding: 24px 28px 40px; flex: 1; }
+
+    /* ── KPI CARDS ─────────────────────────────────────────────── */
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+
+    .kpi {
+        background: var(--stone-50);
+        border: 1px solid var(--stone-200);
+        border-radius: var(--radius-lg);
+        padding: 20px 22px;
+        box-shadow: var(--shadow-sm);
+        transition: box-shadow 0.18s, transform 0.18s;
+        position: relative; overflow: hidden;
+    }
+    .kpi::after {
+        content: '';
+        position: absolute; bottom: 0; left: 0; right: 0;
+        height: 2px;
+        opacity: 0;
+        transition: opacity 0.18s;
+    }
+    .kpi:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+    .kpi:hover::after { opacity: 1; }
+    .kpi.sage::after   { background: var(--sage); }
+    .kpi.amber::after  { background: var(--amber-mid); }
+    .kpi.green::after  { background: #6BAE82; }
+    .kpi.red::after    { background: #C47A7A; }
+
+    .kpi-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+    .kpi-icon {
+        width: 36px; height: 36px; border-radius: var(--radius-sm);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 16px;
+    }
+    .kpi-icon.sage   { background: var(--sage-light); }
+    .kpi-icon.amber  { background: var(--amber-lt); }
+    .kpi-icon.green  { background: var(--green-lt); }
+    .kpi-icon.red    { background: var(--red-lt); }
+
+    .kpi-trend {
+        font-size: 11px; font-weight: 500;
+        padding: 2px 7px; border-radius: 20px;
+    }
+    .kpi-trend.up   { background: var(--green-lt); color: var(--green); }
+    .kpi-trend.down { background: var(--red-lt); color: var(--red); }
+    .kpi-trend.warn { background: var(--amber-lt); color: var(--amber); }
+
+    .kpi-val {
+        font-family: var(--display);
+        font-size: 36px; font-weight: 600;
+        color: var(--stone-800); line-height: 1;
+        letter-spacing: -0.02em;
+    }
+    .kpi-label { font-size: 12px; color: var(--stone-500); margin-top: 5px; letter-spacing: 0.01em; }
+
+    /* ── GRID ───────────────────────────────────────────────── */
+    .grid-2-1 { display: grid; grid-template-columns: 1.55fr 1fr; gap: 14px; margin-bottom: 14px; }
+    .grid-3   { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+
+    /* ── CARD ────────────────────────────────────────────────── */
+    .card {
+        background: var(--stone-50);
+        border: 1px solid var(--stone-200);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+    }
+    .card-head {
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--stone-200);
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-title {
+        font-family: var(--display);
+        font-size: 16px; font-weight: 600;
+        color: var(--stone-800); letter-spacing: -0.01em;
+    }
+    .card-sub { font-size: 11px; color: var(--stone-400); margin-top: 2px; letter-spacing: 0.01em; }
+    .card-body { padding: 0; }
+    .view-all {
+        font-size: 12px; font-weight: 500; color: var(--sage);
+        text-decoration: none; letter-spacing: 0.01em;
+        padding: 4px 10px; border-radius: var(--radius-sm);
+        border: 1px solid var(--sage-mid);
+        background: var(--sage-light);
+        transition: all 0.14s;
+    }
+    .view-all:hover { background: var(--sage-mid); }
+
+    /* ── TABLE ──────────────────────────────────────────────── */
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+        text-align: left; padding: 10px 20px;
+        font-size: 10px; font-weight: 600;
+        color: var(--stone-400); letter-spacing: 0.1em;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--stone-200);
+        background: var(--stone-100);
+        font-family: var(--body);
+    }
+    tbody tr { transition: background 0.1s; }
+    tbody tr:hover td { background: var(--stone-100); }
+    tbody td {
+        padding: 11px 20px; font-size: 13px;
+        color: var(--stone-600);
+        border-bottom: 1px solid var(--stone-200);
+        vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    .td-main  { color: var(--stone-800) !important; font-weight: 500; }
+    .td-small { font-size: 11px; color: var(--stone-400); margin-top: 2px; }
+
+    /* ── STATUS TAGS ─────────────────────────────────────────── */
+    .tag {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 3px 9px; border-radius: 20px;
+        font-size: 10px; font-weight: 600;
+        letter-spacing: 0.04em; text-transform: uppercase;
+        font-family: var(--body);
+    }
+    .tag::before { content: ''; width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+    .tag-sage    { background: var(--sage-light);  color: var(--sage);  border: 1px solid var(--sage-mid); }
+    .tag-sage::before  { background: var(--sage); }
+    .tag-amber   { background: var(--amber-lt);  color: var(--amber); border: 1px solid #E8C87A; }
+    .tag-amber::before { background: var(--amber-mid); }
+    .tag-green   { background: var(--green-lt); color: var(--green); border: 1px solid #A8CDB3; }
+    .tag-green::before { background: #6BAE82; }
+    .tag-red     { background: var(--red-lt); color: var(--red); border: 1px solid #D4A0A0; }
+    .tag-red::before   { background: #C47A7A; }
+    .tag-stone   { background: var(--stone-100); color: var(--stone-500); border: 1px solid var(--stone-300); }
+    .tag-stone::before { background: var(--stone-400); }
+
+    /* ── BUTTONS ─────────────────────────────────────────────── */
+    .btn {
+        padding: 5px 13px; border-radius: var(--radius-sm);
+        font-size: 12px; font-weight: 500;
+        font-family: var(--body);
+        border: 1px solid var(--stone-200);
+        background: white; color: var(--stone-600);
+        cursor: pointer; transition: all 0.14s;
+    }
+    .btn:hover { border-color: var(--stone-300); color: var(--stone-800); background: var(--stone-50); }
+    .btn-sage {
+        background: var(--sage); color: white;
+        border-color: var(--sage);
+        box-shadow: 0 1px 4px rgba(74,112,88,0.25);
+    }
+    .btn-sage:hover { background: #3D5E49; border-color: #3D5E49; }
+    .btn-red { border-color: #D4A0A0; color: var(--red); background: var(--red-lt); }
+    .btn-red:hover { background: #EDD8D8; }
+
+    /* ── PENDING ORGS ───────────────────────────────────────── */
+    .org-row {
+        display: flex; align-items: center; gap: 12px;
+        padding: 12px 20px;
+        border-bottom: 1px solid var(--stone-200);
+        transition: background 0.1s;
+    }
+    .org-row:last-child { border-bottom: none; }
+    .org-row:hover { background: var(--stone-100); }
+    .org-av {
+        width: 34px; height: 34px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 12px; font-weight: 600; color: white; flex-shrink: 0;
+        font-family: var(--body);
+    }
+    .org-name  { font-size: 13px; font-weight: 500; color: var(--stone-800); }
+    .org-detail{ font-size: 11px; color: var(--stone-400); margin-top: 2px; }
+    .org-btns  { margin-left: auto; display: flex; gap: 6px; }
+
+    /* ── ACTIVITY ─────────────────────────────────────────────── */
+    .act-row {
+        display: flex; align-items: flex-start; gap: 12px;
+        padding: 11px 20px;
+        border-bottom: 1px solid var(--stone-200);
+    }
+    .act-row:last-child { border-bottom: none; }
+    .act-dot {
+        width: 7px; height: 7px; border-radius: 50%;
+        flex-shrink: 0; margin-top: 6px;
+    }
+    .act-text { font-size: 12px; color: var(--stone-600); line-height: 1.55; flex: 1; }
+    .act-text strong { color: var(--stone-800); font-weight: 500; }
+    .act-time { font-size: 11px; color: var(--stone-400); white-space: nowrap; margin-top: 5px; }
+
+    /* ── MINI STAT LIST ──────────────────────────────────────── */
+    .mini-row {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 12px 20px;
+        border-bottom: 1px solid var(--stone-200);
+        transition: background 0.1s; cursor: default;
+    }
+    .mini-row:last-child { border-bottom: none; }
+    .mini-row:hover { background: var(--stone-100); }
+    .mini-label { font-size: 12px; color: var(--stone-600); }
+    .mini-val {
+        font-family: var(--display);
+        font-size: 18px; font-weight: 600;
+        color: var(--stone-800); letter-spacing: -0.01em;
+    }
+
+    /* ── QUICK LINKS ─────────────────────────────────────────── */
+    .qlink {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 12px 20px;
+        border-bottom: 1px solid var(--stone-200);
+        text-decoration: none; cursor: pointer;
+        transition: background 0.14s;
+    }
+    .qlink:last-child { border-bottom: none; }
+    .qlink:hover { background: var(--stone-100); }
+    .qlink-left { display: flex; align-items: center; gap: 11px; }
+    .qlink-icon {
+        width: 30px; height: 30px; border-radius: var(--radius-sm);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 14px; flex-shrink: 0;
+    }
+    .qlink-label { font-size: 13px; font-weight: 500; color: var(--stone-700); }
+    .qlink-desc  { font-size: 11px; color: var(--stone-400); margin-top: 1px; }
+    .qlink-arrow { font-size: 14px; color: var(--stone-300); }
+    .qlink:hover .qlink-arrow { color: var(--sage); }
+
+    /* ── LOAD ANIMATION ──────────────────────────────────────── */
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .kpi-row { animation: fadeUp 0.45s ease both; }
+    .grid-2-1 { animation: fadeUp 0.45s 0.08s ease both; }
+    .grid-3   { animation: fadeUp 0.45s 0.16s ease both; }
+
+    /* ── TOAST ───────────────────────────────────────────────── */
+    .toast {
+        position: fixed; top: 20px; right: 20px; z-index: 9999;
+        background: var(--stone-50);
+        border: 1px solid var(--stone-200);
+        border-left: 3px solid var(--sage);
+        border-radius: var(--radius-lg);
+        padding: 14px 18px;
+        display: flex; align-items: flex-start; gap: 12px;
+        max-width: 320px; min-width: 260px;
+        box-shadow: var(--shadow-lg);
+        transform: translateX(110%);
+        transition: transform 0.38s cubic-bezier(0.34, 1.4, 0.64, 1);
+        overflow: hidden;
+    }
+    .toast.show { transform: translateX(0); }
+    .toast-icon { font-size: 18px; flex-shrink: 0; line-height: 1.4; }
+    .toast-title {
+        font-family: var(--display);
+        font-size: 14px; font-weight: 600;
+        color: var(--stone-800); margin-bottom: 2px;
+        letter-spacing: -0.01em;
+    }
+    .toast-msg   { font-size: 12px; color: var(--stone-500); line-height: 1.5; }
+    .toast-close {
+        margin-left: auto; background: none; border: none;
+        color: var(--stone-400); cursor: pointer; font-size: 16px;
+        padding: 0; flex-shrink: 0;
+        transition: color 0.14s;
+    }
+    .toast-close:hover { color: var(--stone-700); }
+    .toast-bar {
+        position: absolute; bottom: 0; left: 0;
+        height: 2px; background: var(--sage);
+        animation: shrink 3.5s linear forwards;
+    }
+    @keyframes shrink { from { width: 100%; } to { width: 0%; } }
+    </style>
+</h:head>
+
+<h:body>
+
+<!-- ═══ SIDEBAR ═════════════════════════════════════════════════ -->
+<div class="sidebar">
+
+    <div class="sidebar-stripe"></div>
+
+    <a href="../index.xhtml" class="sb-logo">
+        <div class="sb-logo-mark">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+        </div>
+        <span class="sb-logo-text">EventMS</span>
+        <span class="sb-logo-role">Admin</span>
+    </a>
+
+    <div class="sb-identity">
+        <div class="sb-av"><h:outputText value="#{authBean.loggedInUser.name.substring(0,2).toUpperCase()}"/></div>
+        <div>
+            <div class="sb-name"><h:outputText value="#{authBean.loggedInUser.name}"/></div>
+            <div class="sb-tag">Administrator · Super Access</div>
+        </div>
+    </div>
+
+    <div class="sb-section">Overview</div>
+    <a href="admin_dashboard.xhtml" class="sb-link active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+    </a>
+    <a href="#" class="sb-link">
+        <!-- href="admin_users.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        User Management
+    </a>
+    <a href="#" class="sb-link">
+        <!-- href="admin_events.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        All Events
+    </a>
+
+    <div class="sb-sep"/>
+    <div class="sb-section">Manage</div>
+
+    <a href="#" class="sb-link">
+        <!-- href="admin_approvals.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Event Approvals
+        <span class="sb-count">8</span>
+    </a>
+    <a href="#" class="sb-link">
+        <!-- href="admin_venues.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Venues
+    </a>
+    <a href="#" class="sb-link">
+        <!-- href="admin_payments.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Payments
+    </a>
+    <a href="#" class="sb-link">
+        <!-- href="admin_notifications.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"/></svg>
+        Notifications
+        <span class="sb-count green">3</span>
+    </a>
+
+    <div class="sb-sep"/>
+    <div class="sb-section">Reports</div>
+
+    <a href="#" class="sb-link">
+        <!-- href="admin_analytics.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Analytics
+    </a>
+    <a href="#" class="sb-link">
+        <!-- href="admin_certificates.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Certificates
+    </a>
+    <a href="#" class="sb-link">
+        <!-- href="admin_feedback.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Feedback Reports
+    </a>
+    <a href="#" class="sb-link">
+        <!-- href="admin_registrations.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        Registrations
+    </a>
+
+    <div class="sb-footer">
+        <a href="#" class="sb-foot-link">
+            <!-- href="admin_settings.xhtml" -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M1 12h2M21 12h2M12 1v2M12 21v2M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41"/></svg>
+            Settings
+        </a>
+        <a href="../login.xhtml" class="sb-foot-link out">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sign out
+        </a>
+    </div>
+</div>
+
+<!-- ═══ MAIN ════════════════════════════════════════════════════ -->
+<div class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+        <div>
+            <div class="topbar-title">Control Centre</div>
+            <div class="topbar-sub" id="dateStr">Loading…</div>
+        </div>
+        <div class="topbar-right">
+            <div class="icon-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <div class="icon-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"/></svg>
+                <div class="notif-pip"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+        <!-- KPI row -->
+        <div class="kpi-row">
+            <div class="kpi sage">
+                <div class="kpi-header">
+                    <div class="kpi-icon sage">👥</div>
+                    <span class="kpi-trend up">↑ 12%</span>
+                </div>
+                <div class="kpi-val">248</div>
+                <div class="kpi-label">Registered users</div>
+            </div>
+            <div class="kpi green">
+                <div class="kpi-header">
+                    <div class="kpi-icon green">📅</div>
+                    <span class="kpi-trend up">↑ 5 new</span>
+                </div>
+                <div class="kpi-val">34</div>
+                <div class="kpi-label">Active events</div>
+            </div>
+            <div class="kpi amber">
+                <div class="kpi-header">
+                    <div class="kpi-icon amber">⏳</div>
+                    <span class="kpi-trend warn">Action needed</span>
+                </div>
+                <div class="kpi-val">8</div>
+                <div class="kpi-label">Pending approvals</div>
+            </div>
+            <div class="kpi red">
+                <div class="kpi-header">
+                    <div class="kpi-icon red">💰</div>
+                    <span class="kpi-trend up">↑ 18%</span>
+                </div>
+                <div class="kpi-val">₹42k</div>
+                <div class="kpi-label">Revenue this month</div>
+            </div>
+        </div>
+
+        <!-- Main grid: events table + pending organizers -->
+        <div class="grid-2-1">
+
+            <!-- Events table -->
+            <div class="card">
+                <div class="card-head">
+                    <div>
+                        <div class="card-title">Recent Events</div>
+                        <div class="card-sub">Latest submissions · sorted by date</div>
+                    </div>
+                    <a href="#" class="view-all">View all →</a>
+                    <!-- href="admin_events.xhtml" -->
+                </div>
+                <div class="card-body">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Event</th>
+                                <th>Organizer</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="td-main">Tech Summit 2026</div>
+                                    <div class="td-small">City Auditorium · 120 seats</div>
+                                </td>
+                                <td>Nidhi S.</td>
+                                <td>May 5</td>
+                                <td><span class="tag tag-amber">Pending</span></td>
+                                <td><button class="btn btn-sage">Approve</button></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="td-main">Design Workshop</div>
+                                    <div class="td-small">Hall B · 60 seats</div>
+                                </td>
+                                <td>Ravi K.</td>
+                                <td>May 12</td>
+                                <td><span class="tag tag-sage">Approved</span></td>
+                                <td><button class="btn">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="td-main">Startup Expo</div>
+                                    <div class="td-small">Main Campus · 200 seats</div>
+                                </td>
+                                <td>Meera L.</td>
+                                <td>Jun 1</td>
+                                <td><span class="tag tag-stone">Draft</span></td>
+                                <td><button class="btn">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="td-main">AI Conference</div>
+                                    <div class="td-small">Tech Park · 300 seats</div>
+                                </td>
+                                <td>Vivek D.</td>
+                                <td>Jun 15</td>
+                                <td><span class="tag tag-green">Live</span></td>
+                                <td><button class="btn">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="td-main">Photography Wksp</div>
+                                    <div class="td-small">Studio A · 30 seats</div>
+                                </td>
+                                <td>Anaya R.</td>
+                                <td>Jun 28</td>
+                                <td><span class="tag tag-amber">Pending</span></td>
+                                <td><button class="btn btn-sage">Approve</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pending organizers -->
+            <div class="card">
+                <div class="card-head">
+                    <div>
+                        <div class="card-title">Pending Organizers</div>
+                        <div class="card-sub">Awaiting verification</div>
+                    </div>
+                    <span class="tag tag-amber">3 waiting</span>
+                </div>
+                <div class="card-body">
+                    <div class="org-row">
+                        <div class="org-av" style="background:#5B7FA6;">AY</div>
+                        <div style="flex:1;">
+                            <div class="org-name">Aayushi Limbasiya</div>
+                            <div class="org-detail">WeCode Tech · Corporate</div>
+                        </div>
+                        <div class="org-btns">
+                            <button class="btn btn-sage" style="padding:4px 10px;">✓</button>
+                            <button class="btn btn-red"  style="padding:4px 10px;">✕</button>
+                        </div>
+                    </div>
+                    <div class="org-row">
+                        <div class="org-av" style="background:#7B6FA6;">NI</div>
+                        <div style="flex:1;">
+                            <div class="org-name">Nidhi Shah</div>
+                            <div class="org-detail">GreenLeaf NGO · Non-Profit</div>
+                        </div>
+                        <div class="org-btns">
+                            <button class="btn btn-sage" style="padding:4px 10px;">✓</button>
+                            <button class="btn btn-red"  style="padding:4px 10px;">✕</button>
+                        </div>
+                    </div>
+                    <div class="org-row">
+                        <div class="org-av" style="background:#A67B5B;">RK</div>
+                        <div style="flex:1;">
+                            <div class="org-name">Ravi Kumar</div>
+                            <div class="org-detail">TechCorp · Corporate</div>
+                        </div>
+                        <div class="org-btns">
+                            <button class="btn btn-sage" style="padding:4px 10px;">✓</button>
+                            <button class="btn btn-red"  style="padding:4px 10px;">✕</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom row: Activity · Summary · Quick actions -->
+        <div class="grid-3">
+
+            <!-- Activity feed -->
+            <div class="card">
+                <div class="card-head">
+                    <div class="card-title">System Activity</div>
+                </div>
+                <div class="card-body">
+                    <div class="act-row">
+                        <div class="act-dot" style="background:#6BAE82;"></div>
+                        <div style="flex:1;">
+                            <div class="act-text"><strong>Vivek D.</strong> registered for Tech Summit 2026</div>
+                            <div class="act-time">2 min ago</div>
+                        </div>
+                    </div>
+                    <div class="act-row">
+                        <div class="act-dot" style="background:#C8A85A;"></div>
+                        <div style="flex:1;">
+                            <div class="act-text"><strong>Design Workshop</strong> submitted for approval</div>
+                            <div class="act-time">14 min ago</div>
+                        </div>
+                    </div>
+                    <div class="act-row">
+                        <div class="act-dot" style="background:#7A9E8A;"></div>
+                        <div style="flex:1;">
+                            <div class="act-text">Certificate <strong>#EM-0042</strong> auto-generated</div>
+                            <div class="act-time">1 hr ago</div>
+                        </div>
+                    </div>
+                    <div class="act-row">
+                        <div class="act-dot" style="background:#C47A7A;"></div>
+                        <div style="flex:1;">
+                            <div class="act-text"><strong>Startup Expo</strong> payment failed — refunded</div>
+                            <div class="act-time">3 hr ago</div>
+                        </div>
+                    </div>
+                    <div class="act-row">
+                        <div class="act-dot" style="background:#6BAE82;"></div>
+                        <div style="flex:1;">
+                            <div class="act-text"><strong>Aayushi L.</strong> organizer account created</div>
+                            <div class="act-time">Yesterday</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Finance summary -->
+            <div class="card">
+                <div class="card-head">
+                    <div class="card-title">Finance Summary</div>
+                    <a href="#" class="view-all">Reports →</a>
+                    <!-- href="admin_payments.xhtml" -->
+                </div>
+                <div class="card-body">
+                    <div class="mini-row">
+                        <span class="mini-label">Total collected</span>
+                        <span class="mini-val" style="color:var(--green);">₹42,500</span>
+                    </div>
+                    <div class="mini-row">
+                        <span class="mini-label">Pending payments</span>
+                        <span class="mini-val" style="color:var(--amber);">₹3,200</span>
+                    </div>
+                    <div class="mini-row">
+                        <span class="mini-label">Refunds processed</span>
+                        <span class="mini-val" style="color:var(--red);">₹800</span>
+                    </div>
+                    <div class="mini-row">
+                        <span class="mini-label">Transactions today</span>
+                        <span class="mini-val">14</span>
+                    </div>
+                    <div class="mini-row">
+                        <span class="mini-label">Certificates issued</span>
+                        <span class="mini-val" style="color:var(--sage);">189</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick actions -->
+            <div class="card">
+                <div class="card-head">
+                    <div class="card-title">Quick Actions</div>
+                </div>
+                <div class="card-body">
+                    <a href="#" class="qlink">
+                        <!-- href="admin_approvals.xhtml" -->
+                        <div class="qlink-left">
+                            <div class="qlink-icon" style="background:var(--amber-lt);">⏳</div>
+                            <div>
+                                <div class="qlink-label">Review pending events</div>
+                                <div class="qlink-desc">8 awaiting your decision</div>
+                            </div>
+                        </div>
+                        <div class="qlink-arrow">→</div>
+                    </a>
+                    <a href="#" class="qlink">
+                        <!-- href="admin_users.xhtml" -->
+                        <div class="qlink-left">
+                            <div class="qlink-icon" style="background:var(--sage-light);">👥</div>
+                            <div>
+                                <div class="qlink-label">Manage users</div>
+                                <div class="qlink-desc">248 registered accounts</div>
+                            </div>
+                        </div>
+                        <div class="qlink-arrow">→</div>
+                    </a>
+                    <a href="#" class="qlink">
+                        <!-- href="admin_venues.xhtml" -->
+                        <div class="qlink-left">
+                            <div class="qlink-icon" style="background:var(--stone-200);">🏛️</div>
+                            <div>
+                                <div class="qlink-label">Venue management</div>
+                                <div class="qlink-desc">12 registered venues</div>
+                            </div>
+                        </div>
+                        <div class="qlink-arrow">→</div>
+                    </a>
+                    <a href="#" class="qlink">
+                        <!-- href="admin_notifications.xhtml" -->
+                        <div class="qlink-left">
+                            <div class="qlink-icon" style="background:var(--green-lt);">📢</div>
+                            <div>
+                                <div class="qlink-label">Broadcast notification</div>
+                                <div class="qlink-desc">Send to all users</div>
+                            </div>
+                        </div>
+                        <div class="qlink-arrow">→</div>
+                    </a>
+                    <a href="#" class="qlink">
+                        <!-- href="admin_feedback.xhtml" -->
+                        <div class="qlink-left">
+                            <div class="qlink-icon" style="background:var(--stone-200);">📋</div>
+                            <div>
+                                <div class="qlink-label">Feedback reports</div>
+                                <div class="qlink-desc">Latest event reviews</div>
+                            </div>
+                        </div>
+                        <div class="qlink-arrow">→</div>
+                    </a>
+                </div>
+            </div>
+
+        </div><!-- /grid-3 -->
+    </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ═══ TOAST ════════════════════════════════════════════════════ -->
+<div class="toast" id="toast">
+    <div class="toast-icon" id="tIcon">👋</div>
+    <div style="flex:1;">
+        <div class="toast-title" id="tTitle">Welcome back!</div>
+        <div class="toast-msg"   id="tMsg">Signed in as Administrator.</div>
+    </div>
+    <button class="toast-close" onclick="hideToast()">×</button>
+    <div class="toast-bar" id="tBar"></div>
+</div>
+
+<script>
+//<![CDATA[
+document.getElementById('dateStr').textContent =
+    new Date().toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+
+function showToast(title, msg, icon) {
+    var t = document.getElementById('toast');
+    document.getElementById('tTitle').textContent = title;
+    document.getElementById('tMsg').textContent   = msg;
+    if (icon) document.getElementById('tIcon').textContent = icon;
+    var bar = document.getElementById('tBar');
+    bar.style.animation = 'none'; void bar.offsetHeight; bar.style.animation = '';
+    t.classList.add('show');
+    setTimeout(hideToast, 3600);
+}
+function hideToast() { document.getElementById('toast').classList.remove('show'); }
+
+window.addEventListener('DOMContentLoaded', function () {
+    var p = new URLSearchParams(window.location.search);
+    if (p.get('welcome') === 'true') {
+        var name = p.get('name') || 'Admin';
+        showToast('Welcome back, ' + name + '.', 'You are signed in as Administrator.', '👋');
+    }
+});
+//]]>
+</script>
+</h:body>
+</html>

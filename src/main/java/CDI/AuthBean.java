@@ -42,16 +42,20 @@ public class AuthBean implements Serializable {
             loggedInUser = authEJB.getUserFromToken(token);
             role = authEJB.getRoleFromToken(token);
 
-            // Redirect based on role
+            // Redirect based on role — welcome toast triggered by ?welcome=true&name=
+            String firstName = (loggedInUser.getName() != null && loggedInUser.getName().contains(" "))
+                ? loggedInUser.getName().split(" ")[0]
+                : (loggedInUser.getName() != null ? loggedInUser.getName() : "User");
+
             if (role.equalsIgnoreCase("Admin")) {
                 FacesContext.getCurrentInstance().getExternalContext()
-                        .redirect("admin/dashboard.xhtml");
+                        .redirect("Admin/admin_dashboard.xhtml?welcome=true&name=" + firstName);
             } else if (role.equalsIgnoreCase("Organizer")) {
                 FacesContext.getCurrentInstance().getExternalContext()
-                        .redirect("organizer/dashboard.xhtml");
+                        .redirect("Organizer/organizer_dashboard.xhtml?welcome=true&name=" + firstName);
             } else {
                 FacesContext.getCurrentInstance().getExternalContext()
-                        .redirect("user/home.xhtml");
+                        .redirect("User/user_dashboard.xhtml?welcome=true&name=" + firstName);
             }
 
         } catch (Exception e) {

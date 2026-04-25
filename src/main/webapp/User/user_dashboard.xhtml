@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      lang="en">
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>My Space — EventMS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&amp;family=Outfit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <style>
+    /* ═══════════════════════════════════════════════
+       USER / PARTICIPANT DASHBOARD — "PERSONAL SPACE"
+       Crisp white · Rich indigo + violet accents
+       DM Serif Display + Outfit
+    ═══════════════════════════════════════════════ */
+    :root {
+        --bg:        #FFFFFF;
+        --bg-2:      #F8F8FC;
+        --bg-3:      #F2F1FA;
+        --surface:   #FFFFFF;
+        --border:    #EBEBF5;
+        --border-2:  #D8D7EE;
+        --indigo:    #4F46E5;
+        --indigo-2:  #6B63F0;
+        --indigo-lt: #EEF2FF;
+        --violet:    #7C3AED;
+        --violet-lt: #F3EFFE;
+        --green:     #059669;
+        --green-lt:  #ECFDF5;
+        --amber:     #D97706;
+        --amber-lt:  #FFFBEB;
+        --red:       #DC2626;
+        --red-lt:    #FEF2F2;
+        --pink:      #DB2777;
+        --pink-lt:   #FDF2F8;
+        --ink:       #1A1833;
+        --ink-2:     #3D3A5C;
+        --ink-3:     #7C799E;
+        --ink-4:     #AEACCB;
+        --sidebar-w: 250px;
+        --header-h:  62px;
+        --radius:    10px;
+        --radius-lg: 16px;
+        --radius-xl: 22px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+    /* ── LAYOUT ── */
+    .shell { display: flex; min-height: 100vh; }
+    .main  { flex: 1; min-width: 0; padding-left: var(--sidebar-w); display: flex; flex-direction: column; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+        position: fixed; top: 0; left: 0; bottom: 0;
+        width: var(--sidebar-w);
+        background: var(--bg);
+        border-right: 1px solid var(--border);
+        display: flex; flex-direction: column;
+        z-index: 100; overflow-y: auto;
+    }
+    .sidebar::-webkit-scrollbar { width: 0; }
+
+    /* Top gradient decoration */
+    .sb-top-glow {
+        height: 3px;
+        background: linear-gradient(90deg, var(--indigo), var(--violet), var(--pink));
+    }
+
+    .sb-logo {
+        display: flex; align-items: center; gap: 10px;
+        padding: 18px 18px 16px;
+        border-bottom: 1px solid var(--border);
+        text-decoration: none;
+    }
+    .sb-logo-mark {
+        width: 34px; height: 34px; border-radius: 9px;
+        background: linear-gradient(135deg, var(--indigo), var(--violet));
+        display: flex; align-items: center; justify-content: center;
+    }
+    .sb-logo-mark svg { width: 17px; height: 17px; fill: white; }
+    .sb-logo-text { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--ink); }
+
+    /* User card */
+    .sb-user {
+        margin: 14px 12px 6px;
+        padding: 12px 14px;
+        background: var(--indigo-lt);
+        border: 1px solid var(--border-2);
+        border-radius: var(--radius-lg);
+        display: flex; align-items: center; gap: 10px;
+    }
+    .sb-avatar {
+        width: 34px; height: 34px; border-radius: 50%;
+        background: linear-gradient(135deg, var(--indigo), var(--violet));
+        display: flex; align-items: center; justify-content: center;
+        font-size: 12px; font-weight: 700; color: white; flex-shrink: 0;
+    }
+    .sb-uname { font-size: 13px; font-weight: 600; color: var(--ink); }
+    .sb-utag  { font-size: 10px; color: var(--ink-3); margin-top: 1px; }
+    .sb-status {
+        margin-left: auto;
+        width: 8px; height: 8px; border-radius: 50%;
+        background: var(--green);
+        box-shadow: 0 0 0 2px var(--green-lt);
+    }
+
+    .sb-section {
+        padding: 14px 18px 5px;
+        font-size: 9px; font-weight: 700;
+        color: var(--ink-4);
+        text-transform: uppercase; letter-spacing: 0.14em;
+    }
+    .sb-link {
+        display: flex; align-items: center; gap: 10px;
+        padding: 9px 16px; margin: 1px 8px;
+        border-radius: var(--radius);
+        font-size: 13px; font-weight: 500;
+        color: var(--ink-3);
+        text-decoration: none; cursor: pointer;
+        transition: all 0.15s;
+    }
+    .sb-link:hover { background: var(--bg-2); color: var(--ink-2); }
+    .sb-link.active { background: var(--indigo-lt); color: var(--indigo); font-weight: 600; }
+    .sb-link svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .sb-badge-new {
+        margin-left: auto; font-size: 9px; font-weight: 700;
+        background: linear-gradient(135deg, var(--indigo), var(--violet));
+        color: white; padding: 2px 7px; border-radius: 20px;
+    }
+    .sb-badge-count {
+        margin-left: auto; font-size: 10px; font-weight: 700;
+        background: var(--indigo); color: white;
+        padding: 1px 7px; border-radius: 20px;
+    }
+    .sb-divider { height: 1px; background: var(--border); margin: 8px 12px; }
+    .sb-footer { margin-top: auto; padding: 10px 8px; border-top: 1px solid var(--border); }
+    .sb-foot-link {
+        display: flex; align-items: center; gap: 10px;
+        padding: 9px 16px; border-radius: var(--radius);
+        font-size: 13px; font-weight: 500; color: var(--ink-3);
+        text-decoration: none; cursor: pointer; transition: all 0.15s;
+    }
+    .sb-foot-link:hover { background: var(--bg-2); color: var(--ink-2); }
+    .sb-foot-link.danger:hover { background: var(--red-lt); color: var(--red); }
+    .sb-foot-link svg { width: 15px; height: 15px; }
+
+    /* ── HEADER ── */
+    .header {
+        height: var(--header-h);
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+        padding: 0 28px;
+        display: flex; align-items: center; justify-content: space-between;
+        position: sticky; top: 0; z-index: 50;
+    }
+    .header-title { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--ink); }
+    .header-sub   { font-size: 12px; color: var(--ink-4); margin-top: 1px; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .search-pill {
+        display: flex; align-items: center; gap: 8px;
+        background: var(--bg-2); border: 1px solid var(--border);
+        border-radius: 20px; padding: 7px 14px;
+        font-size: 13px; color: var(--ink-4); cursor: pointer;
+        transition: all 0.15s; width: 200px;
+    }
+    .search-pill:hover { border-color: var(--border-2); }
+    .search-pill svg { width: 14px; height: 14px; }
+    .notif-btn {
+        width: 36px; height: 36px; border-radius: 50%;
+        border: 1px solid var(--border); background: var(--bg-2);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; color: var(--ink-3); position: relative;
+        transition: all 0.15s;
+    }
+    .notif-btn:hover { border-color: var(--border-2); }
+    .notif-btn svg { width: 15px; height: 15px; }
+    .notif-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); border: 2px solid var(--bg); position: absolute; top: 5px; right: 5px; }
+
+    /* ── CONTENT ── */
+    .content { padding: 24px 28px; flex: 1; background: var(--bg-2); }
+
+    /* Hero banner */
+    .hero {
+        background: linear-gradient(135deg, var(--indigo) 0%, var(--violet) 60%, var(--pink) 100%);
+        border-radius: var(--radius-xl);
+        padding: 28px 30px;
+        margin-bottom: 20px;
+        position: relative; overflow: hidden;
+    }
+    .hero::before {
+        content: '';
+        position: absolute; top: -40px; right: -40px;
+        width: 200px; height: 200px; border-radius: 50%;
+        background: rgba(255,255,255,0.08);
+    }
+    .hero::after {
+        content: '';
+        position: absolute; bottom: -50px; right: 80px;
+        width: 150px; height: 150px; border-radius: 50%;
+        background: rgba(255,255,255,0.05);
+    }
+    .hero-text h2 {
+        font-family: 'DM Serif Display', serif;
+        font-size: 22px; color: white; margin-bottom: 6px;
+    }
+    .hero-text p { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.6; }
+    .hero-chips { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+    .hero-chip {
+        padding: 5px 12px; background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 20px; font-size: 12px; color: white; font-weight: 500;
+    }
+    .hero-emoji { font-size: 44px; position: absolute; right: 28px; top: 50%; transform: translateY(-50%); z-index: 1; }
+
+    /* Stats row */
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
+    .stat-card {
+        background: var(--surface); border: 1px solid var(--border);
+        border-radius: var(--radius-lg); padding: 18px;
+        display: flex; align-items: center; gap: 14px;
+        transition: all 0.15s;
+    }
+    .stat-card:hover { border-color: var(--border-2); box-shadow: 0 4px 14px rgba(79,70,229,0.07); }
+    .stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .stat-info {}
+    .stat-val   { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--ink); line-height: 1; }
+    .stat-label { font-size: 12px; color: var(--ink-3); margin-top: 3px; }
+
+    /* Grid */
+    .grid2 { display: grid; grid-template-columns: 1.5fr 1fr; gap: 14px; margin-bottom: 14px; }
+
+    /* Card */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+    .card-head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .card-title { font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--ink); }
+    .card-sub   { font-size: 11px; color: var(--ink-4); margin-top: 2px; }
+    .card-body  { padding: 0; }
+    .card-link  { font-size: 12px; font-weight: 600; color: var(--indigo); text-decoration: none; }
+    .card-link:hover { text-decoration: underline; }
+
+    /* Registration items */
+    .reg-item {
+        display: flex; align-items: center; gap: 14px;
+        padding: 14px 20px; border-bottom: 1px solid var(--border);
+        transition: background 0.12s;
+    }
+    .reg-item:last-child { border-bottom: none; }
+    .reg-item:hover { background: var(--bg-2); }
+    .reg-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .reg-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+    .reg-date { font-size: 11px; color: var(--ink-4); margin-top: 2px; }
+    .reg-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+    /* Upcoming events to browse */
+    .ev-item {
+        padding: 14px 20px; border-bottom: 1px solid var(--border);
+        transition: background 0.12s;
+    }
+    .ev-item:last-child { border-bottom: none; }
+    .ev-item:hover { background: var(--bg-2); }
+    .ev-name { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+    .ev-meta { font-size: 11px; color: var(--ink-4); margin-bottom: 8px; }
+    .ev-footer { display: flex; align-items: center; justify-content: space-between; }
+
+    /* Certificates */
+    .cert-item {
+        display: flex; align-items: center; gap: 12px;
+        padding: 12px 20px; border-bottom: 1px solid var(--border);
+    }
+    .cert-item:last-child { border-bottom: none; }
+    .cert-icon { width: 36px; height: 36px; border-radius: 9px; background: var(--indigo-lt); display: flex; align-items: center; justify-content: center; font-size: 17px; }
+    .cert-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+    .cert-num  { font-size: 11px; color: var(--ink-4); font-family: monospace; }
+
+    /* Tags */
+    .tag { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+    .tag-green  { background: var(--green-lt); color: var(--green); }
+    .tag-amber  { background: var(--amber-lt); color: var(--amber); }
+    .tag-indigo { background: var(--indigo-lt); color: var(--indigo); }
+    .tag-red    { background: var(--red-lt); color: var(--red); }
+    .tag-violet { background: var(--violet-lt); color: var(--violet); }
+    .tag-pink   { background: var(--pink-lt); color: var(--pink); }
+
+    /* Buttons */
+    .btn { padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; font-family: 'Outfit', sans-serif; border: 1px solid var(--border); background: var(--surface); color: var(--ink-2); cursor: pointer; transition: all 0.15s; }
+    .btn:hover { border-color: var(--border-2); background: var(--bg-2); }
+    .btn-indigo { background: var(--indigo); color: white; border-color: var(--indigo); box-shadow: 0 2px 8px rgba(79,70,229,0.25); }
+    .btn-indigo:hover { background: var(--indigo-2); }
+    .btn-dl { background: var(--violet); color: white; border-color: var(--violet); }
+
+    /* TOAST */
+    .toast { position: fixed; top: 20px; right: 20px; z-index: 999; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 18px; display: flex; align-items: flex-start; gap: 12px; max-width: 340px; box-shadow: 0 8px 32px rgba(79,70,229,0.15), 0 2px 8px rgba(0,0,0,0.06); transform: translateX(120%); transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1); overflow: hidden; }
+    .toast.show { transform: translateX(0); }
+    .toast-icon { font-size: 20px; }
+    .toast-title { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+    .toast-msg   { font-size: 12px; color: var(--ink-3); line-height: 1.5; }
+    .toast-close { margin-left: auto; background: none; border: none; color: var(--ink-4); cursor: pointer; font-size: 16px; }
+    .toast-bar { position: absolute; bottom: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--indigo), var(--violet)); animation: shrink 3.5s linear forwards; }
+    @keyframes shrink { from { width: 100%; } to { width: 0%; } }
+    </style>
+</h:head>
+<h:body>
+
+<!-- ═══ SIDEBAR ════════════════════════════════════════════════════ -->
+<div class="sidebar">
+
+    <div class="sb-top-glow"></div>
+
+    <a href="../index.xhtml" class="sb-logo">
+        <div class="sb-logo-mark"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg></div>
+        <span class="sb-logo-text">EventMS</span>
+    </a>
+
+    <div class="sb-user">
+        <div class="sb-avatar"><h:outputText value="#{authBean.loggedInUser.name.substring(0,2).toUpperCase()}"/></div>
+        <div>
+            <div class="sb-uname"><h:outputText value="#{authBean.loggedInUser.name}"/></div>
+            <div class="sb-utag">Participant</div>
+        </div>
+        <div class="sb-status"></div>
+    </div>
+
+    <div class="sb-section">My Space</div>
+    <a href="user_dashboard.xhtml" class="sb-link active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+    </a>
+    <a href="#" class="sb-link">
+        <!-- href="user_browse_events.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Browse Events
+        <span class="sb-badge-new">NEW</span>
+    </a>
+    <a href="#" class="sb-link">
+        <!-- href="user_my_registrations.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        My Registrations
+        <span class="sb-badge-count">4</span>
+    </a>
+
+    <div class="sb-divider"/>
+    <div class="sb-section">Manage</div>
+
+    <a href="#" class="sb-link">
+        <!-- href="user_payments.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Payments
+    </a>
+    <a href="#" class="sb-link">
+        <!-- href="user_certificates.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Certificates
+    </a>
+    <a href="#" class="sb-link">
+        <!-- href="user_feedback.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Feedback &amp; Reviews
+    </a>
+    <a href="#" class="sb-link">
+        <!-- href="user_notifications.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"/></svg>
+        Notifications
+        <span class="sb-badge-count">2</span>
+    </a>
+
+    <div class="sb-divider"/>
+
+    <div class="sb-footer">
+        <a href="#" class="sb-foot-link">
+            <!-- href="user_profile.xhtml" -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            My Profile
+        </a>
+        <a href="#" class="sb-foot-link">
+            <!-- href="user_settings.xhtml" -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M1 12h2M21 12h2M12 1v2M12 21v2"/></svg>
+            Settings
+        </a>
+        <a href="../login.xhtml" class="sb-foot-link danger">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sign out
+        </a>
+    </div>
+</div>
+
+<!-- ═══ MAIN ══════════════════════════════════════════════════════ -->
+<div class="main">
+
+    <div class="header">
+        <div>
+            <div class="header-title">My Dashboard</div>
+            <div class="header-sub" id="dateStr">Welcome back</div>
+        </div>
+        <div class="header-right">
+            <div class="search-pill">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                Search events…
+            </div>
+            <div class="notif-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"/></svg>
+                <div class="notif-dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- Hero banner -->
+        <div class="hero">
+            <div class="hero-text">
+                <h2>Hello, <h:outputText value="#{authBean.loggedInUser.name}"/> ✨</h2>
+                <p>You have 2 upcoming events · Next event in 11 days · 2 certificates earned</p>
+                <div class="hero-chips">
+                    <span class="hero-chip">🎟️ 4 Registrations</span>
+                    <span class="hero-chip">🎓 2 Certificates</span>
+                    <span class="hero-chip">⭐ 3 Reviews given</span>
+                </div>
+            </div>
+            <div class="hero-emoji">🎪</div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:var(--indigo-lt);">🎟️</div>
+                <div class="stat-info">
+                    <div class="stat-val">4</div>
+                    <div class="stat-label">Events registered</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:var(--violet-lt);">🎓</div>
+                <div class="stat-info">
+                    <div class="stat-val">2</div>
+                    <div class="stat-label">Certificates earned</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:var(--pink-lt);">⭐</div>
+                <div class="stat-info">
+                    <div class="stat-val">3</div>
+                    <div class="stat-label">Reviews submitted</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid2">
+
+            <!-- My registrations -->
+            <div class="card">
+                <div class="card-head">
+                    <div>
+                        <div class="card-title">My Registrations</div>
+                        <div class="card-sub">Your event history</div>
+                    </div>
+                    <a href="#" class="card-link">View all → <!-- user_my_registrations.xhtml --></a>
+                </div>
+                <div class="card-body">
+                    <div class="reg-item">
+                        <div class="reg-icon" style="background:var(--indigo-lt);">📊</div>
+                        <div style="flex:1;">
+                            <div class="reg-name">Tech Summit 2026</div>
+                            <div class="reg-date">May 5 · City Auditorium</div>
+                        </div>
+                        <div class="reg-actions">
+                            <span class="tag tag-green">Confirmed</span>
+                            <button class="btn">Ticket</button>
+                        </div>
+                    </div>
+                    <div class="reg-item">
+                        <div class="reg-icon" style="background:var(--violet-lt);">🎨</div>
+                        <div style="flex:1;">
+                            <div class="reg-name">Design Workshop</div>
+                            <div class="reg-date">May 12 · Hall B</div>
+                        </div>
+                        <div class="reg-actions">
+                            <span class="tag tag-amber">Waitlist #7</span>
+                            <button class="btn">Details</button>
+                        </div>
+                    </div>
+                    <div class="reg-item">
+                        <div class="reg-icon" style="background:var(--green-lt);">🤖</div>
+                        <div style="flex:1;">
+                            <div class="reg-name">AI Workshop 2025</div>
+                            <div class="reg-date">Dec 10 · Completed</div>
+                        </div>
+                        <div class="reg-actions">
+                            <span class="tag tag-indigo">Attended</span>
+                            <button class="btn">Review</button>
+                        </div>
+                    </div>
+                    <div class="reg-item">
+                        <div class="reg-icon" style="background:var(--pink-lt);">📸</div>
+                        <div style="flex:1;">
+                            <div class="reg-name">Photography Wksp</div>
+                            <div class="reg-date">Aug 20 · Completed</div>
+                        </div>
+                        <div class="reg-actions">
+                            <span class="tag tag-indigo">Attended</span>
+                            <button class="btn">View cert</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right column -->
+            <div style="display:flex;flex-direction:column;gap:14px;">
+
+                <!-- Certificates -->
+                <div class="card">
+                    <div class="card-head">
+                        <div class="card-title">My Certificates</div>
+                        <a href="#" class="card-link">All → <!-- user_certificates.xhtml --></a>
+                    </div>
+                    <div class="card-body">
+                        <div class="cert-item">
+                            <div class="cert-icon">🎓</div>
+                            <div style="flex:1;">
+                                <div class="cert-name">AI Workshop 2025</div>
+                                <div class="cert-num">#EM-20251210</div>
+                            </div>
+                            <button class="btn btn-dl" style="font-size:11px;padding:4px 10px;">↓ PDF</button>
+                        </div>
+                        <div class="cert-item">
+                            <div class="cert-icon">🎓</div>
+                            <div style="flex:1;">
+                                <div class="cert-name">Photography 2025</div>
+                                <div class="cert-num">#EM-20250820</div>
+                            </div>
+                            <button class="btn btn-dl" style="font-size:11px;padding:4px 10px;">↓ PDF</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming to browse -->
+                <div class="card" style="flex:1;">
+                    <div class="card-head">
+                        <div class="card-title">Discover Events</div>
+                        <a href="#" class="card-link">Browse → <!-- user_browse_events.xhtml --></a>
+                    </div>
+                    <div class="card-body">
+                        <div class="ev-item">
+                            <div class="ev-name">Startup Expo 2026</div>
+                            <div class="ev-meta">Jun 1 · Main Campus · 200 seats</div>
+                            <div class="ev-footer">
+                                <span class="tag tag-green">Open</span>
+                                <button class="btn btn-indigo" style="font-size:11px;padding:5px 12px;">Register</button>
+                            </div>
+                        </div>
+                        <div class="ev-item">
+                            <div class="ev-name">Cloud Summit</div>
+                            <div class="ev-meta">Jun 20 · Tech Park · 80 seats</div>
+                            <div class="ev-footer">
+                                <span class="tag tag-green">Open</span>
+                                <button class="btn btn-indigo" style="font-size:11px;padding:5px 12px;">Register</button>
+                            </div>
+                        </div>
+                        <div class="ev-item">
+                            <div class="ev-name">Photography Masterclass</div>
+                            <div class="ev-meta">Jul 3 · Studio A · 5 seats left</div>
+                            <div class="ev-footer">
+                                <span class="tag tag-red">Almost full</span>
+                                <button class="btn btn-indigo" style="font-size:11px;padding:5px 12px;">Register</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ═══ TOAST ═════════════════════════════════════════════════════ -->
+<div class="toast" id="toast">
+    <div class="toast-icon" id="tIcon">✨</div>
+    <div style="flex:1;">
+        <div class="toast-title" id="tTitle">Welcome!</div>
+        <div class="toast-msg"   id="tMsg">You're all set.</div>
+    </div>
+    <button class="toast-close" onclick="hideToast()">×</button>
+    <div class="toast-bar" id="tBar"></div>
+</div>
+
+<script>
+//<![CDATA[
+document.getElementById('dateStr').textContent =
+    new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+
+function showToast(title, msg, icon) {
+    var t = document.getElementById('toast');
+    document.getElementById('tTitle').textContent = title;
+    document.getElementById('tMsg').textContent   = msg;
+    document.getElementById('tIcon').textContent  = icon || '✅';
+    var b = document.getElementById('tBar');
+    b.style.animation = 'none'; void b.offsetHeight; b.style.animation = '';
+    t.classList.add('show');
+    setTimeout(hideToast, 3500);
+}
+function hideToast() { document.getElementById('toast').classList.remove('show'); }
+
+window.addEventListener('DOMContentLoaded', function() {
+    var p = new URLSearchParams(window.location.search);
+    if (p.get('welcome') === 'true') {
+        var n = p.get('name') || 'there';
+        showToast('Welcome back, ' + n + '!', 'Check your upcoming events below. ✨', '🎉');
+    }
+});
+//]]>
+</script>
+</h:body>
+</html>

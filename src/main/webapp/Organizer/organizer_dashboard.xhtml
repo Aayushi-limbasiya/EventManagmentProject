@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      lang="en">
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Organizer — EventMS Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <style>
+    /* ═══════════════════════════════════════════════
+       ORGANIZER DASHBOARD — "CREATIVE STUDIO"
+       Warm off-white · Deep teal + amber accents
+       Fraunces display + Plus Jakarta Sans body
+    ═══════════════════════════════════════════════ */
+    :root {
+        --bg:       #F5F1EA;
+        --bg-2:     #EDE8DF;
+        --surface:  #FDFAF5;
+        --surface-2:#F0EBE1;
+        --border:   #D8CFC0;
+        --border-2: #C4B9A8;
+        --teal:     #0D5C63;
+        --teal-2:   #178E98;
+        --teal-lt:  #E0F4F5;
+        --amber:    #D4660A;
+        --amber-lt: #FDF0E6;
+        --green:    #1A7F4B;
+        --green-lt: #E3F5EC;
+        --red:      #C0392B;
+        --red-lt:   #FDECEA;
+        --ink:      #1C1812;
+        --ink-2:    #4A4035;
+        --ink-3:    #8C7E6E;
+        --ink-4:    #B5A898;
+        --sidebar-w: 256px;
+        --header-h:  62px;
+        --radius:    10px;
+        --radius-lg: 16px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+    /* ── LAYOUT ── */
+    .shell { display: flex; min-height: 100vh; }
+    .main  { flex: 1; min-width: 0; padding-left: var(--sidebar-w); display: flex; flex-direction: column; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+        position: fixed; top: 0; left: 0; bottom: 0;
+        width: var(--sidebar-w);
+        background: var(--teal);
+        display: flex; flex-direction: column;
+        z-index: 100; overflow-y: auto;
+    }
+    .sidebar::-webkit-scrollbar { width: 0; }
+
+    .sb-logo {
+        display: flex; align-items: center; gap: 11px;
+        padding: 22px 20px 18px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        text-decoration: none;
+    }
+    .sb-logo-icon {
+        width: 36px; height: 36px; border-radius: 9px;
+        background: rgba(255,255,255,0.15);
+        display: flex; align-items: center; justify-content: center;
+    }
+    .sb-logo-icon svg { width: 18px; height: 18px; fill: white; }
+    .sb-logo-text { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; color: white; }
+    .sb-logo-tag {
+        margin-left: auto; font-size: 9px; font-weight: 600;
+        background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.7);
+        padding: 2px 8px; border-radius: 20px; letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .sb-user {
+        margin: 14px 14px 8px;
+        padding: 12px 14px;
+        background: rgba(255,255,255,0.08);
+        border-radius: var(--radius);
+        display: flex; align-items: center; gap: 10px;
+    }
+    .sb-avatar {
+        width: 32px; height: 32px; border-radius: 50%;
+        background: rgba(255,255,255,0.25);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 12px; font-weight: 700; color: white; flex-shrink: 0;
+    }
+    .sb-uname { font-size: 13px; font-weight: 600; color: white; }
+    .sb-utag  { font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 1px; }
+
+    .sb-section {
+        padding: 14px 20px 6px;
+        font-size: 9px; font-weight: 700;
+        color: rgba(255,255,255,0.35);
+        text-transform: uppercase; letter-spacing: 0.14em;
+    }
+    .sb-link {
+        display: flex; align-items: center; gap: 10px;
+        padding: 9px 16px; margin: 1px 8px;
+        border-radius: var(--radius);
+        font-size: 13px; font-weight: 500;
+        color: rgba(255,255,255,0.65);
+        text-decoration: none; cursor: pointer;
+        transition: all 0.15s; position: relative;
+    }
+    .sb-link:hover { background: rgba(255,255,255,0.08); color: white; }
+    .sb-link.active { background: rgba(255,255,255,0.15); color: white; font-weight: 600; }
+    .sb-link.active::after {
+        content: ''; position: absolute; right: 0; top: 20%; bottom: 20%;
+        width: 3px; border-radius: 2px 0 0 2px;
+        background: var(--amber);
+    }
+    .sb-link svg { width: 15px; height: 15px; opacity: 0.7; flex-shrink: 0; }
+    .sb-link.active svg { opacity: 1; }
+    .sb-badge {
+        margin-left: auto;
+        background: var(--amber); color: white;
+        font-size: 10px; font-weight: 700;
+        padding: 1px 7px; border-radius: 20px;
+    }
+    .sb-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 8px 16px; }
+    .sb-footer { margin-top: auto; padding: 12px 8px; border-top: 1px solid rgba(255,255,255,0.1); }
+    .sb-foot-link {
+        display: flex; align-items: center; gap: 10px;
+        padding: 9px 16px; border-radius: var(--radius);
+        font-size: 13px; font-weight: 500;
+        color: rgba(255,255,255,0.55); text-decoration: none; cursor: pointer;
+        transition: all 0.15s;
+    }
+    .sb-foot-link:hover { background: rgba(255,255,255,0.06); color: white; }
+    .sb-foot-link.out:hover { background: rgba(255,100,100,0.15); color: #FF9999; }
+    .sb-foot-link svg { width: 15px; height: 15px; opacity: 0.6; }
+
+    /* ── HEADER ── */
+    .header {
+        height: var(--header-h);
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        padding: 0 28px;
+        display: flex; align-items: center; justify-content: space-between;
+        position: sticky; top: 0; z-index: 50;
+    }
+    .header-left h1 {
+        font-family: 'Fraunces', serif;
+        font-size: 20px; font-weight: 700; color: var(--ink);
+        letter-spacing: -0.02em;
+    }
+    .header-left p { font-size: 12px; color: var(--ink-3); margin-top: 1px; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .create-btn {
+        display: flex; align-items: center; gap: 7px;
+        padding: 9px 18px;
+        background: var(--teal); color: white;
+        border: none; border-radius: var(--radius);
+        font-size: 13px; font-weight: 600;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        cursor: pointer; transition: all 0.15s;
+        box-shadow: 0 2px 8px rgba(13,92,99,0.25);
+    }
+    .create-btn:hover { background: var(--teal-2); transform: translateY(-1px); }
+    .notif-btn {
+        width: 36px; height: 36px; border-radius: var(--radius);
+        border: 1px solid var(--border); background: var(--bg);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; color: var(--ink-3); position: relative;
+        transition: all 0.15s;
+    }
+    .notif-btn:hover { border-color: var(--border-2); color: var(--ink); }
+    .notif-btn svg { width: 15px; height: 15px; }
+    .notif-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); border: 2px solid var(--surface); position: absolute; top: 5px; right: 5px; }
+
+    /* ── CONTENT ── */
+    .content { padding: 24px 28px; flex: 1; }
+
+    /* Welcome banner */
+    .welcome-bar {
+        background: var(--teal);
+        border-radius: var(--radius-lg);
+        padding: 22px 26px;
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 20px;
+        position: relative; overflow: hidden;
+    }
+    .welcome-bar::before {
+        content: '';
+        position: absolute; right: -30px; top: -40px;
+        width: 160px; height: 160px; border-radius: 50%;
+        background: rgba(255,255,255,0.06);
+    }
+    .wb-text h2 {
+        font-family: 'Fraunces', serif;
+        font-size: 20px; color: white; margin-bottom: 4px;
+    }
+    .wb-text p { font-size: 13px; color: rgba(255,255,255,0.6); }
+    .wb-emoji { font-size: 38px; position: relative; z-index: 1; }
+
+    /* Stats row */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+    .stat-card {
+        background: var(--surface); border: 1px solid var(--border);
+        border-radius: var(--radius-lg); padding: 18px;
+        transition: box-shadow 0.15s;
+    }
+    .stat-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+    .stat-icon { width: 38px; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 17px; margin-bottom: 12px; }
+    .stat-val { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700; color: var(--ink); line-height: 1; }
+    .stat-label { font-size: 12px; color: var(--ink-3); margin-top: 4px; }
+    .stat-change { font-size: 11px; font-weight: 600; margin-top: 5px; }
+    .up { color: var(--green); } .warn { color: var(--amber); }
+
+    /* Grid */
+    .grid2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px; margin-bottom: 14px; }
+    .grid2b { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    /* Card */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+    .card-head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .card-title { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 600; color: var(--ink); }
+    .card-sub   { font-size: 11px; color: var(--ink-4); margin-top: 2px; }
+    .card-body  { padding: 0; }
+    .card-link  { font-size: 12px; font-weight: 600; color: var(--teal); text-decoration: none; cursor: pointer; }
+    .card-link:hover { text-decoration: underline; }
+
+    /* Event cards grid */
+    .events-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 16px; }
+    .ev-card { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); transition: box-shadow 0.15s; }
+    .ev-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
+    .ev-banner { height: 68px; display: flex; align-items: flex-end; padding: 10px 12px; }
+    .ev-banner-title { color: white; font-size: 12px; font-weight: 700; text-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+    .ev-body { padding: 10px 12px; background: var(--surface); }
+    .ev-meta { font-size: 11px; color: var(--ink-4); margin: 4px 0 8px; }
+    .ev-stats { display: flex; gap: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
+    .ev-stat  { font-size: 11px; color: var(--ink-3); }
+    .ev-stat strong { color: var(--ink-2); font-weight: 600; }
+
+    /* Table */
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 10px 20px; font-size: 10px; font-weight: 700; color: var(--ink-4); text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border); }
+    td { padding: 11px 20px; font-size: 13px; color: var(--ink-2); border-bottom: 1px solid rgba(0,0,0,0.04); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--bg-2); }
+    .td-name { font-weight: 600; color: var(--ink); }
+
+    /* Badge */
+    .tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+    .tag-green  { background: var(--green-lt); color: var(--green); }
+    .tag-amber  { background: var(--amber-lt); color: var(--amber); }
+    .tag-red    { background: var(--red-lt); color: var(--red); }
+    .tag-teal   { background: var(--teal-lt); color: var(--teal); }
+    .tag-gray   { background: var(--bg-2); color: var(--ink-3); }
+
+    /* Buttons */
+    .btn { padding: 5px 12px; border-radius: 7px; font-size: 12px; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif; border: 1px solid var(--border); background: var(--surface); color: var(--ink-2); cursor: pointer; transition: all 0.15s; }
+    .btn:hover { background: var(--bg-2); border-color: var(--border-2); }
+    .btn-teal { background: var(--teal); color: white; border-color: var(--teal); }
+    .btn-teal:hover { background: var(--teal-2); }
+
+    /* Participant row */
+    .part-row { display: flex; align-items: center; gap: 12px; padding: 11px 20px; border-bottom: 1px solid rgba(0,0,0,0.04); }
+    .part-row:last-child { border-bottom: none; }
+    .part-av { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; }
+    .part-name { font-size: 13px; font-weight: 500; color: var(--ink); }
+    .part-event { font-size: 11px; color: var(--ink-4); }
+
+    /* TOAST */
+    .toast { position: fixed; top: 20px; right: 20px; z-index: 999; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--teal); border-radius: 12px; padding: 14px 18px; display: flex; align-items: flex-start; gap: 12px; max-width: 340px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); transform: translateX(120%); transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+    .toast.show { transform: translateX(0); }
+    .toast-icon { font-size: 20px; }
+    .toast-title { font-family: 'Fraunces', serif; font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+    .toast-msg   { font-size: 12px; color: var(--ink-3); }
+    .toast-close { margin-left: auto; background: none; border: none; color: var(--ink-4); cursor: pointer; font-size: 16px; }
+    .toast-bar   { position: absolute; bottom: 0; left: 0; height: 2px; background: var(--teal); border-radius: 0 0 12px 12px; animation: shrink 3.5s linear forwards; }
+    @keyframes shrink { from { width: 100%; } to { width: 0%; } }
+    </style>
+</h:head>
+<h:body>
+
+<!-- ═══ SIDEBAR ════════════════════════════════════════════════ -->
+<div class="sidebar">
+
+    <a href="../index.xhtml" class="sb-logo">
+        <div class="sb-logo-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg></div>
+        <span class="sb-logo-text">EventMS</span>
+        <span class="sb-logo-tag">Organizer</span>
+    </a>
+
+    <div class="sb-user">
+        <div class="sb-avatar"><h:outputText value="#{authBean.loggedInUser.name.substring(0,2).toUpperCase()}"/></div>
+        <div>
+            <div class="sb-uname"><h:outputText value="#{authBean.loggedInUser.name}"/></div>
+            <div class="sb-utag">Event Organizer</div>
+        </div>
+    </div>
+
+    <div class="sb-section">My Workspace</div>
+    <a href="organizer_dashboard.xhtml" class="sb-link active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+    </a>
+    <a href="#" class="sb-link">
+        <!-- href="organizer_my_events.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        My Events
+    </a>
+    <a href="#" class="sb-link">
+        <!-- href="organizer_create_event.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Create Event
+        <span class="sb-badge">New</span>
+    </a>
+
+    <div class="sb-divider"/>
+    <div class="sb-section">Event Management</div>
+
+    <a href="#" class="sb-link">
+        <!-- href="organizer_schedule.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Schedule &amp; Venues
+    </a>
+    <a href="#" class="sb-link">
+        <!-- href="organizer_participants.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Participants
+    </a>
+    <a href="#" class="sb-link">
+        <!-- href="organizer_registrations.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Registrations
+    </a>
+
+    <div class="sb-divider"/>
+    <div class="sb-section">Analytics</div>
+
+    <a href="#" class="sb-link">
+        <!-- href="organizer_feedback.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Feedback &amp; Ratings
+    </a>
+    <a href="#" class="sb-link">
+        <!-- href="organizer_certificates.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Certificates
+    </a>
+    <a href="#" class="sb-link">
+        <!-- href="organizer_export.xhtml" -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/></svg>
+        Export CSV / PDF
+    </a>
+
+    <div class="sb-footer">
+        <a href="#" class="sb-foot-link">
+            <!-- href="organizer_profile.xhtml" -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            My Profile
+        </a>
+        <a href="../login.xhtml" class="sb-foot-link out">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sign out
+        </a>
+    </div>
+</div>
+
+<!-- ═══ MAIN ══════════════════════════════════════════════════ -->
+<div class="main">
+
+    <div class="header">
+        <div class="header-left">
+            <h1>Organizer Studio</h1>
+            <p id="dateStr">Loading…</p>
+        </div>
+        <div class="header-right">
+            <div class="notif-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"/></svg>
+                <div class="notif-dot"></div>
+            </div>
+            <button class="create-btn" onclick="alert('Create event page — wire to organizer_create_event.xhtml')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Create Event
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- Welcome bar -->
+        <div class="welcome-bar">
+            <div class="wb-text">
+                <h2>Good work, <h:outputText value="#{authBean.loggedInUser.name}"/> 🎯</h2>
+                <p>You have 2 events pending approval · Next event in 11 days</p>
+            </div>
+            <div class="wb-emoji">🎪</div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:var(--teal-lt);">📅</div>
+                <div class="stat-val">6</div>
+                <div class="stat-label">Total events</div>
+                <div class="stat-change up">2 pending approval</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:var(--amber-lt);">🎟️</div>
+                <div class="stat-val">142</div>
+                <div class="stat-label">Registrations</div>
+                <div class="stat-change up">↑ 18 this week</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:var(--green-lt);">⭐</div>
+                <div class="stat-val">4.8</div>
+                <div class="stat-label">Avg rating</div>
+                <div class="stat-change up">From 47 reviews</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:var(--teal-lt);">📋</div>
+                <div class="stat-val">23</div>
+                <div class="stat-label">Waitlisted</div>
+                <div class="stat-change warn">Across 3 events</div>
+            </div>
+        </div>
+
+        <!-- Events grid -->
+        <div class="card" style="margin-bottom:14px;">
+            <div class="card-head">
+                <div>
+                    <div class="card-title">My Events</div>
+                    <div class="card-sub">All your created events</div>
+                </div>
+                <a href="#" class="card-link">Manage all → <!-- organizer_my_events.xhtml --></a>
+            </div>
+            <div class="card-body">
+                <div class="events-grid">
+                    <div class="ev-card">
+                        <div class="ev-banner" style="background:linear-gradient(135deg,#0D5C63,#178E98);">
+                            <span class="ev-banner-title">Tech Summit 2026</span>
+                        </div>
+                        <div class="ev-body">
+                            <span class="tag tag-amber">Pending</span>
+                            <div class="ev-meta">May 5 · City Auditorium · 120 seats</div>
+                            <div class="ev-stats">
+                                <div class="ev-stat">Registered: <strong>42</strong></div>
+                                <div class="ev-stat">Waitlist: <strong>5</strong></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ev-card">
+                        <div class="ev-banner" style="background:linear-gradient(135deg,#D4660A,#E8901E);">
+                            <span class="ev-banner-title">Design Workshop</span>
+                        </div>
+                        <div class="ev-body">
+                            <span class="tag tag-green">Approved</span>
+                            <div class="ev-meta">May 12 · Hall B · 60 seats</div>
+                            <div class="ev-stats">
+                                <div class="ev-stat">Registered: <strong>58</strong></div>
+                                <div class="ev-stat">Waitlist: <strong>12</strong></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ev-card">
+                        <div class="ev-banner" style="background:linear-gradient(135deg,#4A4035,#8C7E6E);">
+                            <span class="ev-banner-title">Startup Expo</span>
+                        </div>
+                        <div class="ev-body">
+                            <span class="tag tag-gray">Draft</span>
+                            <div class="ev-meta">Jun 1 · Main Campus · 200 seats</div>
+                            <div class="ev-stats">
+                                <div class="ev-stat">Registered: <strong>0</strong></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid2">
+            <!-- Recent registrations -->
+            <div class="card">
+                <div class="card-head">
+                    <div class="card-title">Recent Registrations</div>
+                    <a href="#" class="card-link">View all → <!-- organizer_registrations.xhtml --></a>
+                </div>
+                <div class="card-body">
+                    <table>
+                        <thead><tr><th>Participant</th><th>Event</th><th>Date</th><th>Status</th><th>Payment</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td><div class="td-name">Vivek Devganiya</div></td>
+                                <td>Tech Summit</td>
+                                <td>Apr 24</td>
+                                <td><span class="tag tag-green">Confirmed</span></td>
+                                <td><span class="tag tag-green">Paid</span></td>
+                            </tr>
+                            <tr>
+                                <td><div class="td-name">Nidhi Shah</div></td>
+                                <td>Design Wksp</td>
+                                <td>Apr 23</td>
+                                <td><span class="tag tag-green">Confirmed</span></td>
+                                <td><span class="tag tag-green">Paid</span></td>
+                            </tr>
+                            <tr>
+                                <td><div class="td-name">Ravi Kumar</div></td>
+                                <td>Design Wksp</td>
+                                <td>Apr 22</td>
+                                <td><span class="tag tag-amber">Waitlist</span></td>
+                                <td><span class="tag tag-gray">Pending</span></td>
+                            </tr>
+                            <tr>
+                                <td><div class="td-name">Meera Lal</div></td>
+                                <td>Tech Summit</td>
+                                <td>Apr 21</td>
+                                <td><span class="tag tag-green">Confirmed</span></td>
+                                <td><span class="tag tag-green">Paid</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Quick actions -->
+            <div class="card">
+                <div class="card-head"><div class="card-title">Quick Actions</div></div>
+                <div class="card-body">
+                    <div class="part-row" style="cursor:pointer;" onclick="alert('→ organizer_create_event.xhtml')">
+                        <div class="part-av" style="background:var(--teal);">+</div>
+                        <div><div class="part-name">Create new event</div><div class="part-event">Start from scratch</div></div>
+                    </div>
+                    <div class="part-row" style="cursor:pointer;" onclick="alert('→ organizer_participants.xhtml')">
+                        <div class="part-av" style="background:var(--amber);">👥</div>
+                        <div><div class="part-name">View all participants</div><div class="part-event">Across all events</div></div>
+                    </div>
+                    <div class="part-row" style="cursor:pointer;" onclick="alert('→ organizer_export.xhtml')">
+                        <div class="part-av" style="background:var(--green);">📥</div>
+                        <div><div class="part-name">Export participant list</div><div class="part-event">CSV or PDF</div></div>
+                    </div>
+                    <div class="part-row" style="cursor:pointer;" onclick="alert('→ organizer_feedback.xhtml')">
+                        <div class="part-av" style="background:#9B59B6;">⭐</div>
+                        <div><div class="part-name">View feedback reports</div><div class="part-event">47 new reviews</div></div>
+                    </div>
+                    <div class="part-row" style="cursor:pointer;" onclick="alert('→ organizer_certificates.xhtml')">
+                        <div class="part-av" style="background:#16A085;">🎓</div>
+                        <div><div class="part-name">Issue certificates</div><div class="part-event">Post-event</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+    <div class="toast-icon" id="tIcon">🎯</div>
+    <div style="flex:1;">
+        <div class="toast-title" id="tTitle">Welcome!</div>
+        <div class="toast-msg"   id="tMsg">You're in your organizer workspace.</div>
+    </div>
+    <button class="toast-close" onclick="hideToast()">×</button>
+    <div class="toast-bar" id="tBar"></div>
+</div>
+
+<script>
+//<![CDATA[
+document.getElementById('dateStr').textContent =
+    new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+function showToast(title,msg,icon){
+    var t=document.getElementById('toast');
+    document.getElementById('tTitle').textContent=title;
+    document.getElementById('tMsg').textContent=msg;
+    document.getElementById('tIcon').textContent=icon||'✅';
+    var b=document.getElementById('tBar');
+    b.style.animation='none'; void b.offsetHeight; b.style.animation='';
+    t.classList.add('show');
+    setTimeout(hideToast,3500);
+}
+function hideToast(){document.getElementById('toast').classList.remove('show');}
+window.addEventListener('DOMContentLoaded',function(){
+    var p=new URLSearchParams(window.location.search);
+    if(p.get('welcome')==='true'){
+        var n=p.get('name')||'Organizer';
+        showToast('Welcome back, '+n+'!','Let\'s build something great today.','🎯');
+    }
+});
+//]]>
+</script>
+</h:body>
+</html>
