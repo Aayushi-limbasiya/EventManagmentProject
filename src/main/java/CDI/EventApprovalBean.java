@@ -7,6 +7,8 @@ package CDI;
 import EJB.EventApprovalBeanLocal;
 import Entity.Approvals;
 import jakarta.ejb.EJB;
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 //import jakarta.enterprise.context.ViewScoped;
 import jakarta.inject.Named;
@@ -81,32 +83,57 @@ public class EventApprovalBean implements Serializable {
     // ================================
     // ✅ APPROVE EVENT
     // ================================
-    public void approve() {
-        if (remark == null || remark.trim().isEmpty()) {
-            remark = "Approved by admin";
+    public String approveEvent() {
+        try {
+            if (remark == null || remark.trim().isEmpty()) {
+                remark = "Approved by admin.";
+            }
+            approvalEJB.approveEvent(eventId, adminUserId, remark);
+            loadPending();
+            return "admin_event_approvals?faces-redirect=true&approved=true";
+        } catch (Exception e) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, e.getMessage(), null));
+            return null;
         }
-
-        approvalEJB.approveEvent(eventId, adminUserId, remark);
-        loadPending(); // refresh list
     }
 
-    // ================================
-    // ❌ REJECT EVENT
-    // ================================
-    public void reject() {
-        if (remark == null || remark.trim().isEmpty()) {
-            remark = "Rejected by admin";
+    public String rejectEvent() {
+        try {
+            if (remark == null || remark.trim().isEmpty()) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Please provide a reason for rejection.", null));
+                return null;
+            }
+            approvalEJB.rejectEvent(eventId, adminUserId, remark);
+            loadPending();
+            return "admin_event_approvals?faces-redirect=true&rejected=true";
+        } catch (Exception e) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, e.getMessage(), null));
+            return null;
         }
-
-        approvalEJB.rejectEvent(eventId, adminUserId, remark);
-        loadPending(); // refresh list
     }
 
     // ================================
     // 🔁 GETTERS & SETTERS
     // ================================
     public Collection<Approvals> getApprovalList() {
+        if (approvalList == null) loadPending();
         return approvalList;
+    }
+
+    // Separate lists for each tab on the approvals page
+    public Collection<Approvals> getPendingList() {
+        return approvalEJB.getPendingApprovals();
+    }
+
+    public Collection<Approvals> getApprovedList() {
+        return approvalEJB.getAllApproved();
+    }
+
+    public Collection<Approvals> getRejectedList() {
+        return approvalEJB.getAllRejected();
     }
 
     public void setApprovalList(Collection<Approvals> approvalList) {
