@@ -25,8 +25,16 @@ public class EventManagment implements EventManagmentLocal {
 
     @Override
     public void createEvent(Events event) {
-        event.setStatus("Draft");
-        event.setCreatedAt(new Date());
+        // ✅ Use getReference so JPA gets a managed proxy — avoids "detached entity" error
+        if (event.getUserId() != null && event.getUserId().getUserId() != null) {
+            Entity.Users managedUser = em.getReference(Entity.Users.class, event.getUserId().getUserId());
+            event.setUserId(managedUser);
+        }
+        // ✅ Only set status if caller hasn't already set one (e.g. "Pending" from organizer)
+        if (event.getStatus() == null || event.getStatus().trim().isEmpty()) {
+            event.setStatus("Pending");
+        }
+        event.setCreatedAt(new java.util.Date());
         em.persist(event);
     }
 

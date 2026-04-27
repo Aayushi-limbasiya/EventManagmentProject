@@ -89,7 +89,36 @@ public class EventScheduleBean implements Serializable {
     }
 
     // ===============================
-    // 🔹 ASSIGN VENUE
+    // 🔹 ASSIGN SCHEDULE (called from organizer_schedule.xhtml)
+    // ===============================
+    public String assignSchedule() {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+            Date start = sdf.parse(startTimeStr);
+            Date end   = sdf.parse(endTimeStr);
+
+            scheduleService.assignVenue(eventId, venueId, start, end);
+
+            // Reset form
+            startTimeStr = null;
+            endTimeStr   = null;
+            eventId      = 0;
+            venueId      = 0;
+            schedules    = new ArrayList<>(); // force reload
+
+            showMessage("Venue and schedule assigned successfully!");
+            return "organizer_schedule?faces-redirect=true&scheduled=true";
+        } catch (java.text.ParseException e) {
+            showMessage("Invalid date/time format. Please use the date picker.");
+            return null;
+        } catch (Exception e) {
+            showMessage("Error scheduling: " + e.getMessage());
+            return null;
+        }
+    }
+
+    // ===============================
+    // 🔹 ASSIGN VENUE (original method kept)
     // ===============================
     public void assignVenue() {
         try {
@@ -173,10 +202,12 @@ public class EventScheduleBean implements Serializable {
     // ===============================
 
     public List<EventSchedule> getSchedules() {
+        if (schedules.isEmpty()) loadCalendar();
         return schedules;
     }
 
     public List<Venues> getVenues() {
+        if (venues.isEmpty()) loadVenues();
         return venues;
     }
 

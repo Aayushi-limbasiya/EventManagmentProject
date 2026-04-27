@@ -22,14 +22,9 @@ public class AdminVenueBean implements Serializable {
     @EJB
     private EventSchedulingLocal scheduleService;
 
-    private List<Venues> allVenues = new ArrayList<>();
-    private Venues selectedVenue   = new Venues();
-    private int    deleteVenueId;
-
-    // ── LOAD ────────────────────────────────────────────────
-    public void init() {
-        loadVenues();
-    }
+    private List<Venues> allVenues    = new ArrayList<>();
+    private Venues       selectedVenue = new Venues();
+    private int          deleteVenueId;
 
     public void loadVenues() {
         try {
@@ -51,11 +46,11 @@ public class AdminVenueBean implements Serializable {
                 return null;
             }
 
-            if (selectedVenue.getVenueId() == null || selectedVenue.getVenueId() == 0) {
-                // ADD new venue
+            // ✅ venueId is Integer (nullable) — check for null or 0
+            Integer vid = selectedVenue.getVenueId();
+            if (vid == null || vid == 0) {
                 scheduleService.addVenue(selectedVenue);
             } else {
-                // UPDATE existing venue
                 scheduleService.updateVenue(selectedVenue);
             }
 
@@ -75,26 +70,20 @@ public class AdminVenueBean implements Serializable {
             loadVenues();
             return "admin_venues?faces-redirect=true&deleted=true";
         } catch (Exception e) {
-            addMsg("Cannot delete venue — it may be in use by an active event.");
+            addMsg("Cannot delete — venue may be in use by an active event.");
             return null;
         }
     }
 
-    // ── HELPER ──────────────────────────────────────────────
     private void addMsg(String msg) {
         FacesContext.getCurrentInstance()
                 .addMessage(null, new FacesMessage(msg));
     }
 
     // ── GETTERS / SETTERS ────────────────────────────────────
-    public List<Venues> getAllVenues() {
-        if (allVenues.isEmpty()) loadVenues();
-        return allVenues;
-    }
-
-    public Venues getSelectedVenue() { return selectedVenue; }
-    public void setSelectedVenue(Venues v) { this.selectedVenue = v; }
-
-    public int getDeleteVenueId() { return deleteVenueId; }
-    public void setDeleteVenueId(int id) { this.deleteVenueId = id; }
+    public List<Venues> getAllVenues()           { if (allVenues.isEmpty()) loadVenues(); return allVenues; }
+    public Venues       getSelectedVenue()      { return selectedVenue; }
+    public void         setSelectedVenue(Venues v) { this.selectedVenue = v; }
+    public int          getDeleteVenueId()      { return deleteVenueId; }
+    public void         setDeleteVenueId(int id){ this.deleteVenueId = id; }
 }

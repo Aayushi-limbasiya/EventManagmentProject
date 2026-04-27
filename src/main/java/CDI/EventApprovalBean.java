@@ -89,6 +89,7 @@ public class EventApprovalBean implements Serializable {
                 remark = "Approved by admin.";
             }
             approvalEJB.approveEvent(eventId, adminUserId, remark);
+            clearCache();
             loadPending();
             return "admin_event_approvals?faces-redirect=true&approved=true";
         } catch (Exception e) {
@@ -106,6 +107,7 @@ public class EventApprovalBean implements Serializable {
                 return null;
             }
             approvalEJB.rejectEvent(eventId, adminUserId, remark);
+            clearCache();
             loadPending();
             return "admin_event_approvals?faces-redirect=true&rejected=true";
         } catch (Exception e) {
@@ -123,17 +125,32 @@ public class EventApprovalBean implements Serializable {
         return approvalList;
     }
 
-    // Separate lists for each tab on the approvals page
+    // Separate lists for each tab on the approvals page — cached, not called per render
+    private Collection<Approvals> pendingList;
+    private Collection<Approvals> approvedList;
+    private Collection<Approvals> rejectedList;
+
     public Collection<Approvals> getPendingList() {
-        return approvalEJB.getPendingApprovals();
+        if (pendingList == null) pendingList = approvalEJB.getPendingApprovals();
+        return pendingList;
     }
 
     public Collection<Approvals> getApprovedList() {
-        return approvalEJB.getAllApproved();
+        if (approvedList == null) approvedList = approvalEJB.getAllApproved();
+        return approvedList;
     }
 
     public Collection<Approvals> getRejectedList() {
-        return approvalEJB.getAllRejected();
+        if (rejectedList == null) rejectedList = approvalEJB.getAllRejected();
+        return rejectedList;
+    }
+
+    // Call this after approve/reject to force refresh
+    private void clearCache() {
+        approvalList = null;
+        pendingList  = null;
+        approvedList = null;
+        rejectedList = null;
     }
 
     public void setApprovalList(Collection<Approvals> approvalList) {
