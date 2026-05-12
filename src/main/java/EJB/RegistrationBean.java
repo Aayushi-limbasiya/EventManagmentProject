@@ -60,9 +60,8 @@ public class RegistrationBean implements RegistrationBeanLocal {
             capacity = (cap != null) ? cap : 0;
         }
 
-        // Step 5: Decide status — Confirmed or Waitlist
-        long confirmed = getConfirmedCount(eventId);
-        String status = (capacity == 0 || confirmed < capacity) ? "Confirmed" : "Waitlist";
+        // Step 5: Set status to Pending — organizer will approve or reject
+        String status = "Pending";
 
         // Step 6: Create registration record
         Registrations reg = new Registrations();
@@ -75,27 +74,15 @@ public class RegistrationBean implements RegistrationBeanLocal {
 
         // Step 7: Send confirmation email to participant
         try {
-            String subject;
-            String body;
-
-            if ("Confirmed".equals(status)) {
-                subject = "Registration Confirmed - " + event.getTitle();
-                body = "Dear " + user.getName() + ",\n\n"
-                    + "Your registration for the following event has been CONFIRMED!\n\n"
-                    + "Event Details:\n"
-                    + "  Event : " + event.getTitle() + "\n"
-                    + "  Status: Confirmed\n\n"
-                    + "Please keep this email as your registration confirmation.\n\n"
-                    + "Regards,\nEvent Management Team";
-            } else {
-                subject = "Added to Waitlist - " + event.getTitle();
-                body = "Dear " + user.getName() + ",\n\n"
-                    + "The event \"" + event.getTitle() + "\" is currently full.\n\n"
-                    + "You have been added to the WAITLIST.\n"
-                    + "You will be automatically confirmed if a spot becomes available.\n"
-                    + "We will notify you by email if you get confirmed.\n\n"
-                    + "Regards,\nEvent Management Team";
-            }
+            String subject = "Registration Received - " + event.getTitle();
+            String body = "Dear " + user.getName() + ",\n\n"
+                + "Your registration for the following event has been received!\n\n"
+                + "Event Details:\n"
+                + "  Event : " + event.getTitle() + "\n"
+                + "  Status: Pending Approval\n\n"
+                + "The organizer will review your registration shortly.\n"
+                + "You will be notified once your registration is approved or rejected.\n\n"
+                + "Regards,\nEvent Management Team";
 
             EmailUtil.sendEmail(user.getEmail(), subject, body);
         } catch (Exception e) {
@@ -266,6 +253,11 @@ public class RegistrationBean implements RegistrationBeanLocal {
         return "REG-" + reg.getRegistrationId()
              + "-EVENT-" + reg.getEventId().getEventId()
              + "-USER-" + reg.getUserId().getUserId();
+    }
+
+    @Override
+    public void rejectRegistration(int registrationId) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
     
 

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:pt="jakarta.faces.passthrough"
+      lang="en">
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>My Profile — EventMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&amp;family=Outfit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <style>
+    :root{--bg:#FFFFFF;--bg2:#F8F8FC;--surface:#FFFFFF;--border:#EBEBF5;--border2:#D8D7EE;
+    --indigo:#4F46E5;--indigo2:#6B63F0;--indigolt:#EEF2FF;--violet:#7C3AED;--violetlt:#F3EFFE;
+    --green:#059669;--greenlt:#ECFDF5;--amber:#D97706;--amberlt:#FFFBEB;
+    --red:#DC2626;--redlt:#FEF2F2;--pink:#DB2777;
+    --ink:#1A1833;--ink2:#3D3A5C;--ink3:#7C799E;--ink4:#AEACCB;
+    --sw:250px;--r:10px;--rl:16px;--rxl:22px;--tr:.25s ease;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Outfit',sans-serif;background:var(--bg2);color:var(--ink);-webkit-font-smoothing:antialiased;}
+
+    /* TOGGLE */
+    .toggle{position:fixed;top:14px;left:14px;z-index:200;width:34px;height:34px;border-radius:var(--r);background:var(--indigo);border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;box-shadow:0 2px 8px rgba(79,70,229,.35);}
+    .toggle span{display:block;width:16px;height:1.5px;background:rgba(255,255,255,.9);border-radius:2px;transition:.2s;}
+    .toggle.open span:nth-child(1){transform:translateY(5.5px) rotate(45deg);}
+    .toggle.open span:nth-child(2){opacity:0;}
+    .toggle.open span:nth-child(3){transform:translateY(-5.5px) rotate(-45deg);}
+
+    /* SIDEBAR */
+    .sb{position:fixed;top:0;left:0;bottom:0;width:var(--sw);background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;overflow-y:auto;overflow-x:hidden;transition:width var(--tr),transform var(--tr);}
+    .sb.collapsed{width:0;transform:translateX(-100%);}
+    .sb::-webkit-scrollbar{width:0;}
+    .sb-glow{height:3px;background:linear-gradient(90deg,var(--indigo),var(--violet),var(--pink));}
+    .sb-logo{display:flex;align-items:center;gap:10px;padding:18px 18px 16px 54px;border-bottom:1px solid var(--border);text-decoration:none;white-space:nowrap;}
+    .sb-mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--indigo),var(--violet));display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .sb-mark svg{width:17px;height:17px;fill:white;}
+    .sb-wordmark{font-family:'DM Serif Display',serif;font-size:18px;color:var(--ink);}
+    /* Clickable user card */
+    .sb-user{margin:14px 12px 6px;padding:12px 14px;background:var(--indigolt);border:1px solid var(--border2);border-radius:var(--rl);display:flex;align-items:center;gap:10px;white-space:nowrap;text-decoration:none;cursor:pointer;}
+    .sb-user:hover{background:#E0E7FF;}
+    .sb-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--indigo),var(--violet));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
+    .sb-uname{font-size:13px;font-weight:600;color:var(--ink);}
+    .sb-urole{font-size:10px;color:var(--ink3);margin-top:1px;}
+    .sb-dot{margin-left:auto;width:8px;height:8px;border-radius:50%;background:var(--green);}
+    .sb-sec{padding:14px 18px 5px;font-size:9px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:.14em;}
+    .sb-a{display:flex;align-items:center;gap:10px;padding:9px 16px;margin:1px 8px;border-radius:var(--r);font-size:13px;font-weight:500;color:var(--ink3);text-decoration:none;transition:.15s;white-space:nowrap;}
+    .sb-a:hover{background:var(--bg2);color:var(--ink2);}
+    .sb-a.on{background:var(--indigolt);color:var(--indigo);font-weight:600;}
+    .sb-a svg{width:15px;height:15px;flex-shrink:0;}
+    .badge-new{margin-left:auto;font-size:9px;font-weight:700;background:linear-gradient(135deg,var(--indigo),var(--violet));color:#fff;padding:2px 7px;border-radius:20px;}
+    .sb-hr{height:1px;background:var(--border);margin:8px 12px;}
+    .sb-foot{margin-top:auto;padding:10px 8px;border-top:1px solid var(--border);}
+    .sb-fa{display:flex;align-items:center;gap:10px;padding:9px 16px;border-radius:var(--r);font-size:13px;font-weight:500;color:var(--ink3);text-decoration:none;transition:.15s;white-space:nowrap;cursor:pointer;background:none;border:none;width:100%;font-family:'Outfit',sans-serif;}
+    .sb-fa:hover{background:var(--bg2);color:var(--ink2);}
+    .sb-fa.on{background:var(--indigolt);color:var(--indigo);font-weight:600;}
+    .sb-fa.danger:hover{background:var(--redlt);color:var(--red);}
+    .sb-fa svg{width:15px;height:15px;}
+
+    /* MAIN */
+    .main{padding-left:var(--sw);display:flex;flex-direction:column;min-height:100vh;transition:padding-left var(--tr);}
+    .main.wide{padding-left:0;}
+    .hd{height:62px;background:var(--bg);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;position:sticky;top:0;z-index:50;}
+    .hd-t{font-family:'DM Serif Display',serif;font-size:20px;color:var(--ink);}
+    .hd-s{font-size:12px;color:var(--ink4);margin-top:1px;}
+    .pg{padding:28px;flex:1;max-width:860px;}
+
+    /* PROFILE HERO */
+    .hero{background:linear-gradient(135deg,var(--indigo) 0%,var(--violet) 60%,var(--pink) 100%);border-radius:var(--rxl);padding:26px 30px;margin-bottom:22px;display:flex;align-items:center;gap:22px;position:relative;overflow:hidden;}
+    .hero::before{content:'';position:absolute;top:-50px;right:-50px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.07);}
+    .hav{width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,.25);border:3px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:white;flex-shrink:0;}
+    .hinfo{flex:1;}
+    .hinfo h2{font-family:'DM Serif Display',serif;font-size:22px;color:white;margin-bottom:4px;}
+    .hinfo p{font-size:13px;color:rgba(255,255,255,.72);}
+    .hbadge{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);color:white;font-size:12px;font-weight:600;padding:6px 16px;border-radius:20px;white-space:nowrap;}
+
+    /* CARD */
+    .card{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:18px;}
+    .card-head{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .card-title{font-family:'DM Serif Display',serif;font-size:16px;color:var(--ink);}
+    .card-sub{font-size:11px;color:var(--ink4);margin-top:2px;}
+    .card-body{padding:22px;}
+
+    /* INFO ROWS */
+    .row{display:flex;align-items:flex-start;gap:16px;padding:13px 0;border-bottom:1px solid var(--border);}
+    .row:last-child{border-bottom:none;}
+    .lbl{font-size:11px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:.08em;width:160px;flex-shrink:0;padding-top:2px;}
+    .val{font-size:14px;color:var(--ink);font-weight:500;}
+    .val.muted{color:var(--ink4);font-weight:400;font-style:italic;}
+
+    /* STATUS BADGE */
+    .sbadge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;}
+    .sbadge::before{content:'';width:6px;height:6px;border-radius:50%;}
+    .s-v{background:var(--greenlt);color:var(--green);} .s-v::before{background:var(--green);}
+    .s-p{background:var(--amberlt);color:var(--amber);} .s-p::before{background:var(--amber);}
+    .s-b{background:var(--redlt);color:var(--red);}     .s-b::before{background:var(--red);}
+
+    /* EDIT FORM */
+    .fg{margin-bottom:18px;}
+    .fl{display:block;font-size:11px;font-weight:700;color:var(--ink3);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase;}
+    input.fi,select.fi{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:var(--r);font-size:14px;font-family:'Outfit',sans-serif;color:var(--ink);background:white;outline:none;transition:border-color .14s;}
+    input.fi:focus{border-color:var(--indigo);box-shadow:0 0 0 3px var(--indigolt);}
+    input.fi:disabled{background:var(--bg2);color:var(--ink4);cursor:not-allowed;}
+    .hint{font-size:11px;color:var(--ink4);margin-top:5px;}
+    .form-row{display:flex;gap:12px;margin-top:22px;}
+    .btn-save{padding:11px 28px;background:var(--indigo);color:white;border:none;border-radius:var(--r);font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;box-shadow:0 2px 8px rgba(79,70,229,.25);}
+    .btn-save:hover{background:var(--indigo2);}
+    .btn-cancel{padding:11px 22px;background:white;color:var(--ink2);border:1px solid var(--border);border-radius:var(--r);font-size:14px;font-weight:500;font-family:'Outfit',sans-serif;cursor:pointer;}
+    .btn-edit{padding:9px 20px;background:var(--indigolt);color:var(--indigo);border:1px solid var(--border2);border-radius:var(--r);font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;}
+    .btn-edit:hover{background:#E0E7FF;}
+
+    /* TOAST */
+    .toast{position:fixed;top:20px;right:20px;z-index:999;background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--indigo);border-radius:var(--rl);padding:14px 18px;display:flex;align-items:flex-start;gap:12px;max-width:320px;box-shadow:0 8px 32px rgba(79,70,229,.13);transform:translateX(120%);transition:transform .35s cubic-bezier(.34,1.56,.64,1);overflow:hidden;}
+    .toast.show{transform:translateX(0);}
+    .t-ic{font-size:18px;flex-shrink:0;} .t-tl{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:2px;} .t-mg{font-size:12px;color:var(--ink3);}
+    .t-x{margin-left:auto;background:none;border:none;color:var(--ink4);cursor:pointer;font-size:16px;}
+    .t-bar{position:absolute;bottom:0;left:0;height:2px;background:var(--indigo);animation:sh 3.5s linear forwards;}
+    @keyframes sh{from{width:100%}to{width:0}}
+    </style>
+</h:head>
+<h:body>
+
+<button class="toggle open" id="tog" onclick="toggleSB()"><span></span><span></span><span></span></button>
+
+<!-- SIDEBAR -->
+<div class="sb" id="sb">
+    <div class="sb-glow"></div>
+    <a href="../index.xhtml" class="sb-logo">
+        <div class="sb-mark"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg></div>
+        <span class="sb-wordmark">EventMS</span>
+    </a>
+
+    <!-- User card — uses authBean directly for reliable display -->
+    <a href="user_profile.xhtml" class="sb-user">
+        <div class="sb-av">
+            <h:outputText value="#{authBean.loggedInUser != null ? authBean.loggedInUser.name.substring(0, authBean.loggedInUser.name.length() >= 2 ? 2 : authBean.loggedInUser.name.length()).toUpperCase() : '??'}"/>
+        </div>
+        <div>
+            <div class="sb-uname"><h:outputText value="#{authBean.loggedInUser != null ? authBean.loggedInUser.name : 'User'}"/></div>
+            <div class="sb-urole">Participant</div>
+        </div>
+        <div class="sb-dot"></div>
+    </a>
+
+    <div class="sb-sec">My Space</div>
+    <a href="user_dashboard.xhtml" class="sb-a">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard</a>
+    <a href="user_browse_events.xhtml" class="sb-a">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Browse Events<span class="badge-new">NEW</span></a>
+    <a href="user_my_registrations.xhtml" class="sb-a">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>My Registrations</a>
+    <div class="sb-hr"></div>
+    <div class="sb-sec">Manage</div>
+    <a href="#" class="sb-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Payments</a>
+    <a href="#" class="sb-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Certificates</a>
+    <a href="#" class="sb-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Feedback &amp; Reviews</a>
+    <a href="#" class="sb-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"/></svg>Notifications</a>
+    <div class="sb-hr"></div>
+    <div class="sb-foot">
+        <a href="user_profile.xhtml" class="sb-fa on">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>My Profile</a>
+        <a href="#" class="sb-fa">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M1 12h2M21 12h2M12 1v2M12 21v2"/></svg>Settings</a>
+        <!-- Sign out as plain href — same as admin/organizer, no JSF form needed -->
+        <a href="../login.xhtml" class="sb-fa danger"
+           onclick="document.cookie='JSESSIONID=;expires=Thu,01 Jan 1970 00:00:00 GMT;path=/'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign out
+        </a>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="main">
+    <div class="hd">
+        <div>
+            <div class="hd-t">My Profile</div>
+            <div class="hd-s">View and update your account details</div>
+        </div>
+    </div>
+    <div class="pg">
+
+        <!-- HERO — uses authBean directly, always reliable -->
+        <div class="hero">
+            <div class="hav">
+                <h:outputText value="#{authBean.loggedInUser != null ? authBean.loggedInUser.name.substring(0, authBean.loggedInUser.name.length() >= 2 ? 2 : authBean.loggedInUser.name.length()).toUpperCase() : '??'}"/>
+            </div>
+            <div class="hinfo">
+                <h2><h:outputText value="#{authBean.loggedInUser != null ? authBean.loggedInUser.name : 'User'}"/> ✨</h2>
+                <h:panelGroup rendered="#{authBean.loggedInUser != null}" layout="block">
+                    <p><h:outputText value="#{authBean.loggedInUser.email}"/> · Participant</p>
+                </h:panelGroup>
+            </div>
+            <h:panelGroup rendered="#{authBean.loggedInUser != null}" layout="block">
+                <span class="hbadge"><h:outputText value="#{authBean.loggedInUser.verifiedStatus}"/></span>
+            </h:panelGroup>
+        </div>
+
+        <!-- VIEW MODE -->
+        <h:panelGroup id="viewSection" layout="block"
+                      style="#{profileBean.editMode ? 'display:none' : 'display:block'}">            <div class="card">
+                <div class="card-head">
+                    <div>
+                        <div class="card-title">Personal Information</div>
+                        <div class="card-sub">Your registered details</div>
+                    </div>
+                    <h:form id="editTrigger">
+                        <h:commandButton value="✎ Edit Profile"
+                                         styleClass="btn-edit"
+                                         action="#{profileBean.loadForEdit}"/>
+                    </h:form>
+                </div>
+                <div class="card-body" id="viewBody">
+                    <h:panelGroup rendered="#{profileBean.user != null}" layout="block">
+                        <div class="row">
+                            <span class="lbl">Full Name</span>
+                            <span class="val"><h:outputText value="#{profileBean.user.name}"/></span>
+                        </div>
+                        <div class="row">
+                            <span class="lbl">Email</span>
+                            <span class="val"><h:outputText value="#{profileBean.user.email}"/></span>
+                        </div>
+                        <div class="row">
+                            <span class="lbl">Phone</span>
+                            <span class="val #{empty profileBean.user.phone ? 'muted' : ''}">
+                                <h:outputText value="#{empty profileBean.user.phone ? 'Not provided' : profileBean.user.phone}"/>
+                            </span>
+                        </div>
+                        <div class="row">
+                            <span class="lbl">Gender</span>
+                            <span class="val #{empty profileBean.user.gender ? 'muted' : ''}">
+                                <h:outputText value="#{empty profileBean.user.gender ? 'Not provided' : profileBean.user.gender}"/>
+                            </span>
+                        </div>
+                        <div class="row">
+                            <span class="lbl">Date of Birth</span>
+                            <span class="val">
+                                <h:panelGroup rendered="#{profileBean.user.dob != null}">
+                                    <h:outputText value="#{profileBean.user.dob}">
+                                        <f:convertDateTime pattern="dd MMM yyyy"/>
+                                    </h:outputText>
+                                </h:panelGroup>
+                                <h:panelGroup rendered="#{profileBean.user.dob == null}">
+                                    <span class="muted">Not provided</span>
+                                </h:panelGroup>
+                            </span>
+                        </div>
+                        <div class="row">
+                            <span class="lbl">Account Status</span>
+                            <span class="sbadge #{profileBean.user.verifiedStatus == 'Verified' ? 's-v' : (profileBean.user.verifiedStatus == 'Blocked' ? 's-b' : 's-p')}">
+                                <h:outputText value="#{profileBean.user.verifiedStatus}"/>
+                            </span>
+                        </div>
+                        <div class="row">
+                            <span class="lbl">Role</span>
+                            <span class="val"><h:outputText value="#{profileBean.user.roleId.roleName}"/></span>
+                        </div>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{profileBean.user == null}" layout="block">
+                        <div style="padding:24px;text-align:center;color:var(--ink4);font-size:13px;">
+                            Session data unavailable. Please <a href="../login.xhtml">log in again</a>.
+                        </div>
+                    </h:panelGroup>
+                </div>
+            </div>
+        </h:panelGroup>
+
+        <!-- EDIT MODE -->
+        <h:panelGroup id="editSection" layout="block"
+                      style="#{profileBean.editMode ? 'display:block' : 'display:none'}">
+            <div class="card">
+                <div class="card-head">
+                    <div>
+                        <div class="card-title">Edit Profile</div>
+                        <div class="card-sub">Update your name and phone number</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h:form id="editForm">
+                        <h:messages globalOnly="true"
+                                    style="display:block;margin-bottom:16px;padding:12px 16px;background:var(--redlt);border-radius:var(--r);font-size:13px;color:var(--red);border:1px solid #FCA5A5;"
+                                    layout="list"/>
+                        <div class="fg">
+                            <label class="fl">Full Name *</label>
+                            <h:inputText value="#{profileBean.editName}"
+                                         styleClass="fi"
+                                         pt:placeholder="Your full name"/>
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Phone Number</label>
+                            <h:inputText value="#{profileBean.editPhone}"
+                                         styleClass="fi"
+                                         pt:placeholder="+91 00000 00000"/>
+                            <div class="hint">Used for event notifications.</div>
+                        </div>
+                        <div class="fg">
+                            <label class="fl">Email (cannot be changed)</label>
+                            <h:panelGroup rendered="#{profileBean.user != null}" layout="block">
+                                <input type="text" class="fi" disabled="disabled"
+                                       value="#{profileBean.user.email}"/>
+                            </h:panelGroup>
+                        </div>
+                        <div class="form-row">
+                            <h:commandButton value="Save Changes"
+                                             styleClass="btn-save"
+                                             action="#{profileBean.saveParticipant}"/>
+                            <h:commandButton value="Cancel"
+                                             styleClass="btn-cancel"
+                                             action="#{profileBean.cancelEdit}"
+                                             immediate="true"/>
+                        </div>
+                    </h:form>
+                </div>
+            </div>
+        </h:panelGroup>
+
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+    <div class="t-ic" id="tic">✅</div>
+    <div style="flex:1"><div class="t-tl" id="ttl">Done!</div><div class="t-mg" id="tmg"></div></div>
+    <button class="t-x" onclick="hideT()">×</button>
+    <div class="t-bar" id="tbar"></div>
+</div>
+
+<script>//<![CDATA[
+// Sidebar toggle
+var sbOpen = true;
+function toggleSB() {
+    sbOpen = !sbOpen;
+    document.getElementById('sb').classList.toggle('collapsed', !sbOpen);
+    document.getElementById('main').classList.toggle('wide', !sbOpen);
+    document.getElementById('tog').classList.toggle('open', sbOpen);
+    localStorage.setItem('uSB', sbOpen);
+}
+(function(){ if(localStorage.getItem('uSB')==='false'){ sbOpen=true; toggleSB(); } })();
+
+// Show/hide edit vs view sections
+function showEdit() {
+    document.getElementById('viewSection').style.display = 'none';
+    document.getElementById('editSection').style.display = 'block';
+}
+function showView() {
+    document.getElementById('editSection').style.display = 'none';
+    document.getElementById('viewSection').style.display = 'block';
+}
+
+// If profileBean.editMode is true after a server round-trip, show edit form
+// (handles the case where loadForEdit was called via JSF action)
+document.addEventListener('DOMContentLoaded', function() {
+    var p = new URLSearchParams(window.location.search);
+    if (p.get('updated') === 'true') {
+        showT('Profile updated!', 'Your changes have been saved.', '✅');
+    }
+    // editSection visibility is now driven by server-side JSF EL:
+    // style="display:#{profileBean.editMode ? 'block' : 'none'}"
+    // No JS needed for initial show/hide.
+});
+
+function showT(tl, mg, ic) {
+    document.getElementById('ttl').textContent = tl;
+    document.getElementById('tmg').textContent = mg;
+    document.getElementById('tic').textContent = ic || '✅';
+    var b = document.getElementById('tbar');
+    b.style.animation = 'none'; void b.offsetHeight; b.style.animation = '';
+    document.getElementById('toast').classList.add('show');
+    setTimeout(hideT, 3500);
+}
+function hideT() { document.getElementById('toast').classList.remove('show'); }
+//]]></script>
+</h:body>
+</html>

@@ -25,6 +25,8 @@ public interface RegistrationBeanLocal {
 
     void approveRegistration(int registrationId);
 
+    void rejectRegistration(int registrationId);
+
     void markAttendance(int registrationId, int eventId);
 
    

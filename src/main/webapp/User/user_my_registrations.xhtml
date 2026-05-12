@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:c="jakarta.tags.core"
+      lang="en">
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>My Registrations — EventMS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&amp;family=Outfit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <style>
+    :root{
+        --bg:#FFFFFF;--bg-2:#F8F8FC;--bg-3:#F2F1FA;
+        --surface:#FFFFFF;--border:#EBEBF5;--border-2:#D8D7EE;
+        --indigo:#4F46E5;--indigo-2:#6B63F0;--indigo-lt:#EEF2FF;
+        --violet:#7C3AED;--violet-lt:#F3EFFE;
+        --green:#059669;--green-lt:#ECFDF5;
+        --amber:#D97706;--amber-lt:#FFFBEB;
+        --red:#DC2626;--red-lt:#FEF2F2;
+        --pink:#DB2777;--pink-lt:#FDF2F8;
+        --ink:#1A1833;--ink-2:#3D3A5C;--ink-3:#7C799E;--ink-4:#AEACCB;
+        --sidebar-w:250px;
+        --radius:10px;--radius-lg:16px;--radius-xl:22px;
+        --transition:0.25s ease;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Outfit',sans-serif;background:var(--bg-2);color:var(--ink);-webkit-font-smoothing:antialiased;}
+    .main{flex:1;min-width:0;padding-left:var(--sidebar-w);display:flex;flex-direction:column;transition:padding-left var(--transition);}
+    .main.expanded{padding-left:0;}
+
+    /* HAMBURGER */
+    .sb-toggle{position:fixed;top:14px;left:14px;z-index:200;width:34px;height:34px;border-radius:var(--radius);background:var(--indigo);border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:all 0.15s;box-shadow:0 2px 8px rgba(79,70,229,0.35);}
+    .sb-toggle:hover{background:var(--indigo-2);}
+    .sb-toggle span{display:block;width:16px;height:1.5px;background:rgba(255,255,255,0.9);border-radius:2px;transition:all 0.2s;}
+    .sb-toggle.open span:nth-child(1){transform:translateY(5.5px) rotate(45deg);}
+    .sb-toggle.open span:nth-child(2){opacity:0;}
+    .sb-toggle.open span:nth-child(3){transform:translateY(-5.5px) rotate(-45deg);}
+
+    /* SIDEBAR */
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;overflow-y:auto;overflow-x:hidden;transition:width var(--transition),transform var(--transition);}
+    .sidebar.collapsed{width:0;transform:translateX(-100%);}
+    .sidebar::-webkit-scrollbar{width:0;}
+    .sb-glow{height:3px;background:linear-gradient(90deg,var(--indigo),var(--violet),var(--pink));}
+    .sb-logo{display:flex;align-items:center;gap:10px;padding:18px 18px 16px 54px;border-bottom:1px solid var(--border);text-decoration:none;white-space:nowrap;}
+    .sb-logo-mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--indigo),var(--violet));display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .sb-logo-mark svg{width:17px;height:17px;fill:white;}
+    .sb-logo-text{font-family:'DM Serif Display',serif;font-size:18px;color:var(--ink);}
+    .sb-user{margin:14px 12px 6px;padding:12px 14px;background:var(--indigo-lt);border:1px solid var(--border-2);border-radius:var(--radius-lg);display:flex;align-items:center;gap:10px;white-space:nowrap;cursor:pointer;transition:.15s;}
+    .sb-user:hover{background:#E0E7FF;}
+    .sb-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--indigo),var(--violet));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;flex-shrink:0;}
+    .sb-uname{font-size:13px;font-weight:600;color:var(--ink);}
+    .sb-utag{font-size:10px;color:var(--ink-3);margin-top:1px;}
+    .sb-dot{margin-left:auto;width:8px;height:8px;border-radius:50%;background:var(--green);}
+    .sb-sec{padding:14px 18px 5px;font-size:9px;font-weight:700;color:var(--ink-4);text-transform:uppercase;letter-spacing:0.14em;white-space:nowrap;}
+    .sb-link{display:flex;align-items:center;gap:10px;padding:9px 16px;margin:1px 8px;border-radius:var(--radius);font-size:13px;font-weight:500;color:var(--ink-3);text-decoration:none;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+    .sb-link:hover{background:var(--bg-2);color:var(--ink-2);}
+    .sb-link.active{background:var(--indigo-lt);color:var(--indigo);font-weight:600;}
+    .sb-link svg{width:15px;height:15px;flex-shrink:0;}
+    .sb-new{margin-left:auto;font-size:9px;font-weight:700;background:linear-gradient(135deg,var(--indigo),var(--violet));color:white;padding:2px 7px;border-radius:20px;}
+    .sb-div{height:1px;background:var(--border);margin:8px 12px;}
+    .sb-footer{margin-top:auto;padding:10px 8px;border-top:1px solid var(--border);}
+    .sb-flink{display:flex;align-items:center;gap:10px;padding:9px 16px;border-radius:var(--radius);font-size:13px;font-weight:500;color:var(--ink-3);text-decoration:none;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+    .sb-flink:hover{background:var(--bg-2);color:var(--ink-2);}
+    .sb-flink.danger:hover{background:var(--red-lt);color:var(--red);}
+    .sb-flink svg{width:15px;height:15px;}
+
+    /* HEADER */
+    .header{height:62px;background:var(--bg);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+    .h-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--ink);}
+    .h-sub{font-size:12px;color:var(--ink-4);margin-top:1px;}
+    .h-right{display:flex;align-items:center;gap:10px;}
+
+    /* CONTENT */
+    .content{padding:24px 28px;flex:1;}
+
+    /* STATUS TABS */
+    .tabs-bar{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-xl);padding:6px;display:inline-flex;gap:4px;margin-bottom:22px;box-shadow:0 2px 12px rgba(79,70,229,0.06);}
+    .tab{padding:10px 22px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--ink-3);font-family:'Outfit',sans-serif;transition:all 0.18s;display:flex;align-items:center;gap:7px;}
+    .tab:hover{background:var(--bg-2);color:var(--ink-2);}
+    .tab.active{background:linear-gradient(135deg,var(--indigo),var(--violet));color:white;box-shadow:0 3px 12px rgba(79,70,229,0.3);}
+    .tab-count{font-size:10px;font-weight:800;padding:1px 7px;border-radius:20px;}
+    .tab.active .tab-count{background:rgba(255,255,255,0.25);color:white;}
+    .tab:not(.active) .tab-count{background:var(--border);color:var(--ink-3);}
+
+    /* SUMMARY CARDS */
+    .summary-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px;}
+    .sum-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all 0.15s;}
+    .sum-card:hover{border-color:var(--border-2);box-shadow:0 4px 14px rgba(79,70,229,0.07);transform:translateY(-1px);}
+    .sum-card.active-sum{border-color:var(--indigo);box-shadow:0 4px 14px rgba(79,70,229,0.15);}
+    .sum-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+    .sum-val{font-family:'DM Serif Display',serif;font-size:26px;color:var(--ink);line-height:1;}
+    .sum-lbl{font-size:11px;color:var(--ink-3);margin-top:3px;}
+
+    /* TABLE CARD */
+    .table-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden;}
+    .table-head-bar{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .table-title{font-family:'DM Serif Display',serif;font-size:17px;color:var(--ink);}
+    .table-sub{font-size:11px;color:var(--ink-4);margin-top:2px;}
+
+    /* REG ROW */
+    .reg-row{display:flex;align-items:center;gap:16px;padding:16px 24px;border-bottom:1px solid var(--border);transition:background 0.12s;animation:fadeIn 0.25s ease;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+    .reg-row:last-child{border-bottom:none;}
+    .reg-row:hover{background:var(--bg-2);}
+    .reg-emoji{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+    .reg-info{flex:1;min-width:0;}
+    .reg-name{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .reg-meta{font-size:11px;color:var(--ink-4);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .reg-meta-dot{width:3px;height:3px;border-radius:50%;background:var(--ink-4);}
+    .reg-status{flex-shrink:0;}
+    .reg-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+
+    /* STATUS BADGES */
+    .badge{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;}
+    .badge::before{content:'';width:5px;height:5px;border-radius:50%;}
+    .b-pending{background:var(--amber-lt);color:var(--amber);}  .b-pending::before{background:var(--amber);}
+    .b-confirmed{background:var(--green-lt);color:var(--green);} .b-confirmed::before{background:var(--green);}
+    .b-rejected{background:var(--red-lt);color:var(--red);}    .b-rejected::before{background:var(--red);}
+    .b-waitlist{background:var(--violet-lt);color:var(--violet);} .b-waitlist::before{background:var(--violet);}
+    .b-cancelled{background:var(--bg-3);color:var(--ink-3);}   .b-cancelled::before{background:var(--ink-4);}
+
+    /* ACTION BUTTONS */
+    .btn{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;font-family:'Outfit',sans-serif;border:1px solid var(--border);background:var(--bg);color:var(--ink-2);cursor:pointer;transition:all 0.15s;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+    .btn:hover{border-color:var(--border-2);background:var(--bg-2);}
+    .btn-p{background:var(--indigo);color:white;border-color:var(--indigo);}
+    .btn-p:hover{background:var(--indigo-2);}
+    .btn-red{color:var(--red);border-color:var(--red-lt);}
+    .btn-red:hover{background:var(--red-lt);}
+
+    /* EMPTY */
+    .empty{text-align:center;padding:64px 20px;}
+    .empty-icon{font-size:52px;margin-bottom:14px;}
+    .empty-title{font-family:'DM Serif Display',serif;font-size:21px;color:var(--ink);margin-bottom:6px;}
+    .empty-sub{font-size:13px;color:var(--ink-3);line-height:1.6;}
+    .empty-btn{margin-top:20px;display:inline-flex;align-items:center;gap:7px;padding:11px 24px;border-radius:12px;background:linear-gradient(135deg,var(--indigo),var(--violet));color:white;text-decoration:none;font-size:13px;font-weight:700;box-shadow:0 3px 12px rgba(79,70,229,0.3);}
+
+    /* TOAST */
+    .toast{position:fixed;top:20px;right:20px;z-index:999;background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:14px 18px;display:flex;align-items:flex-start;gap:12px;max-width:340px;box-shadow:0 8px 32px rgba(79,70,229,0.13);transform:translateX(120%);transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);overflow:hidden;}
+    .toast.show{transform:translateX(0);}
+    .t-icon{font-size:20px;} .t-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:2px;} .t-msg{font-size:12px;color:var(--ink-3);line-height:1.5;}
+    .t-close{margin-left:auto;background:none;border:none;color:var(--ink-4);cursor:pointer;font-size:16px;}
+    .t-bar{position:absolute;bottom:0;left:0;height:3px;background:linear-gradient(90deg,var(--indigo),var(--violet));animation:shrink 3.5s linear forwards;}
+    @keyframes shrink{from{width:100%;}to{width:0%;}}
+
+    /* EMOJI BG colors per status */
+    .em-pending{background:var(--amber-lt);}
+    .em-confirmed{background:var(--green-lt);}
+    .em-rejected{background:var(--red-lt);}
+    .em-waitlist{background:var(--violet-lt);}
+    .em-default{background:var(--indigo-lt);}
+    /* DETAIL MODAL */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(26,24,51,0.45);backdrop-filter:blur(4px);z-index:500;align-items:center;justify-content:center;}
+    .modal-overlay.open{display:flex;}
+    .modal{background:var(--bg);border-radius:var(--radius-xl);padding:0;width:100%;max-width:480px;margin:20px;box-shadow:0 24px 64px rgba(79,70,229,0.18);overflow:hidden;animation:modalIn 0.25s ease;}
+    @keyframes modalIn{from{opacity:0;transform:translateY(16px) scale(0.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+    .modal-banner{height:80px;background:linear-gradient(135deg,var(--indigo),var(--violet));display:flex;align-items:flex-end;padding:16px 24px;position:relative;}
+    .modal-banner-title{font-family:'DM Serif Display',serif;font-size:20px;color:white;font-weight:400;}
+    .modal-close{position:absolute;top:12px;right:14px;background:rgba(255,255,255,0.2);border:none;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:.15s;}
+    .modal-close:hover{background:rgba(255,255,255,0.35);}
+    .modal-body{padding:22px 24px;}
+    .modal-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+    .modal-row:last-child{border-bottom:none;}
+    .modal-label{font-size:11px;font-weight:700;color:var(--ink-4);text-transform:uppercase;letter-spacing:0.08em;width:110px;flex-shrink:0;padding-top:1px;}
+    .modal-val{font-size:13px;color:var(--ink);font-weight:500;}
+    .modal-footer{padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;background:var(--bg-2);}
+    </style>
+</h:head>
+<h:body>
+
+<!-- f:metadata MUST be a direct child of h:body/view, NOT inside a div -->
+<f:metadata>
+    <f:event type="preRenderView" listener="#{userRegBean.loadMyRegistrations}"/>
+</f:metadata>
+
+<button class="sb-toggle open" id="sbToggle" onclick="toggleSidebar()" title="Toggle sidebar">
+    <span></span><span></span><span></span>
+</button>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+    <div class="sb-glow"></div>
+    <a href="../index.xhtml" class="sb-logo">
+        <div class="sb-logo-mark"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg></div>
+        <span class="sb-logo-text">EventMS</span>
+    </a>
+    <a href="user_profile.xhtml" class="sb-user" style="text-decoration:none;">
+        <div class="sb-av"><h:outputText value="#{authBean.loggedInUser.name.substring(0,2).toUpperCase()}"/></div>
+        <div>
+            <div class="sb-uname"><h:outputText value="#{authBean.loggedInUser.name}"/></div>
+            <div class="sb-utag">Participant</div>
+        </div>
+        <div class="sb-dot"></div>
+    </a>
+    <div class="sb-sec">My Space</div>
+    <a href="user_dashboard.xhtml" class="sb-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard</a>
+    <a href="user_browse_events.xhtml" class="sb-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Browse Events<span class="sb-new">NEW</span></a>
+    <a href="user_my_registrations.xhtml" class="sb-link active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        My Registrations</a>
+    <div class="sb-div"/>
+    <div class="sb-sec">Manage</div>
+    <a href="#" class="sb-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Payments</a>
+    <a href="#" class="sb-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Certificates</a>
+    <a href="#" class="sb-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Feedback &amp; Reviews</a>
+    <a href="#" class="sb-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"/></svg>
+        Notifications</a>
+    <div class="sb-div"/>
+    <div class="sb-footer">
+        <a href="user_profile.xhtml" class="sb-flink">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            My Profile</a>
+        <a href="#" class="sb-flink">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M1 12h2M21 12h2M12 1v2M12 21v2"/></svg>
+            Settings</a>
+        <a href="../login.xhtml" class="sb-flink danger" onclick="document.cookie='JSESSIONID=;expires=Thu,01 Jan 1970 00:00:00 GMT;path=/'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Sign out
+            </a>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="mainContent">
+    <div class="header">
+        <div>
+            <div class="h-title">My Registrations</div>
+            <div class="h-sub">Track all your event applications</div>
+        </div>
+        <div class="h-right">
+            <a href="user_browse_events.xhtml" style="padding:9px 18px;border-radius:10px;background:linear-gradient(135deg,var(--indigo),var(--violet));color:white;text-decoration:none;font-size:13px;font-weight:700;box-shadow:0 2px 8px rgba(79,70,229,0.3);">
+                + Browse Events
+            </a>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- SUMMARY CARDS -->
+        <div class="summary-row">
+            <div class="sum-card" onclick="switchTab('Pending')" id="sum-Pending">
+                <div class="sum-icon em-pending">⏳</div>
+                <div>
+                    <div class="sum-val" id="cnt-Pending">0</div>
+                    <div class="sum-lbl">Pending Approval</div>
+                </div>
+            </div>
+            <div class="sum-card" onclick="switchTab('Confirmed')" id="sum-Confirmed">
+                <div class="sum-icon em-confirmed">✅</div>
+                <div>
+                    <div class="sum-val" id="cnt-Confirmed">0</div>
+                    <div class="sum-lbl">Approved</div>
+                </div>
+            </div>
+            <div class="sum-card" onclick="switchTab('Rejected')" id="sum-Rejected">
+                <div class="sum-icon em-rejected">❌</div>
+                <div>
+                    <div class="sum-val" id="cnt-Rejected">0</div>
+                    <div class="sum-lbl">Rejected</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABS -->
+        <div class="tabs-bar">
+            <button class="tab active" id="tab-All" onclick="switchTab('All')">
+                All
+                <span class="tab-count" id="tabcnt-All">0</span>
+            </button>
+            <button class="tab" id="tab-Pending" onclick="switchTab('Pending')">
+                ⏳ Pending Approval
+                <span class="tab-count" id="tabcnt-Pending">0</span>
+            </button>
+            <button class="tab" id="tab-Confirmed" onclick="switchTab('Confirmed')">
+                ✅ Approved
+                <span class="tab-count" id="tabcnt-Confirmed">0</span>
+            </button>
+            <button class="tab" id="tab-Rejected" onclick="switchTab('Rejected')">
+                ❌ Rejected
+                <span class="tab-count" id="tabcnt-Rejected">0</span>
+            </button>
+        </div>
+
+        <!-- REGISTRATIONS TABLE -->
+        <div class="table-card" id="regTableCard">
+            <div class="table-head-bar">
+                <div>
+                    <div class="table-title" id="tableTitle">All Registrations</div>
+                    <div class="table-sub" id="tableSub">Your complete event history</div>
+                </div>
+            </div>
+
+            <h:form id="regListForm">
+                <c:choose>
+                    <c:when test="#{empty userRegBean.myRegistrations}">
+                        <div class="empty">
+                            <div class="empty-icon">📋</div>
+                            <div class="empty-title">No registrations yet</div>
+                            <div class="empty-sub">You haven't applied for any events yet.<br/>Browse events and start registering!</div>
+                            <a href="user_browse_events.xhtml" class="empty-btn">🔍 Browse Events</a>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div id="regList">
+                            <h:dataTable value="#{userRegBean.myRegistrations}" var="reg">
+                                <h:column>
+                                    <!-- Data attributes for JS filtering -->
+                                    <div class="reg-row"
+                                         data-status="#{reg.status}"
+                                         data-regid="#{reg.registrationId}">
+
+                                        <!-- Event Icon -->
+                                        <div class="reg-emoji em-#{reg.status == 'Confirmed' ? 'confirmed' : reg.status == 'Pending' ? 'pending' : reg.status == 'Rejected' ? 'rejected' : reg.status == 'Waitlist' ? 'waitlist' : 'default'}">
+                                            🎪
+                                        </div>
+
+                                        <!-- Event Info -->
+                                        <div class="reg-info">
+                                            <div class="reg-name">
+                                                <h:outputText value="#{reg.eventId.title}"/>
+                                            </div>
+                                            <div class="reg-meta">
+                                                <span>📅
+                                                    <h:outputText value="#{reg.registeredAt}">
+                                                        <f:convertDateTime pattern="MMM d, yyyy" type="date"/>
+                                                    </h:outputText>
+                                                </span>
+                                                <span class="reg-meta-dot"></span>
+                                                <span>Reg #<h:outputText value="#{reg.registrationId}"/></span>
+                                                <c:if test="#{not empty reg.attendanceStatus}">
+                                                    <span class="reg-meta-dot"></span>
+                                                    <span>Attendance: <h:outputText value="#{reg.attendanceStatus}"/></span>
+                                                </c:if>
+                                            </div>
+                                        </div>
+
+                                        <!-- Status Badge -->
+                                        <div class="reg-status">
+                                            <c:choose>
+                                                <c:when test="#{reg.status == 'Confirmed'}">
+                                                    <span class="badge b-confirmed">✅ Approved</span>
+                                                </c:when>
+                                                <c:when test="#{reg.status == 'Pending'}">
+                                                    <span class="badge b-pending">⏳ Pending</span>
+                                                </c:when>
+                                                <c:when test="#{reg.status == 'Rejected'}">
+                                                    <span class="badge b-rejected">❌ Rejected</span>
+                                                </c:when>
+                                                <c:when test="#{reg.status == 'Waitlist'}">
+                                                    <span class="badge b-waitlist">🕐 Waitlist</span>
+                                                </c:when>
+                                                <c:when test="#{reg.status == 'Cancelled'}">
+                                                    <span class="badge b-cancelled">Cancelled</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="badge b-cancelled"><h:outputText value="#{reg.status}"/></span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </div>
+
+                                        <!-- Action Buttons -->
+                                        <div class="reg-actions">
+                                            <c:choose>
+                                                <c:when test="#{reg.status == 'Confirmed'}">
+                                                    <button type="button" class="btn btn-p"
+                                                            onclick="openModal('#{reg.eventId.title}','#{reg.registrationId}','#{reg.status}','#{reg.registeredAt}','#{reg.eventId.userId.name}','#{reg.eventId.description}','Confirmed')">
+                                                        🎫 Details
+                                                    </button>
+                                                </c:when>
+                                                <c:when test="#{reg.status == 'Pending'}">
+                                                    <button type="button" class="btn"
+                                                            onclick="openModal('#{reg.eventId.title}','#{reg.registrationId}','#{reg.status}','#{reg.registeredAt}','#{reg.eventId.userId.name}','#{reg.eventId.description}','Pending')">
+                                                        Details
+                                                    </button>
+                                                    <h:commandButton value="Cancel" styleClass="btn btn-red"
+                                                        action="#{userRegBean.cancelRegistration(reg.registrationId)}"
+                                                        onclick="return confirm('Cancel this registration?')">
+                                                        <f:ajax execute="@form" render="regListForm"/>
+                                                    </h:commandButton>
+                                                </c:when>
+                                                <c:when test="#{reg.status == 'Rejected'}">
+                                                    <a href="user_browse_events.xhtml" class="btn">Find Events</a>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <button type="button" class="btn"
+                                                            onclick="openModal('#{reg.eventId.title}','#{reg.registrationId}','#{reg.status}','#{reg.registeredAt}','#{reg.eventId.userId.name}','#{reg.eventId.description}','Other')">
+                                                        Details
+                                                    </button>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </div>
+                                    </div>
+                                </h:column>
+                            </h:dataTable>
+                        </div>
+                        <!-- Empty filtered state -->
+                        <div class="empty" id="emptyFilter" style="display:none;">
+                            <div class="empty-icon">🔍</div>
+                            <div class="empty-title" id="emptyFilterTitle">No events in this category</div>
+                            <div class="empty-sub" id="emptyFilterSub">Try switching to a different tab.</div>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+            </h:form>
+        </div>
+
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+    <div class="t-icon" id="tIcon">✅</div>
+    <div style="flex:1;">
+        <div class="t-title" id="tTitle">Done</div>
+        <div class="t-msg"   id="tMsg">Action completed.</div>
+    </div>
+    <button class="t-close" onclick="hideToast()">×</button>
+    <div class="t-bar" id="tBar"></div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="detailModal" onclick="closeModal(event)">
+    <div class="modal">
+        <div class="modal-banner" id="modalBanner">
+            <div class="modal-banner-title" id="modalTitle">Event Details</div>
+            <button class="modal-close" onclick="closeModalDirect()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-row">
+                <span class="modal-label">Event</span>
+                <span class="modal-val" id="mEventTitle">—</span>
+            </div>
+            <div class="modal-row">
+                <span class="modal-label">Organizer</span>
+                <span class="modal-val" id="mOrganizer">—</span>
+            </div>
+            <div class="modal-row">
+                <span class="modal-label">Description</span>
+                <span class="modal-val" id="mDescription" style="line-height:1.6;">—</span>
+            </div>
+            <div class="modal-row">
+                <span class="modal-label">Reg Number</span>
+                <span class="modal-val" id="mRegId">—</span>
+            </div>
+            <div class="modal-row">
+                <span class="modal-label">Applied On</span>
+                <span class="modal-val" id="mDate">—</span>
+            </div>
+            <div class="modal-row">
+                <span class="modal-label">Status</span>
+                <span class="modal-val" id="mStatus">—</span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" onclick="closeModalDirect()">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+//<![CDATA[
+/* ── SIDEBAR TOGGLE ── */
+var sidebarOpen = true;
+function toggleSidebar() {
+    sidebarOpen = !sidebarOpen;
+    document.getElementById('sidebar').classList.toggle('collapsed', !sidebarOpen);
+    document.getElementById('mainContent').classList.toggle('expanded', !sidebarOpen);
+    document.getElementById('sbToggle').classList.toggle('open', sidebarOpen);
+    localStorage.setItem('userSidebarOpen', sidebarOpen);
+}
+(function() {
+    if (localStorage.getItem('userSidebarOpen') === 'false') {
+        sidebarOpen = true; toggleSidebar();
+    }
+})();
+
+/* ── DETAIL MODAL ── */
+function openModal(title, regId, status, date, organizer, description, statusType) {
+    document.getElementById('modalTitle').textContent    = title || 'Event Details';
+    document.getElementById('mEventTitle').textContent   = title || '—';
+    document.getElementById('mOrganizer').textContent    = organizer || '—';
+    document.getElementById('mDescription').textContent  = description || 'No description provided.';
+    document.getElementById('mRegId').textContent        = '#' + (regId || '—');
+    document.getElementById('mDate').textContent         = date || '—';
+    document.getElementById('mStatus').textContent       = status || '—';
+
+    // Change banner color based on status
+    var banner = document.getElementById('modalBanner');
+    if (statusType === 'Confirmed') {
+        banner.style.background = 'linear-gradient(135deg,#059669,#0891B2)';
+    } else if (statusType === 'Pending') {
+        banner.style.background = 'linear-gradient(135deg,#D97706,#B45309)';
+    } else if (statusType === 'Rejected') {
+        banner.style.background = 'linear-gradient(135deg,#DC2626,#9B1C1C)';
+    } else {
+        banner.style.background = 'linear-gradient(135deg,#4F46E5,#7C3AED)';
+    }
+
+    document.getElementById('detailModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+    if (e.target === document.getElementById('detailModal')) {
+        closeModalDirect();
+    }
+}
+function closeModalDirect() {
+    document.getElementById('detailModal').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+/* ── TAB FILTERING ── */
+var currentTab = 'All';
+var tabLabels = {
+    'All': 'All Registrations', 'Pending': 'Pending Approval',
+    'Confirmed': 'Approved Events', 'Rejected': 'Rejected Applications'
+};
+var tabSubs = {
+    'All': 'Your complete event history', 'Pending': 'Awaiting organizer approval',
+    'Confirmed': 'You are confirmed for these events', 'Rejected': 'These applications were not approved'
+};
+var emptyMsgs = {
+    'All': ['No registrations yet','Browse events and start applying!'],
+    'Pending': ['No pending applications','All your applications have been processed.'],
+    'Confirmed': ['No approved events','Keep applying — approvals will show here.'],
+    'Rejected': ['No rejected applications','Great news — nothing rejected!']
+};
+
+function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('active', t.id === 'tab-' + tab); });
+    document.querySelectorAll('.sum-card').forEach(function(c){ c.classList.toggle('active-sum', c.id === 'sum-' + tab); });
+    document.getElementById('tableTitle').textContent = tabLabels[tab] || tab;
+    document.getElementById('tableSub').textContent   = tabSubs[tab]  || '';
+    var rows = document.querySelectorAll('.reg-row');
+    var visible = 0;
+    rows.forEach(function(row) {
+        var st = row.getAttribute('data-status') || '';
+        var show = (tab === 'All') || (st === tab);
+        row.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+    var ef = document.getElementById('emptyFilter');
+    var rl = document.getElementById('regList');
+    if (ef && rl) {
+        if (visible === 0 && rows.length > 0) {
+            ef.style.display = '';
+            document.getElementById('emptyFilterTitle').textContent = emptyMsgs[tab] ? emptyMsgs[tab][0] : 'No events';
+            document.getElementById('emptyFilterSub').textContent   = emptyMsgs[tab] ? emptyMsgs[tab][1] : '';
+        } else { ef.style.display = 'none'; }
+    }
+}
+
+function buildCounts() {
+    var rows   = document.querySelectorAll('.reg-row');
+    var counts = { All: rows.length, Pending: 0, Confirmed: 0, Rejected: 0, Waitlist: 0 };
+    rows.forEach(function(r) { var s = r.getAttribute('data-status') || ''; if (counts[s] !== undefined) counts[s]++; });
+    ['All','Pending','Confirmed','Rejected'].forEach(function(k) {
+        var el = document.getElementById('tabcnt-' + k); if (el) el.textContent = counts[k] || 0;
+        var cel = document.getElementById('cnt-' + k);   if (cel) cel.textContent = counts[k] || 0;
+    });
+}
+
+function showToast(title, msg, icon) {
+    document.getElementById('tTitle').textContent = title;
+    document.getElementById('tMsg').textContent   = msg;
+    document.getElementById('tIcon').textContent  = icon || '✅';
+    var b = document.getElementById('tBar');
+    b.style.animation = 'none'; void b.offsetHeight; b.style.animation = '';
+    document.getElementById('toast').classList.add('show');
+    setTimeout(hideToast, 3500);
+}
+function hideToast() { document.getElementById('toast').classList.remove('show'); }
+
+window.addEventListener('DOMContentLoaded', function() {
+    buildCounts();
+    var p = new URLSearchParams(window.location.search);
+    if (p.get('tab')) switchTab(p.get('tab'));
+    if (p.get('registered') === 'true')
+        showToast('Applied!', 'Your registration is pending organizer approval.', '🎟️');
+});
+//]]>
+</script>
+</h:body>
+</html>

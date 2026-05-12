@@ -50,7 +50,7 @@
     .sidebar {
         position: fixed; top: 0; left: 0; bottom: 0;
         width: var(--sidebar-w);
-        background: var(--teal);
+        background: linear-gradient(180deg,#0B3D2E 0%,#0F4F3A 100%);
         display: flex; flex-direction: column;
         z-index: 100; overflow-y: auto;
     }
@@ -288,13 +288,13 @@
         <span class="sb-logo-tag">Organizer</span>
     </a>
 
-    <div class="sb-user">
+    <a href="organizer_profile.xhtml" class="sb-user" style="text-decoration:none;display:flex;align-items:center;gap:10px;cursor:pointer;">
         <div class="sb-avatar"><h:outputText value="#{authBean.loggedInUser.name.substring(0,2).toUpperCase()}"/></div>
         <div>
             <div class="sb-uname"><h:outputText value="#{authBean.loggedInUser.name}"/></div>
             <div class="sb-utag">Event Organizer</div>
         </div>
-    </div>
+    </a>
 
     <div class="sb-section">My Workspace</div>
     <a href="organizer_dashboard.xhtml" class="sb-link active">
@@ -347,7 +347,7 @@
     </a>
 
     <div class="sb-footer">
-        <a href="#" class="sb-foot-link"><!-- organizer_profile.xhtml future -->
+        <a href="organizer_profile.xhtml" class="sb-foot-link">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
             My Profile
         </a>

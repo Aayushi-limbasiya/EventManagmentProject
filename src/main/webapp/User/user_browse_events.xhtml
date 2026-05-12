@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:c="jakarta.tags.core"
+      lang="en">
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Browse Events — EventMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&amp;family=Outfit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <style>
+    :root{
+        --bg:#FFFFFF;--bg-2:#F8F8FC;--surface:#FFFFFF;
+        --border:#EBEBF5;--border-2:#D8D7EE;
+        --indigo:#4F46E5;--indigo-2:#6B63F0;--indigo-lt:#EEF2FF;
+        --violet:#7C3AED;--violet-lt:#F3EFFE;
+        --green:#059669;--green-lt:#ECFDF5;
+        --amber:#D97706;--amber-lt:#FFFBEB;
+        --red:#DC2626;--red-lt:#FEF2F2;
+        --pink:#DB2777;--pink-lt:#FDF2F8;
+        --ink:#1A1833;--ink-2:#3D3A5C;--ink-3:#7C799E;--ink-4:#AEACCB;
+        --sw:250px;--r:10px;--rl:16px;--rxl:22px;--tr:.25s ease;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Outfit',sans-serif;background:var(--bg-2);color:var(--ink);-webkit-font-smoothing:antialiased;}
+
+    /* TOGGLE */
+    .toggle{position:fixed;top:14px;left:14px;z-index:200;width:34px;height:34px;border-radius:var(--r);background:var(--indigo);border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;box-shadow:0 2px 8px rgba(79,70,229,.35);transition:.15s;}
+    .toggle:hover{background:var(--indigo-2);}
+    .toggle span{display:block;width:16px;height:1.5px;background:rgba(255,255,255,.9);border-radius:2px;transition:.2s;}
+    .toggle.open span:nth-child(1){transform:translateY(5.5px) rotate(45deg);}
+    .toggle.open span:nth-child(2){opacity:0;}
+    .toggle.open span:nth-child(3){transform:translateY(-5.5px) rotate(-45deg);}
+
+    /* SIDEBAR */
+    .sb{position:fixed;top:0;left:0;bottom:0;width:var(--sw);background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;overflow-y:auto;overflow-x:hidden;transition:width var(--tr),transform var(--tr);}
+    .sb.collapsed{width:0;transform:translateX(-100%);}
+    .sb::-webkit-scrollbar{width:0;}
+    .sb-glow{height:3px;background:linear-gradient(90deg,var(--indigo),var(--violet),var(--pink));}
+    .sb-logo{display:flex;align-items:center;gap:10px;padding:18px 18px 16px 54px;border-bottom:1px solid var(--border);text-decoration:none;white-space:nowrap;}
+    .sb-mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--indigo),var(--violet));display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .sb-mark svg{width:17px;height:17px;fill:white;}
+    .sb-wordmark{font-family:'DM Serif Display',serif;font-size:18px;color:var(--ink);}
+    .sb-user{margin:14px 12px 6px;padding:12px 14px;background:var(--indigo-lt);border:1px solid var(--border-2);border-radius:var(--rl);display:flex;align-items:center;gap:10px;white-space:nowrap;cursor:pointer;transition:.15s;}
+    .sb-user:hover{background:#E0E7FF;}
+    .sb-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--indigo),var(--violet));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
+    .sb-uname{font-size:13px;font-weight:600;color:var(--ink);}
+    .sb-urole{font-size:10px;color:var(--ink-3);margin-top:1px;}
+    .sb-dot{margin-left:auto;width:8px;height:8px;border-radius:50%;background:var(--green);}
+    .sb-sec{padding:14px 18px 5px;font-size:9px;font-weight:700;color:var(--ink-4);text-transform:uppercase;letter-spacing:.14em;white-space:nowrap;}
+    .sb-a{display:flex;align-items:center;gap:10px;padding:9px 16px;margin:1px 8px;border-radius:var(--r);font-size:13px;font-weight:500;color:var(--ink-3);text-decoration:none;transition:.15s;white-space:nowrap;}
+    .sb-a:hover{background:var(--bg-2);color:var(--ink-2);}
+    .sb-a.on{background:var(--indigo-lt);color:var(--indigo);font-weight:600;}
+    .sb-a svg{width:15px;height:15px;flex-shrink:0;}
+    .badge-new{margin-left:auto;font-size:9px;font-weight:700;background:linear-gradient(135deg,var(--indigo),var(--violet));color:#fff;padding:2px 7px;border-radius:20px;}
+    .sb-hr{height:1px;background:var(--border);margin:8px 12px;}
+    .sb-foot{margin-top:auto;padding:10px 8px;border-top:1px solid var(--border);}
+    .sb-fa{display:flex;align-items:center;gap:10px;padding:9px 16px;border-radius:var(--r);font-size:13px;font-weight:500;color:var(--ink-3);text-decoration:none;transition:.15s;white-space:nowrap;cursor:pointer;background:none;border:none;width:100%;font-family:'Outfit',sans-serif;}
+    .sb-fa:hover{background:var(--bg-2);color:var(--ink-2);}
+    .sb-fa.danger:hover{background:var(--red-lt);color:var(--red);}
+    .sb-fa svg{width:15px;height:15px;}
+
+    /* MAIN */
+    .main{flex:1;min-width:0;padding-left:var(--sw);display:flex;flex-direction:column;transition:padding-left var(--tr);}
+    .main.wide{padding-left:0;}
+
+    /* HEADER */
+    .hd{height:62px;background:var(--bg);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+    .hd-t{font-family:'DM Serif Display',serif;font-size:20px;color:var(--ink);}
+    .hd-s{font-size:12px;color:var(--ink-4);margin-top:1px;}
+    .hd-r{display:flex;align-items:center;gap:10px;}
+    .search-wrap{position:relative;}
+    .search-wrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--ink-4);}
+    .search-input{padding:9px 14px 9px 36px;border:1px solid var(--border);border-radius:20px;font-size:13px;font-family:'Outfit',sans-serif;background:var(--bg-2);color:var(--ink);outline:none;width:240px;transition:all .15s;}
+    .search-input:focus{border-color:var(--indigo);width:280px;background:white;}
+
+    /* CONTENT */
+    .pg{padding:24px 28px 40px;flex:1;}
+
+    /* PAGE TITLE ROW */
+    .page-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+    .page-title{font-family:'DM Serif Display',serif;font-size:26px;color:var(--ink);}
+    .page-sub{font-size:13px;color:var(--ink-3);margin-top:3px;}
+    .ev-count-badge{background:var(--indigo-lt);color:var(--indigo);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;}
+
+    /* EVENTS GRID */
+    .events-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;}
+
+    /* EVENT CARD */
+    .ev-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--rxl);overflow:hidden;transition:all .18s;box-shadow:0 1px 4px rgba(79,70,229,.04);}
+    .ev-card:hover{box-shadow:0 6px 24px rgba(79,70,229,.12);transform:translateY(-2px);}
+    .ev-banner{height:90px;position:relative;display:flex;align-items:flex-end;padding:12px 16px;}
+    .ev-banner::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.55),transparent);}
+    .ev-banner-title{font-family:'DM Serif Display',serif;font-size:17px;color:white;position:relative;z-index:1;line-height:1.25;}
+    .ev-body{padding:14px 16px 16px;}
+    .ev-organizer{font-size:11px;color:var(--ink-3);margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+    .ev-desc{font-size:12px;color:var(--ink-3);line-height:1.6;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+    .ev-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+
+    /* TAGS */
+    .tag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;}
+    .tag::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+    .tag-green{background:var(--green-lt);color:var(--green);}      .tag-green::before{background:var(--green);}
+    .tag-amber{background:var(--amber-lt);color:var(--amber);}      .tag-amber::before{background:var(--amber);}
+    .tag-indigo{background:var(--indigo-lt);color:var(--indigo);}   .tag-indigo::before{background:var(--indigo);}
+
+    /* BANNER COLORS */
+    .b-0{background:linear-gradient(135deg,#3730A3,#6D28D9);}
+    .b-1{background:linear-gradient(135deg,#065F46,#0891B2);}
+    .b-2{background:linear-gradient(135deg,#92400E,#B45309);}
+    .b-3{background:linear-gradient(135deg,#1E1B4B,#4338CA);}
+    .b-4{background:linear-gradient(135deg,#3B0764,#7C3AED);}
+    .b-5{background:linear-gradient(135deg,#164E63,#0369A1);}
+
+    /* REGISTER BUTTON */
+    .btn-reg{padding:8px 18px;border-radius:9px;font-size:12px;font-weight:700;font-family:'Outfit',sans-serif;background:linear-gradient(135deg,var(--indigo),var(--violet));color:white;border:none;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(79,70,229,.25);}
+    .btn-reg:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(79,70,229,.35);}
+    .btn-reg:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+    .btn-done{padding:8px 18px;border-radius:9px;font-size:12px;font-weight:700;font-family:'Outfit',sans-serif;background:var(--green-lt);color:var(--green);border:1px solid #A7F3D0;cursor:default;}
+
+    /* EMPTY */
+    .empty{text-align:center;padding:72px 20px;}
+    .empty-icon{font-size:52px;margin-bottom:14px;}
+    .empty-title{font-family:'DM Serif Display',serif;font-size:22px;color:var(--ink);margin-bottom:8px;}
+    .empty-sub{font-size:13px;color:var(--ink-3);}
+
+    /* TOAST */
+    .toast{position:fixed;top:20px;right:20px;z-index:999;background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:14px 18px;display:flex;align-items:flex-start;gap:12px;max-width:340px;box-shadow:0 8px 32px rgba(79,70,229,.13);transform:translateX(120%);transition:transform .35s cubic-bezier(.34,1.56,.64,1);overflow:hidden;}
+    .toast.show{transform:translateX(0);}
+    .t-ic{font-size:20px;} .t-tl{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:2px;} .t-mg{font-size:12px;color:var(--ink-3);line-height:1.5;}
+    .t-x{margin-left:auto;background:none;border:none;color:var(--ink-4);cursor:pointer;font-size:16px;}
+    .t-bar{position:absolute;bottom:0;left:0;height:3px;background:linear-gradient(90deg,var(--indigo),var(--violet));animation:sh 3.5s linear forwards;}
+    @keyframes sh{from{width:100%;}to{width:0;}}
+    </style>
+</h:head>
+<h:body>
+
+<f:metadata>
+    <f:event type="preRenderView" listener="#{userRegBean.loadAllEvents}"/>
+</f:metadata>
+
+<button class="toggle open" id="tog" onclick="toggleSB()">
+    <span/><span/><span/>
+</button>
+
+<!-- SIDEBAR -->
+<div class="sb" id="sb">
+    <div class="sb-glow"/>
+    <a href="../index.xhtml" class="sb-logo">
+        <div class="sb-mark"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg></div>
+        <span class="sb-wordmark">EventMS</span>
+    </a>
+    <a href="user_profile.xhtml" class="sb-user" style="text-decoration:none;">
+        <div class="sb-av"><h:outputText value="#{authBean.loggedInUser.name.substring(0,2).toUpperCase()}"/></div>
+        <div><div class="sb-uname"><h:outputText value="#{authBean.loggedInUser.name}"/></div><div class="sb-urole">Participant</div></div>
+        <div class="sb-dot"/>
+    </a>
+    <div class="sb-sec">My Space</div>
+    <a href="user_dashboard.xhtml" class="sb-a">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard</a>
+    <a href="user_browse_events.xhtml" class="sb-a on">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Browse Events<span class="badge-new">NEW</span></a>
+    <a href="user_my_registrations.xhtml" class="sb-a">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>My Registrations</a>
+    <div class="sb-hr"/>
+    <div class="sb-sec">Manage</div>
+    <a href="#" class="sb-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Payments</a>
+    <a href="#" class="sb-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Certificates</a>
+    <a href="#" class="sb-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Feedback &amp; Reviews</a>
+    <a href="#" class="sb-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"/></svg>Notifications</a>
+    <div class="sb-hr"/>
+    <div class="sb-foot">
+        <a href="user_profile.xhtml" class="sb-fa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>My Profile</a>
+        <a href="#" class="sb-fa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M1 12h2M21 12h2M12 1v2M12 21v2"/></svg>Settings</a>
+        <h:form><h:commandLink action="#{authBean.logout}" styleClass="sb-fa danger">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign out
+        </h:commandLink></h:form>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="main">
+
+    <div class="hd">
+        <div><div class="hd-t">Browse Events</div><div class="hd-s">Discover and register for upcoming events</div></div>
+        <div class="hd-r">
+            <div class="search-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" class="search-input" id="searchInput"
+                       placeholder="Search events…"
+                       oninput="filterEvents(this.value)"/>
+            </div>
+        </div>
+    </div>
+
+    <div class="pg">
+
+        <div class="page-title-row">
+            <div>
+                <div class="page-title">Upcoming Events</div>
+                <div class="page-sub">All approved events open for registration</div>
+            </div>
+            <span class="ev-count-badge" id="evCount">Loading…</span>
+        </div>
+
+        <!-- EVENT GRID — real data from userRegBean.allEvents -->
+        <div class="events-grid" id="eventsGrid">
+            <h:dataTable value="#{userRegBean.allEvents}" var="ev" id="eventsTable">
+                <h:column>
+                    <div class="ev-card" data-title="#{ev.title}" id="evc-#{ev.eventId}">
+                        <div class="ev-banner b-#{ev.eventId mod 6}">
+                            <div class="ev-banner-title"><h:outputText value="#{ev.title}"/></div>
+                        </div>
+                        <div class="ev-body">
+                            <div class="ev-organizer">
+                                👤 <h:outputText value="#{ev.userId.name}"/>
+                            </div>
+                            <h:panelGroup rendered="#{not empty ev.description}" layout="block">
+                                <div class="ev-desc"><h:outputText value="#{ev.description}"/></div>
+                            </h:panelGroup>
+                            <div class="ev-footer">
+                                <span class="tag tag-green">Open</span>
+                                <h:form>
+                                    <h:panelGroup rendered="#{userRegBean.isRegistered(ev.eventId)}" layout="block">
+                                        <span class="btn-done">✅ Applied</span>
+                                    </h:panelGroup>
+                                    <h:panelGroup rendered="#{!userRegBean.isRegistered(ev.eventId)}" layout="block">
+                                        <h:commandButton value="Register →"
+                                                         styleClass="btn-reg"
+                                                         action="#{userRegBean.registerForEvent(ev.eventId)}"/>
+                                    </h:panelGroup>
+                                </h:form>
+                            </div>
+                        </div>
+                    </div>
+                </h:column>
+            </h:dataTable>
+        </div>
+
+        <!-- Empty state when no approved events -->
+        <h:panelGroup rendered="#{empty userRegBean.allEvents}" layout="block">
+            <div class="empty">
+                <div class="empty-icon">🎪</div>
+                <div class="empty-title">No events available right now</div>
+                <div class="empty-sub">Check back soon — new events are added regularly.</div>
+            </div>
+        </h:panelGroup>
+
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+    <div class="t-ic" id="tic">🎟️</div>
+    <div style="flex:1"><div class="t-tl" id="ttl">Done!</div><div class="t-mg" id="tmg"></div></div>
+    <button class="t-x" onclick="hideT()">×</button>
+    <div class="t-bar" id="tbar"/>
+</div>
+
+<script>
+//<![CDATA[
+var sbOpen = true;
+function toggleSB() {
+    sbOpen = !sbOpen;
+    document.getElementById('sb').classList.toggle('collapsed', !sbOpen);
+    document.getElementById('main').classList.toggle('wide', !sbOpen);
+    document.getElementById('tog').classList.toggle('open', sbOpen);
+    localStorage.setItem('uSB', sbOpen);
+}
+(function(){if(localStorage.getItem('uSB')==='false'){sbOpen=true;toggleSB();}})();
+
+function filterEvents(val) {
+    var sv = val.toLowerCase();
+    var cards = document.querySelectorAll('.ev-card');
+    var vis = 0;
+    cards.forEach(function(c) {
+        var title = (c.getAttribute('data-title') || '').toLowerCase();
+        var show  = !sv || title.includes(sv);
+        c.closest('tr').style.display = show ? '' : 'none';
+        if (show) vis++;
+    });
+    document.getElementById('evCount').textContent = vis + ' event' + (vis !== 1 ? 's' : '');
+}
+
+function showT(tl, mg, ic) {
+    document.getElementById('ttl').textContent = tl;
+    document.getElementById('tmg').textContent = mg;
+    document.getElementById('tic').textContent = ic || '✅';
+    var b = document.getElementById('tbar');
+    b.style.animation = 'none'; void b.offsetHeight; b.style.animation = '';
+    document.getElementById('toast').classList.add('show');
+    setTimeout(hideT, 3500);
+}
+function hideT() { document.getElementById('toast').classList.remove('show'); }
+
+window.addEventListener('DOMContentLoaded', function() {
+    var cards = document.querySelectorAll('.ev-card');
+    document.getElementById('evCount').textContent = cards.length + ' event' + (cards.length !== 1 ? 's' : '');
+
+    var p = new URLSearchParams(window.location.search);
+    if (p.get('registered') === 'true')
+        showT('Registered! 🎉', 'Your application is now pending organizer approval.', '🎟️');
+});
+//]]>
+</script>
+</h:body>
+</html>

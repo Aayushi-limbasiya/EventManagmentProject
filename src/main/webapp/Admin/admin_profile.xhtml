@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      lang="en">
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Admin Profile — EventMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&amp;family=Geist:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+    <style>
+    :root{--stone-50:#FAFAF7;--stone-100:#F5F4EF;--stone-200:#EAE8E0;--stone-300:#D6D3C8;--stone-400:#B8B4A4;--stone-500:#8A8675;--stone-600:#605D50;--stone-700:#3D3B31;--stone-800:#1C1A14;--sage:#4A7058;--sage-light:#EBF2ED;--sage-mid:#C2D9CA;--amber:#8B5E1A;--amber-lt:#FAF0DC;--amber-mid:#E8C87A;--green:#3A6B4A;--green-lt:#EAF3EC;--red:#8B2E2E;--red-lt:#F5EAEA;--display:'Cormorant Garamond',Georgia,serif;--body:'Geist',system-ui,sans-serif;--sidebar-w:256px;--r:10px;--rl:14px;--rxl:18px;--tr:.25s ease;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--body);background:var(--stone-100);color:var(--stone-800);-webkit-font-smoothing:antialiased;font-size:14px;}
+    .toggle{position:fixed;top:14px;left:14px;z-index:200;width:34px;height:34px;border-radius:var(--r);background:var(--stone-800);border:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;}
+    .toggle span{display:block;width:16px;height:1.5px;background:rgba(255,255,255,.7);border-radius:2px;transition:.2s;}
+    .toggle.open span:nth-child(1){transform:translateY(5.5px) rotate(45deg);}
+    .toggle.open span:nth-child(2){opacity:0;}
+    .toggle.open span:nth-child(3){transform:translateY(-5.5px) rotate(-45deg);}
+    .sb{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);background:var(--stone-800);display:flex;flex-direction:column;z-index:100;overflow-y:auto;overflow-x:hidden;transition:width var(--tr),transform var(--tr);}
+    .sb.collapsed{width:0;transform:translateX(-100%);}
+    .sb::-webkit-scrollbar{width:0;}
+    .sb-stripe{height:2px;background:linear-gradient(90deg,var(--sage),var(--amber-mid));}
+    .sb-logo{display:flex;align-items:center;gap:11px;padding:20px 18px 18px 54px;border-bottom:1px solid rgba(255,255,255,.06);text-decoration:none;white-space:nowrap;}
+    .sb-logo-mark{width:34px;height:34px;border-radius:var(--r);background:var(--sage);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .sb-logo-mark svg{width:17px;height:17px;fill:white;}
+    .sb-logo-text{font-family:var(--display);font-size:20px;font-weight:600;color:var(--stone-50);}
+    .sb-logo-role{margin-left:auto;font-size:9px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--stone-500);border:1px solid rgba(255,255,255,.08);padding:2px 7px;border-radius:20px;white-space:nowrap;}
+    /* Clickable user card → profile */
+    .sb-identity{margin:12px 14px 6px;padding:11px 13px;background:rgba(74,112,88,.15);border:1px solid rgba(74,112,88,.25);border-radius:var(--r);display:flex;align-items:center;gap:10px;white-space:nowrap;text-decoration:none;cursor:pointer;transition:.15s;}
+    .sb-identity:hover{background:rgba(74,112,88,.22);}
+    .sb-av{width:30px;height:30px;border-radius:50%;background:var(--sage);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:white;flex-shrink:0;}
+    .sb-name{font-size:13px;font-weight:500;color:var(--stone-200);}
+    .sb-tag{font-size:10px;color:var(--stone-500);margin-top:1px;}
+    .sb-sec{padding:16px 18px 5px;font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--stone-600);white-space:nowrap;}
+    .sb-link{display:flex;align-items:center;gap:9px;padding:8px 15px;margin:1px 8px;border-radius:var(--r);font-size:13px;font-weight:400;color:var(--stone-400);text-decoration:none;cursor:pointer;transition:.14s;white-space:nowrap;}
+    .sb-link:hover{background:rgba(255,255,255,.05);color:var(--stone-100);}
+    .sb-link.active{background:rgba(74,112,88,.18);color:var(--stone-50);font-weight:500;}
+    .sb-link.active::before{content:'';position:absolute;left:0;top:22%;bottom:22%;width:2px;border-radius:0 2px 2px 0;background:var(--sage);}
+    .sb-link{position:relative;}
+    .sb-link svg{width:14px;height:14px;flex-shrink:0;opacity:.6;}
+    .sb-link.active svg,.sb-link:hover svg{opacity:1;}
+    .sb-count{margin-left:auto;font-size:10px;font-weight:600;background:var(--amber);color:white;padding:1px 7px;border-radius:20px;}
+    .sb-sep{height:1px;background:rgba(255,255,255,.05);margin:8px 14px;}
+    .sb-footer{margin-top:auto;border-top:1px solid rgba(255,255,255,.05);padding:10px 8px 14px;}
+    .sb-foot-link{display:flex;align-items:center;gap:9px;padding:8px 15px;border-radius:var(--r);font-size:13px;color:var(--stone-500);text-decoration:none;cursor:pointer;transition:.14s;white-space:nowrap;}
+    .sb-foot-link:hover{background:rgba(255,255,255,.04);color:var(--stone-300);}
+    .sb-foot-link.on{background:rgba(74,112,88,.18);color:var(--stone-50);}
+    .sb-foot-link.out:hover{background:rgba(139,46,46,.12);color:#D47878;}
+    .sb-foot-link svg{width:14px;height:14px;opacity:.5;}
+    .main{padding-left:var(--sidebar-w);display:flex;flex-direction:column;min-height:100vh;transition:padding-left var(--tr);}
+    .main.wide{padding-left:0;}
+    .topbar{height:58px;background:var(--stone-50);border-bottom:1px solid var(--stone-200);padding:0 28px;display:flex;align-items:center;position:sticky;top:0;z-index:50;box-shadow:0 1px 3px rgba(15,14,10,.06);}
+    .topbar-title{font-family:var(--display);font-size:20px;font-weight:600;color:var(--stone-800);}
+    .topbar-sub{font-size:11px;color:var(--stone-400);margin-top:1px;}
+    .pg{padding:28px;flex:1;max-width:800px;}
+
+    /* HERO */
+    .profile-hero{background:var(--stone-800);border-radius:var(--rxl);padding:26px 30px;margin-bottom:22px;display:flex;align-items:center;gap:22px;position:relative;overflow:hidden;}
+    .profile-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:rgba(74,112,88,.15);}
+    .pav{width:70px;height:70px;border-radius:50%;background:var(--sage);border:3px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:white;flex-shrink:0;}
+    .phinfo h2{font-family:var(--display);font-size:22px;color:var(--stone-50);margin-bottom:4px;}
+    .phinfo p{font-size:12px;color:var(--stone-400);}
+    .ph-badge{margin-left:auto;background:rgba(74,112,88,.25);border:1px solid rgba(74,112,88,.4);color:#A8CDB3;font-size:12px;font-weight:600;padding:6px 16px;border-radius:20px;}
+    .admin-note{background:rgba(74,112,88,.1);border:1px solid rgba(74,112,88,.2);border-radius:var(--r);padding:10px 16px;font-size:12px;color:#6BAE82;margin-top:10px;}
+
+    /* CARDS */
+    .card{background:var(--stone-50);border:1px solid var(--stone-200);border-radius:var(--rl);overflow:hidden;margin-bottom:16px;box-shadow:0 1px 3px rgba(15,14,10,.05);}
+    .card-head{padding:15px 22px;border-bottom:1px solid var(--stone-200);background:var(--stone-100);}
+    .card-title{font-family:var(--display);font-size:16px;font-weight:600;color:var(--stone-800);}
+    .card-sub{font-size:11px;color:var(--stone-400);margin-top:2px;}
+    .card-body{padding:20px 22px;}
+    .info-row{display:flex;align-items:flex-start;gap:16px;padding:12px 0;border-bottom:1px solid var(--stone-200);}
+    .info-row:last-child{border-bottom:none;}
+    .info-label{font-size:11px;font-weight:600;color:var(--stone-400);text-transform:uppercase;letter-spacing:.08em;width:160px;flex-shrink:0;padding-top:2px;}
+    .info-val{font-size:14px;color:var(--stone-700);font-weight:500;}
+    .info-val.muted{color:var(--stone-400);font-weight:400;font-style:italic;}
+    .status-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;}
+    .status-badge::before{content:'';width:6px;height:6px;border-radius:50%;}
+    .s-verified{background:var(--green-lt);color:var(--green);}  .s-verified::before{background:#6BAE82;}
+    .s-pending{background:var(--amber-lt);color:var(--amber);}   .s-pending::before{background:var(--amber-mid);}
+
+    /* TOAST */
+    .toast{position:fixed;top:20px;right:20px;z-index:999;background:var(--stone-50);border:1px solid var(--stone-200);border-left:3px solid var(--sage);border-radius:var(--rl);padding:14px 18px;display:flex;align-items:flex-start;gap:12px;max-width:320px;box-shadow:0 8px 32px rgba(15,14,10,.1);transform:translateX(120%);transition:transform .35s cubic-bezier(.34,1.56,.64,1);overflow:hidden;}
+    .toast.show{transform:translateX(0);}
+    .t-ic{font-size:18px;flex-shrink:0;} .t-tl{font-family:var(--display);font-size:14px;color:var(--stone-800);margin-bottom:2px;} .t-mg{font-size:12px;color:var(--stone-500);}
+    .t-x{margin-left:auto;background:none;border:none;color:var(--stone-400);cursor:pointer;font-size:16px;}
+    .t-bar{position:absolute;bottom:0;left:0;height:2px;background:var(--sage);animation:sh 3.5s linear forwards;}
+    @keyframes sh{from{width:100%}to{width:0}}
+    </style>
+</h:head>
+<h:body>
+
+<button class="toggle open" id="tog" onclick="toggleSB()"><span/><span/><span/></button>
+
+<!-- SIDEBAR -->
+<div class="sb" id="sb">
+    <div class="sb-stripe"></div>
+    <a href="../index.xhtml" class="sb-logo">
+        <div class="sb-logo-mark"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg></div>
+        <span class="sb-logo-text">EventMS</span><span class="sb-logo-role">Admin</span>
+    </a>
+    <!-- Clickable user card → profile -->
+    <a href="admin_profile.xhtml" class="sb-identity">
+        <div class="sb-av"><h:outputText value="#{authBean.loggedInUser.name.substring(0,2).toUpperCase()}"/></div>
+        <div><div class="sb-name"><h:outputText value="#{authBean.loggedInUser.name}"/></div><div class="sb-tag">Administrator</div></div>
+    </a>
+    <div class="sb-sec">Overview</div>
+    <a href="admin_dashboard.xhtml" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+    <a href="admin_user_management.xhtml" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>User Management</a>
+    <a href="admin_all_events.xhtml" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>All Events</a>
+    <div class="sb-sep"/>
+    <div class="sb-sec">Manage</div>
+    <a href="admin_event_approvals.xhtml" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Event Approvals<span class="sb-count">8</span></a>
+    <a href="admin_venues.xhtml" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Venues</a>
+    <a href="#" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Payments</a>
+    <a href="#" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"/></svg>Notifications</a>
+    <div class="sb-sep"/>
+    <div class="sb-sec">Reports</div>
+    <a href="#" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</a>
+    <a href="#" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Certificates</a>
+    <div class="sb-footer">
+        <a href="admin_profile.xhtml" class="sb-foot-link on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>My Profile</a>
+        <a href="#" class="sb-foot-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M1 12h2M21 12h2M12 1v2M12 21v2"/></svg>Settings</a>
+        <a href="../login.xhtml" class="sb-foot-link out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign out</a>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="main">
+    <div class="topbar"><div><div class="topbar-title">Admin Profile</div><div class="topbar-sub">Your account information (read-only)</div></div></div>
+    <div class="pg">
+
+        <!-- Hero -->
+        <div class="profile-hero">
+            <div class="pav"><h:outputText value="#{authBean.loggedInUser.name.substring(0,2).toUpperCase()}"/></div>
+            <div class="phinfo">
+                <h2><h:outputText value="#{authBean.loggedInUser.name}"/></h2>
+                <p><h:outputText value="#{authBean.loggedInUser.email}"/> · Administrator</p>
+                <div class="admin-note" style="margin-top:10px;">🔒 Admin profiles are managed by the system. Contact your super admin to make changes.</div>
+            </div>
+            <span class="ph-badge">Administrator</span>
+        </div>
+
+        <!-- Account details — view only, no edit button -->
+        <div class="card">
+            <div class="card-head">
+                <div><div class="card-title">Account Information</div><div class="card-sub">Read-only · Contact system admin to update</div></div>
+            </div>
+            <div class="card-body">
+                <div class="info-row"><span class="info-label">Full Name</span><span class="info-val"><h:outputText value="#{authBean.loggedInUser.name}"/></span></div>
+                <div class="info-row"><span class="info-label">Email</span><span class="info-val"><h:outputText value="#{authBean.loggedInUser.email}"/></span></div>
+                <div class="info-row"><span class="info-label">Phone</span>
+                    <span class="info-val #{empty authBean.loggedInUser.phone ? 'muted' : ''}">
+                        <h:outputText value="#{empty authBean.loggedInUser.phone ? 'Not provided' : authBean.loggedInUser.phone}"/>
+                    </span>
+                </div>
+                <div class="info-row"><span class="info-label">Gender</span>
+                    <span class="info-val #{empty authBean.loggedInUser.gender ? 'muted' : ''}">
+                        <h:outputText value="#{empty authBean.loggedInUser.gender ? 'Not provided' : authBean.loggedInUser.gender}"/>
+                    </span>
+                </div>
+                <div class="info-row"><span class="info-label">Date of Birth</span>
+                    <span class="info-val #{authBean.loggedInUser.dob == null ? 'muted' : ''}">
+                        <h:panelGroup rendered="#{authBean.loggedInUser.dob != null}">
+                            <h:outputText value="#{authBean.loggedInUser.dob}"><f:convertDateTime pattern="dd MMM yyyy"/></h:outputText>
+                        </h:panelGroup>
+                        <h:panelGroup rendered="#{authBean.loggedInUser.dob == null}">Not provided</h:panelGroup>
+                    </span>
+                </div>
+                <div class="info-row"><span class="info-label">Role</span><span class="info-val"><h:outputText value="#{authBean.loggedInUser.roleId.roleName}"/></span></div>
+                <div class="info-row"><span class="info-label">Account Status</span>
+                    <span class="status-badge s-#{authBean.loggedInUser.verifiedStatus == 'Verified' ? 'verified' : 'pending'}">
+                        <h:outputText value="#{authBean.loggedInUser.verifiedStatus}"/>
+                    </span>
+                </div>
+                <div class="info-row"><span class="info-label">User ID</span><span class="info-val" style="font-family:monospace;font-size:13px;">#<h:outputText value="#{authBean.loggedInUser.userId}"/></span></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="toast" id="toast"><div class="t-ic" id="tic">👤</div><div style="flex:1"><div class="t-tl" id="ttl">Profile</div><div class="t-mg" id="tmg"></div></div><button class="t-x" onclick="hideT()">×</button><div class="t-bar" id="tbar"/></div>
+
+<script>//<![CDATA[
+var sbOpen=true;
+function toggleSB(){sbOpen=!sbOpen;document.getElementById('sb').classList.toggle('collapsed',!sbOpen);document.getElementById('main').classList.toggle('wide',!sbOpen);document.getElementById('tog').classList.toggle('open',sbOpen);localStorage.setItem('aSB',sbOpen);}
+(function(){if(localStorage.getItem('aSB')==='false'){sbOpen=true;toggleSB();}})();
+function hideT(){document.getElementById('toast').classList.remove('show');}
+//]]></script>
+</h:body>
+</html>

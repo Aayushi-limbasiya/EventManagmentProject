@@ -32,6 +32,11 @@ public class EventManagmentBean implements Serializable {
         eventList = eventEJB.getAllEvents();
     }
 
+    // Load only Approved events — used by the User Browse Events page
+    public void loadApprovedEvents() {
+        eventList = eventEJB.getEventsByStatus("Approved");
+    }
+
     public void loadUpcomingEvents() {
         eventList = eventEJB.getUpcomingEvents();
     }

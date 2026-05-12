@@ -42,6 +42,10 @@ public class AuthBean implements Serializable {
             loggedInUser = authEJB.getUserFromToken(token);
             role = authEJB.getRoleFromToken(token);
 
+            // Store in HTTP session so other beans can access via session map
+            FacesContext.getCurrentInstance().getExternalContext()
+                    .getSessionMap().put("loggedInUser", loggedInUser);
+
             // Redirect based on role — welcome toast triggered by ?welcome=true&name=
             String firstName = (loggedInUser.getName() != null && loggedInUser.getName().contains(" "))
                 ? loggedInUser.getName().split(" ")[0]
@@ -69,17 +73,19 @@ public class AuthBean implements Serializable {
     // 🚪 LOGOUT
     // ================================
     public void logout() {
+        // Step 1: Invalidate token in DB — wrapped separately so any error here
+        // NEVER prevents the redirect below
+        if (token != null) {
+            try { authEJB.logout(token); } catch (Exception ignored) {}
+        }
+
+        // Step 2: Invalidate session and redirect
         try {
-            if (token != null) {
-                authEJB.logout(token);
-            }
-
-            FacesContext.getCurrentInstance().getExternalContext()
-                    .invalidateSession();
-
-            FacesContext.getCurrentInstance().getExternalContext()
-                    .redirect("login.xhtml");
-
+            FacesContext fc = FacesContext.getCurrentInstance();
+            fc.getExternalContext().invalidateSession();
+            // Absolute path — works from Admin/, Organizer/, User/ subfolders
+            String ctx = fc.getExternalContext().getRequestContextPath();
+            fc.getExternalContext().redirect(ctx + "/login.xhtml");
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -6,7 +6,9 @@ package CDI;
 
 import EJB.RegistrationBeanLocal;
 import Entity.Registrations;
+import Entity.Users;
 import jakarta.ejb.EJB;
+import jakarta.inject.Inject;
 //import jakarta.enterprise.context.ViewScoped;
 import jakarta.inject.Named;
 import jakarta.faces.application.FacesMessage;
@@ -25,6 +27,9 @@ public class RegistrationBean implements Serializable {
     @EJB
     private RegistrationBeanLocal registrationService;
 
+    @Inject
+    private AuthBean authBean;
+
     private List<Registrations> registrations = new ArrayList<>();
 
     private int userId;
@@ -33,6 +38,25 @@ public class RegistrationBean implements Serializable {
 
     private String qrValue;
     private long confirmedCount;
+
+    // Helper: get the current logged-in user's ID safely
+    private Integer getLoggedInUserId() {
+        if (authBean != null && authBean.getLoggedInUser() != null) {
+            return authBean.getLoggedInUser().getUserId();
+        }
+        return null;
+    }
+
+    // Called from XHTML: #{registrationBean.isCurrentUserRegistered(ev.eventId)}
+    public boolean isCurrentUserRegistered(Integer eId) {
+        Integer uid = getLoggedInUserId();
+        if (uid == null || eId == null) return false;
+        try {
+            return registrationService.isAlreadyRegistered(uid, eId);
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     // ===============================
     // 🔹 REGISTER FOR EVENT
@@ -96,6 +120,48 @@ public class RegistrationBean implements Serializable {
     // ===============================
     // 🔹 LOAD DATA
     // ===============================
+    // loadByCurrentUser - called from user pages via preRenderView
+    public void loadByCurrentUser() {
+        try {
+            jakarta.faces.context.FacesContext fc = jakarta.faces.context.FacesContext.getCurrentInstance();
+            Object userObj = fc.getExternalContext().getSessionMap().get("loggedInUser");
+            if (userObj instanceof Entity.Users) {
+                Entity.Users u = (Entity.Users) userObj;
+                registrations = new ArrayList<>(
+                    registrationService.getRegisteredEventsByUser(u.getUserId())
+                );
+            }
+        } catch (Exception e) {
+            showMessage("Error loading your registrations");
+        }
+    }
+
+    // isAlreadyRegistered overload for EL calls with two params
+    public boolean isAlreadyRegistered(Integer uId, Integer eId) {
+        try {
+            if (uId == null || eId == null) return false;
+            return registrationService.isAlreadyRegistered(uId, eId);
+        } catch (Exception e) { return false; }
+    }
+
+    // Used in browse events page: #{registrationBean.isRegisteredFor(userId, eventId)}
+    public boolean isRegisteredFor(Integer uId, Integer eId) {
+        try {
+            if (uId == null || eId == null) return false;
+            return registrationService.isAlreadyRegistered(uId, eId);
+        } catch (Exception e) { return false; }
+    }
+
+    // register directly from browse page
+    public void registerFromBrowse() {
+        try {
+            String status = registrationService.registerForEvent(userId, eventId);
+            showMessage("Registered: " + status);
+        } catch (Exception e) {
+            showMessage("Error: " + e.getMessage());
+        }
+    }
+
     public void loadByUser() {
         try {
             registrations = new ArrayList<>(
