@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
+    xmlns:c="jakarta.tags.core" lang="en" xmlns:pt="jakarta.faces.passthrough">
+<h:head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Feedback — EventMS</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&amp;family=Outfit:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #FFFFFF;
+            --bg2: #F8F8FC;
+            --surface: #FFFFFF;
+            --border: #EBEBF5;
+            --border2: #D8D7EE;
+            --indigo: #4F46E5;
+            --indigo2: #6B63F0;
+            --indigolt: #EEF2FF;
+            --violet: #7C3AED;
+            --violetlt: #F3EFFE;
+            --green: #059669;
+            --greenlt: #ECFDF5;
+            --amber: #D97706;
+            --amberlt: #FFFBEB;
+            --red: #DC2626;
+            --redlt: #FEF2F2;
+            --pink: #DB2777;
+            --star: #F59E0B;
+            --star-empty: #E5E7EB;
+            --ink: #1A1833;
+            --ink2: #3D3A5C;
+            --ink3: #7C799E;
+            --ink4: #AEACCB;
+            --sw: 250px;
+            --r: 10px;
+            --rl: 16px;
+            --rxl: 22px;
+            --tr: .25s ease;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg2);
+            color: var(--ink);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* TOGGLE */
+        .toggle {
+            position: fixed;
+            top: 14px;
+            left: 14px;
+            z-index: 200;
+            width: 34px;
+            height: 34px;
+            border-radius: var(--r);
+            background: var(--indigo);
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, .35);
+        }
+
+        .toggle span {
+            display: block;
+            width: 16px;
+            height: 1.5px;
+            background: rgba(255, 255, 255, .9);
+            border-radius: 2px;
+            transition: .2s;
+        }
+
+        .toggle.open span:nth-child(1) {
+            transform: translateY(5.5px) rotate(45deg);
+        }
+
+        .toggle.open span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .toggle.open span:nth-child(3) {
+            transform: translateY(-5.5px) rotate(-45deg);
+        }
+
+        /* SIDEBAR */
+        .sb {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: var(--sw);
+            background: var(--bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            overflow-y: auto;
+            overflow-x: hidden;
+            transition: width var(--tr), transform var(--tr);
+        }
+
+        .sb.collapsed {
+            width: 0;
+            transform: translateX(-100%);
+        }
+
+        .sb::-webkit-scrollbar {
+            width: 0;
+        }
+
+        .sb-glow {
+            height: 3px;
+            background: linear-gradient(90deg, var(--indigo), var(--violet), var(--pink));
+        }
+
+        .sb-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 18px 18px 16px 54px;
+            border-bottom: 1px solid var(--border);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .sb-mark {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, var(--indigo), var(--violet));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .sb-mark svg {
+            width: 17px;
+            height: 17px;
+            fill: white;
+        }
+
+        .sb-wordmark {
+            font-family: 'DM Serif Display', serif;
+            font-size: 18px;
+            color: var(--ink);
+        }
+
+        .sb-user {
+            margin: 14px 12px 6px;
+            padding: 12px 14px;
+            background: var(--indigolt);
+            border: 1px solid var(--border2);
+            border-radius: var(--rl);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: .15s;
+            text-decoration: none;
+        }
+
+        .sb-user:hover {
+            background: #E0E7FF;
+        }
+
+        .sb-av {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--indigo), var(--violet));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .sb-uname {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        .sb-urole {
+            font-size: 10px;
+            color: var(--ink3);
+            margin-top: 1px;
+        }
+
+        .sb-dot {
+            margin-left: auto;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+        }
+
+        .sb-sec {
+            padding: 14px 18px 5px;
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--ink4);
+            text-transform: uppercase;
+            letter-spacing: .14em;
+        }
+
+        .sb-a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 16px;
+            margin: 1px 8px;
+            border-radius: var(--r);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--ink3);
+            text-decoration: none;
+            transition: .15s;
+            white-space: nowrap;
+        }
+
+        .sb-a:hover {
+            background: var(--bg2);
+            color: var(--ink2);
+        }
+
+        .sb-a.on {
+            background: var(--indigolt);
+            color: var(--indigo);
+            font-weight: 600;
+        }
+
+        .sb-a svg {
+            width: 15px;
+            height: 15px;
+            flex-shrink: 0;
+        }
+
+        .badge-new {
+            margin-left: auto;
+            font-size: 9px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--indigo), var(--violet));
+            color: #fff;
+            padding: 2px 7px;
+            border-radius: 20px;
+        }
+
+        .sb-hr {
+            height: 1px;
+            background: var(--border);
+            margin: 8px 12px;
+        }
+
+        .sb-foot {
+            margin-top: auto;
+            padding: 10px 8px;
+            border-top: 1px solid var(--border);
+        }
+
+        .sb-fa {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 16px;
+            border-radius: var(--r);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--ink3);
+            text-decoration: none;
+            transition: .15s;
+            white-space: nowrap;
+        }
+
+        .sb-fa:hover {
+            background: var(--bg2);
+            color: var(--ink2);
+        }
+
+        .sb-fa.on {
+            background: var(--indigolt);
+            color: var(--indigo);
+            font-weight: 600;
+        }
+
+        .sb-fa.danger:hover {
+            background: var(--redlt);
+            color: var(--red);
+        }
+
+        .sb-fa svg {
+            width: 15px;
+            height: 15px;
+        }
+
+        /* MAIN */
+        .main {
+            padding-left: var(--sw);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: padding-left var(--tr);
+        }
+
+        .main.wide {
+            padding-left: 0;
+        }
+
+        .hd {
+            height: 62px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0 28px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .hd-t {
+            font-family: 'DM Serif Display', serif;
+            font-size: 20px;
+            color: var(--ink);
+        }
+
+        .hd-s {
+            font-size: 12px;
+            color: var(--ink4);
+            margin-top: 1px;
+        }
+
+        .pg {
+            padding: 28px;
+            max-width: 760px;
+        }
+
+        /* HERO BANNER */
+        .hero {
+            background: linear-gradient(135deg, var(--indigo), var(--violet));
+            border-radius: var(--rxl);
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            right: -30px;
+            top: -30px;
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .06);
+        }
+
+        .hero-icon {
+            font-size: 36px;
+            flex-shrink: 0;
+        }
+
+        .hero-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 20px;
+            color: white;
+            margin-bottom: 4px;
+        }
+
+        .hero-sub {
+            font-size: 13px;
+            color: rgba(255, 255, 255, .72);
+        }
+
+        /* FORM CARD */
+        .card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--rl);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .card-head {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg2);
+        }
+
+        .card-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 17px;
+            color: var(--ink);
+        }
+
+        .card-sub {
+            font-size: 12px;
+            color: var(--ink4);
+            margin-top: 3px;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        /* FORM FIELDS */
+        .fg {
+            margin-bottom: 20px;
+        }
+
+        .fl {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--ink3);
+            margin-bottom: 7px;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+
+        input.fi,
+        select.fi,
+        textarea.fi {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            font-size: 14px;
+            font-family: 'Outfit', sans-serif;
+            color: var(--ink);
+            background: white;
+            outline: none;
+            transition: border-color .14s;
+        }
+
+        input.fi:focus,
+        select.fi:focus,
+        textarea.fi:focus {
+            border-color: var(--indigo);
+            box-shadow: 0 0 0 3px var(--indigolt);
+        }
+
+        input.fi:disabled {
+            background: var(--bg2);
+            color: var(--ink3);
+            cursor: not-allowed;
+        }
+
+        textarea.fi {
+            resize: vertical;
+            min-height: 120px;
+            line-height: 1.6;
+        }
+
+        .char-count {
+            font-size: 11px;
+            color: var(--ink4);
+            text-align: right;
+            margin-top: 4px;
+        }
+
+        .char-count.warn {
+            color: var(--amber);
+        }
+
+        .char-count.over {
+            color: var(--red);
+        }
+
+        /* STAR RATING */
+        .stars-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .stars {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .star {
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            transition: transform .12s;
+            border: none;
+            background: none;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .star:hover {
+            transform: scale(1.15);
+        }
+
+        .star svg {
+            width: 38px;
+            height: 38px;
+        }
+
+        /* FIX */
+        .star svg polygon {
+            transition: fill .12s, stroke .12s;
+        }
+
+        .star svg.star-filled polygon {
+            fill: var(--star);
+            stroke: var(--star);
+            stroke-width: 1.5;
+        }
+
+        .star svg.star-empty polygon {
+            fill: var(--star-empty);
+            stroke: #D1D5DB;
+            stroke-width: 1.5;
+        }
+
+        .star svg.star-hover polygon {
+            fill: #FCD34D;
+            stroke: #FCD34D;
+            stroke-width: 1.5;
+        }
+
+        .rating-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ink2);
+            min-height: 22px;
+        }
+
+        /* PAST FEEDBACK */
+        .feedback-item {
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .feedback-item:last-child {
+            border-bottom: none;
+        }
+
+        .fi-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .fi-event {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        .fi-date {
+            font-size: 11px;
+            color: var(--ink4);
+        }
+
+        .fi-stars {
+            display: flex;
+            gap: 3px;
+            margin-bottom: 6px;
+        }
+
+        .fi-star {
+            font-size: 16px;
+        }
+
+        .fi-comment {
+            font-size: 13px;
+            color: var(--ink2);
+            line-height: 1.6;
+        }
+
+        /* SUBMIT BTN */
+        .btn-submit {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, var(--indigo), var(--violet));
+            color: white;
+            border: none;
+            border-radius: var(--r);
+            font-size: 15px;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 3px 12px rgba(79, 70, 229, .3);
+            transition: all .15s;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 18px rgba(79, 70, 229, .4);
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--ink4);
+            font-size: 13px;
+        }
+
+        .empty-icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 999;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--green);
+            border-radius: var(--rl);
+            padding: 14px 18px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            max-width: 320px;
+            box-shadow: 0 8px 32px rgba(79, 70, 229, .13);
+            transform: translateX(120%);
+            transition: transform .35s cubic-bezier(.34, 1.56, .64, 1);
+            overflow: hidden;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .t-ic {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .t-tl {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 2px;
+        }
+
+        .t-mg {
+            font-size: 12px;
+            color: var(--ink3);
+        }
+
+        .t-x {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: var(--ink4);
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .t-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 2px;
+            background: var(--green);
+            animation: sh 3.5s linear forwards;
+        }
+
+        @keyframes sh {
+            from {
+                width: 100%
+            }
+
+            to {
+                width: 0
+            }
+        }
+
+        /* ERRORS */
+        .err-box {
+            background: var(--redlt);
+            border: 1px solid #FCA5A5;
+            border-radius: var(--r);
+            padding: 12px 16px;
+            font-size: 13px;
+            color: var(--red);
+            margin-bottom: 16px;
+        }
+    </style>
+</h:head>
+<h:body>
+
+    <button class="toggle open" id="tog" onclick="toggleSB()"><span></span><span></span><span></span></button>
+
+    <!-- SIDEBAR -->
+    <div class="sb" id="sb">
+        <div class="sb-glow"></div>
+        <a href="../index.xhtml" class="sb-logo">
+            <div class="sb-mark"><svg viewBox="0 0 24 24">
+                    <path
+                        d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z" />
+                </svg></div>
+            <span class="sb-wordmark">EventMS</span>
+        </a>
+        <a href="user_profile.xhtml" class="sb-user" style="text-decoration:none;">
+            <div class="sb-av">
+                <h:outputText value="#{authBean.loggedInUser.name.substring(0,2).toUpperCase()}" />
+            </div>
+            <div>
+                <div class="sb-uname">
+                    <h:outputText value="#{authBean.loggedInUser.name}" />
+                </div>
+                <div class="sb-urole">Participant</div>
+            </div>
+            <div class="sb-dot"></div>
+        </a>
+        <div class="sb-sec">My Space</div>
+        <a href="user_dashboard.xhtml" class="sb-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <rect x="3" y="3" width="7" height="7" />
+                <rect x="14" y="3" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" />
+                <rect x="14" y="14" width="7" height="7" />
+            </svg>Dashboard</a>
+        <a href="user_browse_events.xhtml" class="sb-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>Browse Events<span class="badge-new">NEW</span></a>
+        <a href="user_my_registrations.xhtml" class="sb-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <polyline points="9 11 12 14 22 4" />
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+            </svg>My Registrations</a>
+        <div class="sb-hr"></div>
+        <div class="sb-sec">Manage</div>
+        <a href="#" class="sb-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="1" y="4" width="22" height="16" rx="2" />
+                <line x1="1" y1="10" x2="23" y2="10" />
+            </svg>Payments</a>
+        <a href="#" class="sb-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+            </svg>Certificates</a>
+        <a href="user_feedback.xhtml" class="sb-a on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <polygon
+                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>Feedback &amp; Reviews</a>
+        <a href="#" class="sb-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0" />
+            </svg>Notifications</a>
+        <div class="sb-hr"></div>
+        <div class="sb-foot">
+            <a href="user_profile.xhtml" class="sb-fa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <circle cx="12" cy="8" r="4" />
+                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                </svg>My Profile</a>
+            <a href="#" class="sb-fa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3" />
+                    <path
+                        d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M1 12h2M21 12h2M12 1v2M12 21v2" />
+                </svg>Settings</a>
+            <a href="../login.xhtml" class="sb-fa danger"
+                onclick="document.cookie='JSESSIONID=;expires=Thu,01 Jan 1970 00:00:00 GMT;path=/'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>Sign out</a>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main" id="main">
+        <div class="hd">
+            <div>
+                <div class="hd-t">Feedback &amp; Reviews</div>
+                <div class="hd-s">Rate and review your event experiences</div>
+            </div>
+        </div>
+        <div class="pg">
+
+            <!-- Hero -->
+            <div class="hero">
+                <div class="hero-icon">⭐</div>
+                <div>
+                    <div class="hero-title">Share Your Experience</div>
+                    <div class="hero-sub">Your feedback helps organizers improve future events</div>
+                </div>
+            </div>
+
+            <!-- SUBMIT FEEDBACK FORM -->
+            <div class="card">
+                <div class="card-head">
+                    <div class="card-title">Write a Review</div>
+                    <div class="card-sub">Select an event you attended and share your thoughts</div>
+                </div>
+                <div class="card-body">
+                    <h:form id="feedbackForm">
+
+                        <h:messages globalOnly="true" layout="list" rendered="#{facesContext.maximumSeverity != null}"
+                            style="display:block;background:var(--redlt);border:1px solid #FCA5A5;border-radius:var(--r);padding:12px 16px;font-size:13px;color:var(--red);margin-bottom:16px;" />
+
+                        <!-- Email (read-only) -->
+                        <div class="fg">
+                            <label class="fl">Your Email</label>
+                            <input type="text" class="fi" disabled="disabled" value="#{feedbackBean.userEmail}" />
+                        </div>
+
+                        <!-- Event selector -->
+                        <div class="fg">
+                            <label class="fl">Select Event *</label>
+                            <h:selectOneMenu value="#{feedbackBean.selectedEventId}" styleClass="fi">
+                                <f:selectItem itemValue="0" itemLabel="— Choose an event you attended —" />
+                                <f:selectItems value="#{feedbackBean.myRegisteredEvents}" var="ev"
+                                    itemValue="#{ev.eventId}" itemLabel="#{ev.title}" />
+                            </h:selectOneMenu>
+                            <h:panelGroup rendered="#{empty feedbackBean.myRegisteredEvents}" layout="block">
+                                <div style="font-size:12px;color:var(--ink4);margin-top:6px;">
+                                    No events available — either you haven't registered for any, or you've already
+                                    reviewed all of them.
+                                </div>
+                            </h:panelGroup>
+                        </div>
+
+                        <!-- Star Rating -->
+                        <div class="fg">
+                            <label class="fl">Rating *</label>
+                            <div class="stars-wrap">
+                                <div class="stars" id="starRow">
+                                    <button type="button" class="star" onclick="setRating(1)"
+                                        onmouseover="hoverRating(1)" onmouseout="resetHover()">
+                                        <svg viewBox="0 0 24 24" class="star-empty" id="s1">
+                                            <polygon
+                                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                                                stroke-width="1.5" />
+                                        </svg>
+                                    </button>
+                                    <button type="button" class="star" onclick="setRating(2)"
+                                        onmouseover="hoverRating(2)" onmouseout="resetHover()">
+                                        <svg viewBox="0 0 24 24" class="star-empty" id="s2">
+                                            <polygon
+                                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                                                stroke-width="1.5" />
+                                        </svg>
+                                    </button>
+                                    <button type="button" class="star" onclick="setRating(3)"
+                                        onmouseover="hoverRating(3)" onmouseout="resetHover()">
+                                        <svg viewBox="0 0 24 24" class="star-empty" id="s3">
+                                            <polygon
+                                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                                                stroke-width="1.5" />
+                                        </svg>
+                                    </button>
+                                    <button type="button" class="star" onclick="setRating(4)"
+                                        onmouseover="hoverRating(4)" onmouseout="resetHover()">
+                                        <svg viewBox="0 0 24 24" class="star-empty" id="s4">
+                                            <polygon
+                                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                                                stroke-width="1.5" />
+                                        </svg>
+                                    </button>
+                                    <button type="button" class="star" onclick="setRating(5)"
+                                        onmouseover="hoverRating(5)" onmouseout="resetHover()">
+                                        <svg viewBox="0 0 24 24" class="star-empty" id="s5">
+                                            <polygon
+                                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                                                stroke-width="1.5" />
+                                        </svg>
+                                    </button>
+                                    <!-- Hidden field bound to bean -->
+                                    <h:inputHidden value="#{feedbackBean.rating}" id="ratingInput" />
+                                </div>
+                                <div class="rating-label" id="ratingLabel">Click a star to rate</div>
+                            </div>
+                        </div>
+
+                        <!-- Comment -->
+                        <div class="fg">
+                            <label class="fl">Your Feedback *</label>
+                            <h:inputTextarea value="#{feedbackBean.comment}" styleClass="fi" id="commentBox"
+                                pt:maxlength="1000" pt:oninput="updateCount(this)" />
+                            <div class="char-count" id="charCount">0 / 1000 characters</div>
+                        </div>
+
+                        <h:commandButton value="Submit Feedback →" styleClass="btn-submit"
+                            action="#{feedbackBean.submitFeedback}" />
+                    </h:form>
+                </div>
+            </div>
+
+            <!-- PAST FEEDBACK LIST -->
+            <div class="card">
+                <div class="card-head">
+                    <div class="card-title">My Past Reviews</div>
+                    <div class="card-sub">Feedback you have submitted</div>
+                </div>
+                <div class="card-body">
+                    <c:choose>
+                        <c:when test="#{empty feedbackBean.myFeedbackList}">
+                            <div class="empty">
+                                <div class="empty-icon">📝</div>
+                                <div>You haven't submitted any reviews yet.</div>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <h:dataTable value="#{feedbackBean.myFeedbackList}" var="fb">
+                                <h:column>
+                                    <div class="feedback-item">
+                                        <div class="fi-header">
+                                            <div class="fi-event">
+                                                <h:outputText value="#{fb.eventId.title}" />
+                                            </div>
+                                            <div class="fi-date">
+                                                <h:outputText value="#{fb.createdAt}">
+                                                    <f:convertDateTime pattern="dd MMM yyyy" />
+                                                </h:outputText>
+                                            </div>
+                                        </div>
+                                        <div class="fi-stars">
+                                            <c:forEach begin="1" end="5" var="i">
+                                                <span class="fi-star">#{i le fb.rating ? '⭐' : '☆'}</span>
+                                            </c:forEach>
+                                            <span style="font-size:12px;color:var(--ink4);margin-left:6px;">
+                                                <h:outputText value="#{fb.rating}" /> / 5
+                                            </span>
+                                        </div>
+                                        <div class="fi-comment">
+                                            <h:outputText value="#{fb.comment}" />
+                                        </div>
+                                    </div>
+                                </h:column>
+                            </h:dataTable>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast">
+        <div class="t-ic">⭐</div>
+        <div style="flex:1">
+            <div class="t-tl" id="ttl">Review submitted!</div>
+            <div class="t-mg" id="tmg">Thank you for your feedback.</div>
+        </div>
+        <button class="t-x" onclick="hideT()">×</button>
+        <div class="t-bar" id="tbar"></div>
+    </div>
+
+    <script>//<![CDATA[
+        // Sidebar toggle
+        var sbOpen = true;
+        function toggleSB() {
+            sbOpen = !sbOpen;
+            document.getElementById('sb').classList.toggle('collapsed', !sbOpen);
+            document.getElementById('main').classList.toggle('wide', !sbOpen);
+            document.getElementById('tog').classList.toggle('open', sbOpen);
+            localStorage.setItem('uSB', sbOpen);
+        }
+        (function () { if (localStorage.getItem('uSB') === 'false') { sbOpen = true; toggleSB(); } })();
+
+        // ── STAR RATING ──────────────────────────────────────────────
+        var currentRating = 0;
+        var labels = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+
+        function paintStars(n, cls) {
+            for (var i = 1; i <= 5; i++) {
+                var svg = document.getElementById('s' + i);
+                if (!svg) continue;
+                svg.setAttribute('class', 'star-' + ((i <= n) ? cls : 'empty'));
+            }
+        }
+
+        function setRating(n) {
+            currentRating = n;
+            paintStars(n, 'filled');
+            document.getElementById('ratingLabel').textContent = n + ' / 5 - ' + labels[n];
+            // Write value into the hidden JSF input
+            var inp = document.querySelector('[id$="ratingInput"]');
+            if (inp) inp.value = n;
+        }
+
+        function hoverRating(n) {
+            paintStars(n, 'hover');
+            document.getElementById('ratingLabel').textContent = n + ' / 5 - ' + labels[n];
+        }
+
+        function resetHover() {
+            if (currentRating > 0) {
+                paintStars(currentRating, 'filled');
+                document.getElementById('ratingLabel').textContent = currentRating + ' / 5 - ' + labels[currentRating];
+            } else {
+                paintStars(0, 'empty');
+                document.getElementById('ratingLabel').textContent = 'Click a star to rate';
+            }
+        }
+
+        // ── CHAR COUNTER ─────────────────────────────────────────────
+        function updateCount(el) {
+            var len = el.value.length;
+            var el2 = document.getElementById('charCount');
+            el2.textContent = len + ' / 1000 characters';
+            el2.className = 'char-count' + (len > 900 ? (len >= 1000 ? ' over' : ' warn') : '');
+        }
+
+        // ── TOAST ────────────────────────────────────────────────────
+        function hideT() { document.getElementById('toast').classList.remove('show'); }
+        window.addEventListener('DOMContentLoaded', function () {
+            var p = new URLSearchParams(window.location.search);
+            if (p.get('submitted') === 'true') {
+                document.getElementById('toast').classList.add('show');
+                setTimeout(hideT, 3500);
+            }
+        });
+        //]]></script>
+</h:body>
+
+</html>

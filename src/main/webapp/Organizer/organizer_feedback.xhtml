@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:c="jakarta.tags.core"
+      lang="en">
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Feedback &amp; Ratings — EventMS Organizer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@300;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <style>
+    :root{--bg:#F5F1EA;--bg2:#EDE8DF;--surface:#FDFAF5;--border:#D8CFC0;--border2:#C4B9A8;
+    --teal:#0D5C63;--teal2:#178E98;--teallt:#E0F4F5;
+    --amber:#D4660A;--amberlt:#FDF0E6;
+    --green:#1A7F4B;--greenlt:#E3F5EC;
+    --red:#C0392B;--redlt:#FDECEA;
+    --star:#F59E0B;--star-empty:#D1D5DB;
+    --ink:#1C1812;--ink2:#4A4035;--ink3:#8C7E6E;--ink4:#B5A898;
+    --sw:256px;--r:11px;--rl:16px;--rxl:22px;--tr:.25s ease;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;}
+
+    /* TOGGLE */
+    .toggle{position:fixed;top:14px;left:14px;z-index:200;width:34px;height:34px;border-radius:var(--r);background:rgba(13,92,99,.9);border:1px solid rgba(255,255,255,.15);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;}
+    .toggle span{display:block;width:16px;height:1.5px;background:rgba(255,255,255,.8);border-radius:2px;transition:.2s;}
+    .toggle.open span:nth-child(1){transform:translateY(5.5px) rotate(45deg);}
+    .toggle.open span:nth-child(2){opacity:0;}
+    .toggle.open span:nth-child(3){transform:translateY(-5.5px) rotate(-45deg);}
+
+    /* SIDEBAR */
+    .sb{position:fixed;top:0;left:0;bottom:0;width:var(--sw);background:linear-gradient(180deg,#0B3D2E,#0F4F3A);display:flex;flex-direction:column;z-index:100;overflow-y:auto;overflow-x:hidden;transition:width var(--tr),transform var(--tr);}
+    .sb.collapsed{width:0;transform:translateX(-100%);}
+    .sb::-webkit-scrollbar{width:0;}
+    .sb-logo{display:flex;align-items:center;gap:11px;padding:20px 18px 18px 54px;border-bottom:1px solid rgba(255,255,255,.08);text-decoration:none;white-space:nowrap;}
+    .sb-logo-icon{width:32px;height:32px;border-radius:var(--r);background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .sb-logo-icon svg{width:16px;height:16px;fill:white;}
+    .sb-logo-text{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:white;}
+    .sb-logo-tag{margin-left:auto;font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.12);padding:2px 7px;border-radius:20px;white-space:nowrap;}
+    .sb-user{margin:12px 14px 6px;padding:11px 13px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);border-radius:var(--r);display:flex;align-items:center;gap:10px;white-space:nowrap;cursor:pointer;transition:.15s;text-decoration:none;}
+    .sb-user:hover{background:rgba(255,255,255,.13);}
+    .sb-av{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;flex-shrink:0;}
+    .sb-uname{font-size:13px;font-weight:600;color:white;}
+    .sb-utag{font-size:10px;color:rgba(255,255,255,.45);margin-top:1px;}
+    .sb-sec{padding:14px 18px 5px;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.3);}
+    .sb-a{display:flex;align-items:center;gap:9px;padding:8px 15px;margin:1px 8px;border-radius:8px;font-size:13px;font-weight:400;color:rgba(255,255,255,.6);text-decoration:none;transition:.14s;white-space:nowrap;}
+    .sb-a:hover{background:rgba(255,255,255,.07);color:white;}
+    .sb-a.on{background:rgba(255,255,255,.14);color:white;font-weight:600;}
+    .sb-a svg{width:14px;height:14px;flex-shrink:0;opacity:.65;}
+    .sb-a.on svg,.sb-a:hover svg{opacity:1;}
+    .sb-sep{height:1px;background:rgba(255,255,255,.07);margin:8px 14px;}
+    .sb-foot{margin-top:auto;border-top:1px solid rgba(255,255,255,.07);padding:10px 8px 14px;}
+    .sb-fa{display:flex;align-items:center;gap:9px;padding:8px 15px;border-radius:8px;font-size:13px;color:rgba(255,255,255,.5);text-decoration:none;transition:.14s;white-space:nowrap;}
+    .sb-fa:hover{background:rgba(255,255,255,.06);color:white;}
+    .sb-fa.out:hover{background:rgba(255,80,80,.15);color:#FF9999;}
+    .sb-fa svg{width:14px;height:14px;opacity:.5;}
+
+    /* MAIN */
+    .main{padding-left:var(--sw);display:flex;flex-direction:column;min-height:100vh;transition:padding-left var(--tr);}
+    .main.wide{padding-left:0;}
+    .hd{height:58px;background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;position:sticky;top:0;z-index:50;box-shadow:0 1px 3px rgba(28,24,18,.07);}
+    .hd-t{font-family:'Fraunces',serif;font-size:20px;font-weight:700;color:var(--ink);}
+    .hd-s{font-size:11px;color:var(--ink4);margin-top:1px;}
+    .pg{padding:28px;max-width:900px;}
+
+    /* STATS ROW */
+    .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px;}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:18px 20px;box-shadow:0 1px 3px rgba(28,24,18,.05);}
+    .stat-val{font-family:'Fraunces',serif;font-size:28px;font-weight:700;color:var(--ink);line-height:1;}
+    .stat-lbl{font-size:12px;color:var(--ink3);margin-top:4px;}
+    .stat-icon{font-size:22px;margin-bottom:8px;}
+
+    /* FEEDBACK CARDS */
+    .fb-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:14px;box-shadow:0 1px 3px rgba(28,24,18,.05);}
+    .fb-card-head{padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg);display:flex;align-items:center;justify-content:space-between;}
+    .fb-event-name{font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:var(--ink);}
+    .fb-date{font-size:11px;color:var(--ink4);}
+    .fb-body{padding:16px 20px;}
+    .fb-user-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+    .fb-av{width:30px;height:30px;border-radius:50%;background:var(--teallt);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--teal);}
+    .fb-username{font-size:13px;font-weight:600;color:var(--ink);}
+    .fb-stars{display:flex;gap:2px;margin-left:auto;}
+    .fb-star{font-size:15px;}
+    .fb-comment{font-size:13px;color:var(--ink2);line-height:1.65;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-top:4px;}
+
+    /* AVG RATING BADGE */
+    .avg-badge{display:inline-flex;align-items:center;gap:6px;background:var(--teallt);border:1px solid var(--border2);border-radius:20px;padding:5px 14px;font-size:13px;font-weight:700;color:var(--teal);}
+
+    /* EMPTY */
+    .empty{text-align:center;padding:52px 20px;color:var(--ink4);font-size:13px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);}
+    .empty-icon{font-size:40px;margin-bottom:10px;}
+    .empty-title{font-family:'Fraunces',serif;font-size:18px;color:var(--ink);margin-bottom:6px;}
+
+    /* TOAST */
+    .toast{position:fixed;top:20px;right:20px;z-index:999;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--teal);border-radius:var(--rl);padding:14px 18px;display:flex;align-items:flex-start;gap:12px;max-width:320px;box-shadow:0 8px 32px rgba(13,92,99,.12);transform:translateX(120%);transition:transform .35s cubic-bezier(.34,1.56,.64,1);overflow:hidden;}
+    .toast.show{transform:translateX(0);}
+    .t-ic{font-size:18px;flex-shrink:0;} .t-tl{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:2px;} .t-mg{font-size:12px;color:var(--ink3);}
+    .t-x{margin-left:auto;background:none;border:none;color:var(--ink4);cursor:pointer;font-size:16px;}
+    .t-bar{position:absolute;bottom:0;left:0;height:2px;background:var(--teal);animation:sh 3.5s linear forwards;}
+    @keyframes sh{from{width:100%}to{width:0}}
+    </style>
+</h:head>
+<h:body>
+
+<button class="toggle open" id="tog" onclick="toggleSB()"><span></span><span></span><span></span></button>
+
+<!-- SIDEBAR -->
+<div class="sb" id="sb">
+    <a href="../index.xhtml" class="sb-logo">
+        <div class="sb-logo-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg></div>
+        <span class="sb-logo-text">EventMS</span><span class="sb-logo-tag">Organizer</span>
+    </a>
+    <a href="organizer_profile.xhtml" class="sb-user">
+        <div class="sb-av"><h:outputText value="#{authBean.loggedInUser.name.substring(0,2).toUpperCase()}"/></div>
+        <div><div class="sb-uname"><h:outputText value="#{authBean.loggedInUser.name}"/></div><div class="sb-utag">Event Organizer</div></div>
+    </a>
+    <div class="sb-sec">My Workspace</div>
+    <a href="organizer_dashboard.xhtml" class="sb-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+    <a href="organizer_my_events.xhtml" class="sb-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>My Events</a>
+    <a href="organizer_create_event.xhtml" class="sb-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Create Event</a>
+    <div class="sb-sep"></div>
+    <div class="sb-sec">Event Management</div>
+    <a href="organizer_schedule.xhtml" class="sb-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Schedule &amp; Venues</a>
+    <a href="organizer_participants.xhtml" class="sb-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Participants</a>
+    <a href="organizer_registrations.xhtml" class="sb-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Registrations</a>
+    <div class="sb-sep"></div>
+    <div class="sb-sec">Analytics</div>
+    <a href="organizer_feedback.xhtml" class="sb-a on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Feedback &amp; Ratings</a>
+    <a href="#" class="sb-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Certificates</a>
+    <div class="sb-foot">
+        <a href="organizer_profile.xhtml" class="sb-fa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>My Profile</a>
+        <a href="#" class="sb-fa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/></svg>Settings</a>
+        <a href="../login.xhtml" class="sb-fa out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign out</a>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="main">
+    <div class="hd"><div><div class="hd-t">Feedback &amp; Ratings</div><div class="hd-s">What participants said about your events</div></div></div>
+    <div class="pg">
+
+        <!-- STATS -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon">💬</div>
+                <div class="stat-val" id="totalCount">
+                    <h:outputText value="#{feedbackBean.organizerFeedback.size()}"/>
+                </div>
+                <div class="stat-lbl">Total Reviews</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-val" id="avgRating">—</div>
+                <div class="stat-lbl">Average Rating</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-val" id="fiveStarCount">—</div>
+                <div class="stat-lbl">5-Star Reviews</div>
+            </div>
+        </div>
+
+        <!-- FEEDBACK LIST -->
+        <c:choose>
+            <c:when test="#{empty feedbackBean.organizerFeedback}">
+                <div class="empty">
+                    <div class="empty-icon">📭</div>
+                    <div class="empty-title">No feedback yet</div>
+                    <div>Once participants review your events, their feedback will appear here.</div>
+                </div>
+            </c:when>
+            <c:otherwise>
+                <h:dataTable value="#{feedbackBean.organizerFeedback}" var="fb" id="fbTable">
+                    <h:column>
+                        <div class="fb-card">
+                            <div class="fb-card-head">
+                                <div class="fb-event-name"><h:outputText value="#{fb.eventId.title}"/></div>
+                                <div class="fb-date">
+                                    <h:outputText value="#{fb.createdAt}">
+                                        <f:convertDateTime pattern="dd MMM yyyy"/>
+                                    </h:outputText>
+                                </div>
+                            </div>
+                            <div class="fb-body">
+                                <div class="fb-user-row">
+                                    <div class="fb-av">
+                                        <h:outputText value="#{fb.userId.name.substring(0,2).toUpperCase()}"/>
+                                    </div>
+                                    <div class="fb-username"><h:outputText value="#{fb.userId.name}"/></div>
+                                    <div class="fb-stars" title="#{fb.rating} out of 5">
+                                        <c:forEach begin="1" end="5" var="i">
+                                            <span class="fb-star">#{i le fb.rating ? '⭐' : '☆'}</span>
+                                        </c:forEach>
+                                        <span style="font-size:12px;color:var(--ink4);margin-left:5px;">
+                                            <h:outputText value="#{fb.rating}"/>/5
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="fb-comment">
+                                    "<h:outputText value="#{fb.comment}"/>"
+                                </div>
+                            </div>
+                        </div>
+                    </h:column>
+                </h:dataTable>
+            </c:otherwise>
+        </c:choose>
+
+    </div>
+</div>
+
+<div class="toast" id="toast">
+    <div class="t-ic">⭐</div>
+    <div style="flex:1"><div class="t-tl" id="ttl">New Review!</div><div class="t-mg">A participant left feedback.</div></div>
+    <button class="t-x" onclick="hideT()">×</button>
+    <div class="t-bar" id="tbar"></div>
+</div>
+
+<script>//<![CDATA[
+var sbOpen = true;
+function toggleSB() {
+    sbOpen = !sbOpen;
+    document.getElementById('sb').classList.toggle('collapsed', !sbOpen);
+    document.getElementById('main').classList.toggle('wide', !sbOpen);
+    document.getElementById('tog').classList.toggle('open', sbOpen);
+    localStorage.setItem('oSB', sbOpen);
+}
+(function(){ if(localStorage.getItem('oSB')==='false'){ sbOpen=true; toggleSB(); } })();
+
+// Compute avg rating + 5-star count from rendered cards
+window.addEventListener('DOMContentLoaded', function() {
+    var cards = document.querySelectorAll('.fb-card');
+    var total = 0, fiveStars = 0, count = cards.length;
+    cards.forEach(function(c) {
+        var txt = c.querySelector('.fb-stars span') ? c.querySelector('.fb-stars span').textContent : '';
+        var r = parseInt(txt);
+        if (!isNaN(r)) { total += r; if (r === 5) fiveStars++; }
+    });
+    if (count > 0) {
+        document.getElementById('avgRating').textContent = (total / count).toFixed(1);
+        document.getElementById('fiveStarCount').textContent = fiveStars;
+    } else {
+        document.getElementById('avgRating').textContent = '—';
+        document.getElementById('fiveStarCount').textContent = '—';
+    }
+});
+
+function hideT() { document.getElementById('toast').classList.remove('show'); }
+//]]></script>
+</h:body>
+</html>
