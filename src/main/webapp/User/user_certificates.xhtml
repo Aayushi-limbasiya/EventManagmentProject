@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      lang="en">
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>My Certificates — EventMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&amp;family=Outfit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <style>
+    :root{--bg:#FFFFFF;--bg2:#F8F8FC;--border:#EBEBF5;--border2:#D8D7EE;
+    --indigo:#4F46E5;--indigo2:#6B63F0;--indigolt:#EEF2FF;--violet:#7C3AED;--violetlt:#F3EFFE;
+    --green:#059669;--greenlt:#ECFDF5;--amber:#D97706;--amberlt:#FFFBEB;
+    --gold:#C9A227;--goldlt:#FBF6E3;
+    --ink:#1A1833;--ink2:#3D3A5C;--ink3:#7C799E;--ink4:#AEACCB;
+    --sw:250px;--r:10px;--rl:16px;--rxl:22px;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Outfit',sans-serif;background:var(--bg2);color:var(--ink);-webkit-font-smoothing:antialiased;}
+    .main{padding-left:var(--sw);display:flex;flex-direction:column;min-height:100vh;transition:padding-left .25s ease;}
+    .hd{height:62px;background:var(--bg);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+    .hd-t{font-family:'DM Serif Display',serif;font-size:20px;color:var(--ink);}
+    .hd-s{font-size:12px;color:var(--ink4);margin-top:1px;}
+    .pg{padding:24px 28px;flex:1;}
+
+    .hero{background:linear-gradient(135deg,var(--indigo),var(--violet));border-radius:var(--rxl);padding:24px 28px;margin-bottom:22px;color:white;display:flex;align-items:center;gap:18px;position:relative;overflow:hidden;}
+    .hero::before{content:'';position:absolute;top:-40px;right:-40px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,.08);}
+    .hero-ic{font-size:42px;}
+    .hero h2{font-family:'DM Serif Display',serif;font-size:21px;margin-bottom:4px;}
+    .hero p{font-size:13px;opacity:.75;}
+
+    .cert-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px;}
+    .cert{background:var(--bg);border:1px solid var(--border);border-radius:var(--rxl);overflow:hidden;transition:.2s;position:relative;}
+    .cert:hover{border-color:var(--border2);box-shadow:0 8px 28px rgba(79,70,229,.1);transform:translateY(-2px);}
+    .cert-top{height:86px;background:linear-gradient(135deg,var(--goldlt),var(--violetlt));display:flex;align-items:center;justify-content:center;font-size:34px;border-bottom:2px solid var(--gold);}
+    .cert-bd{padding:18px;}
+    .cert-ev{font-family:'DM Serif Display',serif;font-size:17px;color:var(--ink);margin-bottom:6px;}
+    .cert-no{font-size:11px;font-family:monospace;color:var(--ink3);background:var(--bg2);padding:4px 9px;border-radius:6px;display:inline-block;margin-bottom:8px;}
+    .cert-meta{font-size:11px;color:var(--ink4);margin-bottom:14px;}
+    .cert-actions{display:flex;gap:8px;}
+    .btn-dl{flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:700;font-family:'Outfit',sans-serif;background:linear-gradient(135deg,var(--indigo),var(--violet));color:white;border:none;cursor:pointer;text-decoration:none;text-align:center;box-shadow:0 2px 8px rgba(79,70,229,.25);display:block;}
+    .btn-dl:hover{opacity:.9;}
+    .btn-copy{padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;background:var(--bg2);color:var(--ink2);border:1px solid var(--border);cursor:pointer;}
+    .btn-copy:hover{border-color:var(--border2);}
+
+    .empty{text-align:center;padding:70px 20px;}
+    .empty-ic{font-size:52px;margin-bottom:14px;}
+    .empty-t{font-family:'DM Serif Display',serif;font-size:21px;color:var(--ink);margin-bottom:6px;}
+    .empty-s{font-size:13px;color:var(--ink3);line-height:1.6;}
+
+    .toast{position:fixed;top:20px;right:20px;z-index:999;background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:14px 18px;display:flex;gap:12px;max-width:320px;box-shadow:0 8px 32px rgba(79,70,229,.13);transform:translateX(120%);transition:transform .35s cubic-bezier(.34,1.56,.64,1);}
+    .toast.show{transform:translateX(0);}
+    .t-tl{font-size:13px;font-weight:700;} .t-mg{font-size:12px;color:var(--ink3);}
+    </style>
+</h:head>
+<h:body>
+
+<ui:include src="user_sidebar.xhtml">
+    <ui:param name="activeMenu" value="certificates"/>
+</ui:include>
+
+<div class="main" id="main">
+    <div class="hd">
+        <div>
+            <div class="hd-t">My Certificates</div>
+            <div class="hd-s">Download and share your achievements</div>
+        </div>
+    </div>
+
+    <div class="pg">
+
+        <div class="hero">
+            <div class="hero-ic">🎓</div>
+            <div>
+                <h2>You have earned <h:outputText value="#{userCertBean.certCount}"/> certificate(s)</h2>
+                <p>Each one carries a unique number anyone can verify on the public verification page.</p>
+            </div>
+        </div>
+
+        <ui:fragment rendered="#{empty userCertBean.myCertificates}">
+            <div class="empty">
+                <div class="empty-ic">📜</div>
+                <div class="empty-t">No certificates yet</div>
+                <div class="empty-s">Certificates appear here after the organizer issues them<br/>for events you attended.</div>
+            </div>
+        </ui:fragment>
+
+        <div class="cert-grid">
+            <ui:repeat value="#{userCertBean.myCertificates}" var="c">
+                <div class="cert">
+                    <div class="cert-top">🏅</div>
+                    <div class="cert-bd">
+                        <div class="cert-ev"><h:outputText value="#{c.registrationId.eventId.title}"/></div>
+                        <div class="cert-no" id="no-#{c.certificateId}"><h:outputText value="#{c.certificateNumber}"/></div>
+                        <div class="cert-meta">Issued
+                            <h:outputText value="#{c.issueDate}"><f:convertDateTime pattern="dd MMM yyyy"/></h:outputText>
+                        </div>
+                        <div class="cert-actions">
+                            <a class="btn-dl"
+                               href="#{request.contextPath}/certificate/download?number=#{c.certificateNumber}">
+                               ⬇ Download PDF</a>
+                            <button type="button" class="btn-copy"
+                                    onclick="copyNo('#{c.certificateNumber}')">📋</button>
+                        </div>
+                    </div>
+                </div>
+            </ui:repeat>
+        </div>
+
+    </div>
+</div>
+
+<div class="toast" id="toast">
+    <div style="font-size:20px;">📋</div>
+    <div><div class="t-tl">Copied!</div><div class="t-mg" id="tmg"></div></div>
+</div>
+
+<script>//<![CDATA[
+function copyNo(no){
+    navigator.clipboard.writeText(no).then(function(){
+        document.getElementById('tmg').textContent = no;
+        var t=document.getElementById('toast');
+        t.classList.add('show');
+        setTimeout(function(){t.classList.remove('show');},2500);
+    });
+}
+//]]></script>
+</h:body>
+</html>

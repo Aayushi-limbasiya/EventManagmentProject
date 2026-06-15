@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      lang="en">
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Payments — EventM S Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&amp;family=Geist:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+    <style>
+    :root{
+        --stone-50:#FAFAF7;--stone-100:#F5F4EF;--stone-200:#EAE8E0;--stone-300:#D6D3C8;
+        --stone-400:#B8B4A4;--stone-500:#8A8675;--stone-600:#605D50;--stone-700:#3D3B31;--stone-800:#1C1A14;
+        --sage:#4A7058;--sage-light:#EBF2ED;--amber:#8B5E1A;--amber-lt:#FAF0DC;
+        --green:#3A6B4A;--green-lt:#EAF3EC;--red:#8B2E2E;--red-lt:#F5EAEA;
+        --violet:#5B4E7A;--violet-lt:#EEEAF6;
+        --display:'Cormorant Garamond',Georgia,serif;--body:'Geist',system-ui,sans-serif;
+        --sidebar-w:256px;--radius-sm:6px;--radius:10px;--radius-lg:14px;
+        --shadow-sm:0 1px 3px rgba(15,14,10,.06),0 1px 2px rgba(15,14,10,.04);
+        --transition:.25s ease;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--body);background:var(--stone-100);color:var(--stone-800);font-size:14px;-webkit-font-smoothing:antialiased;}
+    .main{flex:1;min-width:0;padding-left:var(--sidebar-w);display:flex;flex-direction:column;min-height:100vh;transition:padding-left var(--transition);}
+    .topbar{height:58px;background:var(--stone-50);border-bottom:1px solid var(--stone-200);padding:0 24px 0 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:var(--shadow-sm);}
+    .topbar-title{font-family:var(--display);font-size:20px;font-weight:600;}
+    .topbar-sub{font-size:12px;color:var(--stone-500);margin-top:1px;}
+    .content{padding:24px 28px 40px;flex:1;}
+
+    .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+    .kpi{background:var(--stone-50);border:1px solid var(--stone-200);border-radius:var(--radius-lg);padding:16px 20px;box-shadow:var(--shadow-sm);}
+    .kpi-ic{font-size:18px;margin-bottom:8px;}
+    .kpi-val{font-family:var(--display);font-size:26px;font-weight:600;line-height:1;margin-bottom:3px;}
+    .kpi-lbl{font-size:11px;color:var(--stone-500);}
+
+    .tabs{display:inline-flex;gap:4px;background:var(--stone-50);border:1px solid var(--stone-200);border-radius:var(--radius-lg);padding:5px;margin-bottom:18px;}
+    .tab{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:500;border:none;background:transparent;color:var(--stone-500);font-family:var(--body);cursor:pointer;transition:.15s;}
+    .tab:hover{color:var(--stone-700);}
+    .tab.on{background:var(--sage);color:white;}
+
+    .card{background:var(--stone-50);border:1px solid var(--stone-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:hidden;}
+    .card-head{padding:15px 20px;border-bottom:1px solid var(--stone-200);display:flex;align-items:center;justify-content:space-between;}
+    .card-title{font-family:var(--display);font-size:16px;font-weight:600;}
+    .card-sub{font-size:11px;color:var(--stone-500);margin-top:2px;}
+
+    .p-row{display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--stone-200);font-size:13px;}
+    .p-row:last-child{border-bottom:none;}
+    .p-row:hover{background:var(--stone-100);}
+    .p-ic{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+    .p-ev{font-weight:600;}
+    .p-meta{font-size:11px;color:var(--stone-500);margin-top:1px;}
+    .p-amt{font-family:var(--display);font-size:18px;font-weight:600;margin-left:auto;margin-right:12px;white-space:nowrap;}
+    .tag{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;}
+    .tg-paid{background:var(--green-lt);color:var(--green);}
+    .tg-pend{background:var(--amber-lt);color:var(--amber);}
+    .tg-fail{background:var(--red-lt);color:var(--red);}
+    .tg-ref{background:var(--violet-lt);color:var(--violet);}
+    .btn{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;font-family:var(--body);border:1px solid var(--stone-200);background:var(--stone-50);color:var(--stone-700);cursor:pointer;transition:.14s;}
+    .btn:hover{background:var(--stone-100);}
+    .btn-sage{background:var(--sage);color:white;border-color:var(--sage);}
+    .btn-sage:hover{opacity:.9;}
+    .btn-red{color:var(--red);border-color:var(--red-lt);}
+    .btn-red:hover{background:var(--red-lt);}
+    .empty{text-align:center;padding:48px;color:var(--stone-400);font-size:13px;}
+    </style>
+</h:head>
+<h:body>
+
+<ui:include src="admin_sidebar.xhtml">
+    <ui:param name="activeMenu" value="payments"/>
+</ui:include>
+
+<div class="main" id="mainContent">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title">Payments</div>
+            <div class="topbar-sub">Verify, refund and track platform revenue</div>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <h:messages globalOnly="true"
+            style="display:block;margin-bottom:14px;padding:12px 16px;background:var(--sage-light);border-radius:10px;font-size:13px;color:var(--sage);" layout="list"/>
+
+        <!-- KPI -->
+        <div class="kpi-row">
+            <div class="kpi"><div class="kpi-ic">💰</div>
+                <div class="kpi-val">₹<h:outputText value="#{paymentBean.totalRevenueSafe}"/></div>
+                <div class="kpi-lbl">Total revenue (Paid)</div></div>
+            <div class="kpi"><div class="kpi-ic">⏳</div>
+                <div class="kpi-val"><h:outputText value="#{paymentBean.pendingCount}"/></div>
+                <div class="kpi-lbl">Pending verification</div></div>
+            <div class="kpi"><div class="kpi-ic">↩️</div>
+                <div class="kpi-val"><h:outputText value="#{paymentBean.refundedCount}"/></div>
+                <div class="kpi-lbl">Refunded</div></div>
+            <div class="kpi"><div class="kpi-ic">🧾</div>
+                <div class="kpi-val"><h:outputText value="#{paymentBean.totalTransactions}"/></div>
+                <div class="kpi-lbl">Total transactions</div></div>
+        </div>
+
+        <!-- PENDING VERIFICATIONS -->
+        <h:form id="pendForm">
+            <div class="card" style="margin-bottom:18px;">
+                <div class="card-head">
+                    <div>
+                        <div class="card-title">⏳ Pending Verifications</div>
+                        <div class="card-sub">Approve to confirm — participant gets an email automatically</div>
+                    </div>
+                    <h:commandButton value="↻ Refresh" styleClass="btn"
+                                     action="#{paymentBean.loadPending}"/>
+                </div>
+                <ui:fragment rendered="#{empty paymentBean.payments}">
+                    <div class="empty">No pending payments. All caught up ✓</div>
+                </ui:fragment>
+                <ui:repeat value="#{paymentBean.payments}" var="p">
+                    <div class="p-row">
+                        <div class="p-ic" style="background:var(--amber-lt);">⏳</div>
+                        <div>
+                            <div class="p-ev">
+                                <h:outputText value="#{p.registrationId.eventId.title}"/>
+                                — <h:outputText value="#{p.registrationId.userId.name}"/>
+                            </div>
+                            <div class="p-meta">
+                                #PAY-<h:outputText value="#{p.paymentId}"/>
+                                · <h:outputText value="#{p.paymentMethod}"/>
+                                · <h:outputText value="#{p.paymentDate}"><f:convertDateTime pattern="MMM d, yyyy HH:mm"/></h:outputText>
+                            </div>
+                        </div>
+                        <div class="p-amt">₹<h:outputText value="#{p.amount}"/></div>
+                        <h:commandButton value="✓ Approve" styleClass="btn btn-sage"
+                                         action="#{paymentBean.verify(p.paymentId)}"/>
+                        <h:commandButton value="✕ Fail" styleClass="btn btn-red"
+                                         action="#{paymentBean.markFailed(p.paymentId)}"
+                                         onclick="return confirm('Mark this payment as Failed?')"/>
+                    </div>
+                </ui:repeat>
+            </div>
+        </h:form>
+
+        <!-- ALL / REFUNDED quick views -->
+        <h:form id="otherForm">
+            <div class="card">
+                <div class="card-head">
+                    <div>
+                        <div class="card-title">Other Views</div>
+                        <div class="card-sub">Load refunded list or refund a paid transaction by ID</div>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <h:commandButton value="Load Refunded" styleClass="btn"
+                                         action="#{paymentBean.loadRefunded}"/>
+                    </div>
+                </div>
+                <div style="padding:16px 20px;display:flex;gap:10px;align-items:flex-end;border-bottom:1px solid var(--stone-200);">
+                    <div style="flex:0 0 180px;">
+                        <label style="display:block;font-size:11px;font-weight:600;color:var(--stone-500);margin-bottom:5px;">PAYMENT ID</label>
+                        <h:inputText value="#{paymentBean.paymentId}" style="width:100%;padding:9px 12px;border:1px solid var(--stone-200);border-radius:8px;font-family:var(--body);font-size:13px;"/>
+                    </div>
+                    <div style="flex:1;">
+                        <label style="display:block;font-size:11px;font-weight:600;color:var(--stone-500);margin-bottom:5px;">REFUND REASON</label>
+                        <h:inputText value="#{paymentBean.refundReason}" style="width:100%;padding:9px 12px;border:1px solid var(--stone-200);border-radius:8px;font-family:var(--body);font-size:13px;"/>
+                    </div>
+                    <h:commandButton value="↩ Process Refund" styleClass="btn btn-red"
+                                     action="#{paymentBean.refund(paymentBean.paymentId)}"
+                                     onclick="return confirm('Refund this payment?')"/>
+                </div>
+                <ui:repeat value="#{paymentBean.payments}" var="p">
+                    <div class="p-row">
+                        <div class="p-ic"
+                             style="background:#{p.paymentStatus eq 'Paid' ? 'var(--green-lt)' : (p.paymentStatus eq 'Pending' ? 'var(--amber-lt)' : (p.paymentStatus eq 'Refunded' ? 'var(--violet-lt)' : 'var(--red-lt)'))};">
+                            <h:outputText value="#{p.paymentStatus eq 'Paid' ? '✅' : (p.paymentStatus eq 'Pending' ? '⏳' : (p.paymentStatus eq 'Refunded' ? '↩️' : '❌'))}"/>
+                        </div>
+                        <div>
+                            <div class="p-ev"><h:outputText value="#{p.registrationId.eventId.title}"/> — <h:outputText value="#{p.registrationId.userId.name}"/></div>
+                            <div class="p-meta">#PAY-<h:outputText value="#{p.paymentId}"/> · <h:outputText value="#{p.paymentMethod}"/></div>
+                        </div>
+                        <div class="p-amt">₹<h:outputText value="#{p.amount}"/></div>
+                        <span class="tag #{p.paymentStatus eq 'Paid' ? 'tg-paid' : (p.paymentStatus eq 'Pending' ? 'tg-pend' : (p.paymentStatus eq 'Refunded' ? 'tg-ref' : 'tg-fail'))}">
+                            <h:outputText value="#{p.paymentStatus}"/>
+                        </span>
+                    </div>
+                </ui:repeat>
+            </div>
+        </h:form>
+
+    </div>
+</div>
+</h:body>
+</html>

@@ -27,6 +27,7 @@ import jakarta.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.math.BigDecimal;
 
 /**
  *
@@ -89,6 +90,8 @@ public class Events implements Serializable {
     @Size(max = 30)
     @Column(name = "status")
     private String status;
+    @Column(name = "fee")
+    private BigDecimal fee = BigDecimal.ZERO;
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
@@ -146,6 +149,14 @@ public class Events implements Serializable {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public BigDecimal getFee() {
+        return fee;
+    }
+
+    public void setFee(BigDecimal fee) {
+        this.fee = fee;
     }
 
     public Date getCreatedAt() {

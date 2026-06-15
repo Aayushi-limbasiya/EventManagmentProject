@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      lang="en">
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Analytics — EventMS Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&amp;family=Geist:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+    :root{
+        --stone-50:#FAFAF7;--stone-100:#F5F4EF;--stone-200:#EAE8E0;--stone-300:#D6D3C8;
+        --stone-400:#B8B4A4;--stone-500:#8A8675;--stone-600:#605D50;--stone-700:#3D3B31;--stone-800:#1C1A14;
+        --sage:#4A7058;--sage-light:#EBF2ED;--amber:#8B5E1A;--amber-mid:#E8C87A;--amber-lt:#FAF0DC;
+        --green:#3A6B4A;--green-lt:#EAF3EC;--red:#8B2E2E;--red-lt:#F5EAEA;
+        --display:'Cormorant Garamond',Georgia,serif;--body:'Geist',system-ui,sans-serif;
+        --sidebar-w:256px;--radius-sm:6px;--radius:10px;--radius-lg:14px;
+        --shadow-sm:0 1px 3px rgba(15,14,10,0.06),0 1px 2px rgba(15,14,10,0.04);
+        --transition:.25s ease;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--body);background:var(--stone-100);color:var(--stone-800);-webkit-font-smoothing:antialiased;font-size:14px;}
+    .main{flex:1;min-width:0;padding-left:var(--sidebar-w);display:flex;flex-direction:column;transition:padding-left var(--transition);min-height:100vh;}
+    .topbar{height:58px;background:var(--stone-50);border-bottom:1px solid var(--stone-200);padding:0 24px 0 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:var(--shadow-sm);}
+    .topbar-title{font-family:var(--display);font-size:20px;font-weight:600;color:var(--stone-800);}
+    .topbar-sub{font-size:12px;color:var(--stone-500);margin-top:1px;}
+    .content{padding:24px 28px 40px;flex:1;}
+    .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+    .kpi{background:var(--stone-50);border:1px solid var(--stone-200);border-radius:var(--radius-lg);padding:18px 20px;box-shadow:var(--shadow-sm);}
+    .kpi-val{font-family:var(--display);font-size:30px;font-weight:600;color:var(--stone-800);line-height:1;margin-bottom:4px;}
+    .kpi-label{font-size:12px;color:var(--stone-500);}
+    .kpi-icon{font-size:20px;margin-bottom:10px;}
+    .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+    .card{background:var(--stone-50);border:1px solid var(--stone-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:hidden;}
+    .card-head{padding:15px 20px;border-bottom:1px solid var(--stone-200);}
+    .card-title{font-family:var(--display);font-size:16px;font-weight:600;color:var(--stone-800);}
+    .card-sub{font-size:11px;color:var(--stone-500);margin-top:2px;}
+    .card-body{padding:20px;height:300px;position:relative;}
+    .full{grid-column:1 / -1;}
+    .empty-note{text-align:center;color:var(--stone-400);padding:60px 20px;font-size:13px;}
+    </style>
+</h:head>
+<h:body>
+
+<ui:include src="admin_sidebar.xhtml">
+    <ui:param name="activeMenu" value="analytics"/>
+</ui:include>
+
+<div class="main" id="mainContent">
+    <div class="topbar">
+        <div>
+            <div class="topbar-title">Analytics</div>
+            <div class="topbar-sub" id="dateStr"></div>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- Headline KPIs -->
+        <div class="kpi-row">
+            <div class="kpi"><div class="kpi-icon">👥</div><div class="kpi-val"><h:outputText value="#{adminDashBean.totalUsers}"/></div><div class="kpi-label">Total users</div></div>
+            <div class="kpi"><div class="kpi-icon">📅</div><div class="kpi-val"><h:outputText value="#{adminDashBean.totalEvents}"/></div><div class="kpi-label">Total events</div></div>
+            <div class="kpi"><div class="kpi-icon">✅</div><div class="kpi-val"><h:outputText value="#{adminDashBean.approvedCount}"/></div><div class="kpi-label">Approved events</div></div>
+            <div class="kpi"><div class="kpi-icon">⏳</div><div class="kpi-val"><h:outputText value="#{adminDashBean.pendingApprovals}"/></div><div class="kpi-label">Pending approvals</div></div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="card">
+                <div class="card-head"><div class="card-title">Events by Status</div><div class="card-sub">Distribution across all events</div></div>
+                <div class="card-body"><canvas id="eventStatusChart"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-head"><div class="card-title">Users by Role</div><div class="card-sub">Platform membership breakdown</div></div>
+                <div class="card-body"><canvas id="userRoleChart"></canvas></div>
+            </div>
+            <div class="card full">
+                <div class="card-head"><div class="card-title">Approvals Overview</div><div class="card-sub">Pending vs Approved vs Rejected</div></div>
+                <div class="card-body"><canvas id="approvalChart"></canvas></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Hidden spans carry the bean's JSON into JS -->
+<span id="evStatusLabels" style="display:none">#{adminDashBean.eventStatusLabelsJson}</span>
+<span id="evStatusValues" style="display:none">#{adminDashBean.eventStatusValuesJson}</span>
+<span id="roleLabels"     style="display:none">#{adminDashBean.userRoleLabelsJson}</span>
+<span id="roleValues"     style="display:none">#{adminDashBean.userRoleValuesJson}</span>
+<span id="approvalValues" style="display:none">#{adminDashBean.approvalValuesJson}</span>
+
+<script>
+//<![CDATA[
+document.getElementById('dateStr').textContent =
+    new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+
+function J(id, fallback){
+    try { return JSON.parse(document.getElementById(id).textContent.trim() || fallback); }
+    catch(e){ return JSON.parse(fallback); }
+}
+
+var PALETTE = ['#4A7058','#8B5E1A','#8B2E2E','#3A6B4A','#605D50','#E8C87A','#5B7FA6','#7B6FA6'];
+
+window.addEventListener('DOMContentLoaded', function(){
+    if (typeof Chart === 'undefined') return;
+    Chart.defaults.font.family = "'Geist',system-ui,sans-serif";
+    Chart.defaults.color = '#605D50';
+
+    // 1) Events by status — doughnut
+    var esL = J('evStatusLabels','[]'), esV = J('evStatusValues','[]');
+    new Chart(document.getElementById('eventStatusChart'), {
+        type:'doughnut',
+        data:{ labels:esL, datasets:[{ data:esV, backgroundColor:PALETTE, borderWidth:2, borderColor:'#FAFAF7' }] },
+        options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'right' } } }
+    });
+
+    // 2) Users by role — bar
+    var rL = J('roleLabels','[]'), rV = J('roleValues','[]');
+    new Chart(document.getElementById('userRoleChart'), {
+        type:'bar',
+        data:{ labels:rL, datasets:[{ label:'Users', data:rV, backgroundColor:'#4A7058', borderRadius:6, maxBarThickness:48 }] },
+        options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
+    });
+
+    // 3) Approvals overview — bar
+    var aV = J('approvalValues','[0,0,0]');
+    new Chart(document.getElementById('approvalChart'), {
+        type:'bar',
+        data:{ labels:['Pending','Approved','Rejected'], datasets:[{ label:'Events', data:aV, backgroundColor:['#8B5E1A','#3A6B4A','#8B2E2E'], borderRadius:6, maxBarThickness:60 }] },
+        options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
+    });
+});
+//]]>
+</script>
+</h:body>
+</html>

@@ -7,6 +7,7 @@ package CDI;
 import EJB.PaymentBeanLocal;
 import Entity.Payments;
 import jakarta.ejb.EJB;
+import jakarta.annotation.PostConstruct;
 //import jakarta.enterprise.context.ViewScoped;
 import jakarta.inject.Named;
 import jakarta.faces.application.FacesMessage;
@@ -44,6 +45,18 @@ public class PaymentBean implements Serializable {
     private String refundReason;
 
     private Payments selectedPayment;
+
+    // ===============================
+    // 🔹 AUTO-LOAD pending on page open
+    // ===============================
+    @PostConstruct
+    public void init() {
+        try {
+            loadPending();
+        } catch (Exception e) {
+            // ignore — page still renders with empty list
+        }
+    }
 
     // ===============================
     // 🔹 MAKE PAYMENT
@@ -182,6 +195,47 @@ public class PaymentBean implements Serializable {
     }
 
     // ===============================
+    // 🔹 KPI HELPERS (for admin_payments.xhtml)
+    // ===============================
+
+    /** Total revenue, never null (safe for EL) */
+    public BigDecimal getTotalRevenueSafe() {
+        try {
+            BigDecimal t = paymentService.getTotalRevenue();
+            return (t != null) ? t : BigDecimal.ZERO;
+        } catch (Exception e) {
+            return BigDecimal.ZERO;
+        }
+    }
+
+    /** Count of payments awaiting verification */
+    public long getPendingCount() {
+        try {
+            Collection<Payments> c = paymentService.getPendingVerifications();
+            return (c != null) ? c.size() : 0;
+        } catch (Exception e) { return 0; }
+    }
+
+    /** Count of refunded payments */
+    public long getRefundedCount() {
+        try {
+            Collection<Payments> c = paymentService.getRefundedPayments();
+            return (c != null) ? c.size() : 0;
+        } catch (Exception e) { return 0; }
+    }
+
+    /** Total transactions on the platform (from report map) */
+    public long getTotalTransactions() {
+        try {
+            Map<String, Object> r = paymentService.getPaymentReport();
+            if (r != null && r.get("totalTransactions") != null) {
+                return Long.parseLong(r.get("totalTransactions").toString());
+            }
+        } catch (Exception ignore) { }
+        return getPendingCount() + getRefundedCount();
+    }
+
+    // ===============================
     // 🔹 GETTERS & SETTERS
     // ===============================
 
@@ -195,6 +249,14 @@ public class PaymentBean implements Serializable {
 
     public void setRegistrationId(int registrationId) {
         this.registrationId = registrationId;
+    }
+
+    public int getPaymentId() {
+        return paymentId;
+    }
+
+    public void setPaymentId(int paymentId) {
+        this.paymentId = paymentId;
     }
 
     public BigDecimal getAmount() {

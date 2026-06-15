@@ -1,0 +1,147 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets">
+<!--
+  ============================================================
+   SHARED ORGANIZER SIDEBAR  (organizer_sidebar.xhtml)
+   Include in any page:
+     <ui:include src="organizer_sidebar.xhtml">
+         <ui:param name="activeMenu" value="dashboard"/>
+     </ui:include>
+   Edit ONLY this file to change the sidebar everywhere.
+   activeMenu: dashboard | events | create | schedule |
+               participants | registrations | feedback |
+               certificates | profile
+  ============================================================
+-->
+<style>
+    .osb-toggle{position:fixed;top:14px;left:14px;z-index:200;width:34px;height:34px;border-radius:11px;background:rgba(13,92,99,.95);border:1px solid rgba(255,255,255,.15);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+    .osb-toggle span{display:block;width:16px;height:1.5px;background:rgba(255,255,255,.85);border-radius:2px;transition:.2s;}
+    .osb-toggle.open span:nth-child(1){transform:translateY(5.5px) rotate(45deg);}
+    .osb-toggle.open span:nth-child(2){opacity:0;}
+    .osb-toggle.open span:nth-child(3){transform:translateY(-5.5px) rotate(-45deg);}
+    .osb{position:fixed;top:0;left:0;bottom:0;width:256px;background:linear-gradient(180deg,#0B3D2E,#0F4F3A);display:flex;flex-direction:column;z-index:100;overflow-y:auto;overflow-x:hidden;transition:width .25s ease,transform .25s ease;}
+    .osb.collapsed{width:0;transform:translateX(-100%);}
+    .osb::-webkit-scrollbar{width:0;}
+    .osb-logo{display:flex;align-items:center;gap:11px;padding:20px 18px 18px 54px;border-bottom:1px solid rgba(255,255,255,.08);text-decoration:none;white-space:nowrap;}
+    .osb-logo-icon{width:32px;height:32px;border-radius:11px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .osb-logo-icon svg{width:16px;height:16px;fill:white;}
+    .osb-logo-text{font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:white;}
+    .osb-logo-tag{margin-left:auto;font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.12);padding:2px 7px;border-radius:20px;white-space:nowrap;}
+    .osb-user{margin:12px 14px 6px;padding:11px 13px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);border-radius:11px;display:flex;align-items:center;gap:10px;white-space:nowrap;cursor:pointer;transition:.15s;text-decoration:none;}
+    .osb-user:hover{background:rgba(255,255,255,.13);}
+    .osb-av{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;flex-shrink:0;}
+    .osb-uname{font-size:13px;font-weight:600;color:white;}
+    .osb-utag{font-size:10px;color:rgba(255,255,255,.45);margin-top:1px;}
+    .osb-sec{padding:14px 18px 5px;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.3);}
+    .osb-a{display:flex;align-items:center;gap:9px;padding:8px 15px;margin:1px 8px;border-radius:8px;font-size:13px;font-weight:400;color:rgba(255,255,255,.6);text-decoration:none;transition:.14s;white-space:nowrap;}
+    .osb-a:hover{background:rgba(255,255,255,.07);color:white;}
+    .osb-a.on{background:rgba(255,255,255,.14);color:white;font-weight:600;}
+    .osb-a svg{width:14px;height:14px;flex-shrink:0;opacity:.65;}
+    .osb-a.on svg,.osb-a:hover svg{opacity:1;}
+    .osb-badge{margin-left:auto;font-size:9px;font-weight:700;background:rgba(255,255,255,.2);color:white;padding:2px 7px;border-radius:20px;}
+    .osb-sep{height:1px;background:rgba(255,255,255,.07);margin:8px 14px;}
+    .osb-foot{margin-top:auto;border-top:1px solid rgba(255,255,255,.07);padding:10px 8px 14px;}
+    .osb-fa{display:flex;align-items:center;gap:9px;padding:8px 15px;border-radius:8px;font-size:13px;color:rgba(255,255,255,.5);text-decoration:none;transition:.14s;white-space:nowrap;background:none;border:none;width:100%;font-family:inherit;cursor:pointer;}
+    .osb-fa:hover{background:rgba(255,255,255,.06);color:white;}
+    .osb-fa.out:hover{background:rgba(255,80,80,.15);color:#FF9999;}
+    .osb-fa svg{width:14px;height:14px;opacity:.5;}
+</style>
+
+<button class="osb-toggle open" id="osbToggle" onclick="osbToggle()" title="Toggle sidebar">
+    <span></span><span></span><span></span>
+</button>
+
+<div class="osb" id="osb">
+    <a href="organizer_dashboard.xhtml" class="osb-logo">
+        <div class="osb-logo-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg></div>
+        <span class="osb-logo-text">EventMS</span>
+        <span class="osb-logo-tag">Organizer</span>
+    </a>
+
+    <a href="organizer_profile.xhtml" class="osb-user">
+        <div class="osb-av"><h:outputText value="#{authBean.loggedInUser.name.substring(0,2).toUpperCase()}"/></div>
+        <div>
+            <div class="osb-uname"><h:outputText value="#{authBean.loggedInUser.name}"/></div>
+            <div class="osb-utag">Event Organizer</div>
+        </div>
+    </a>
+
+    <div class="osb-sec">My Workspace</div>
+    <a href="organizer_dashboard.xhtml" class="osb-a #{activeMenu eq 'dashboard' ? 'on' : ''}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+    </a>
+    <a href="organizer_my_events.xhtml" class="osb-a #{activeMenu eq 'events' ? 'on' : ''}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        My Events
+    </a>
+    <a href="organizer_create_event.xhtml" class="osb-a #{activeMenu eq 'create' ? 'on' : ''}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Create Event
+    </a>
+
+    <div class="osb-sep"></div>
+    <div class="osb-sec">Event Management</div>
+    <a href="organizer_schedule.xhtml" class="osb-a #{activeMenu eq 'schedule' ? 'on' : ''}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Schedule &amp; Venues
+    </a>
+    <a href="organizer_participants.xhtml" class="osb-a #{activeMenu eq 'participants' ? 'on' : ''}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Participants
+    </a>
+    <a href="organizer_registrations.xhtml" class="osb-a #{activeMenu eq 'registrations' ? 'on' : ''}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Registrations
+    </a>
+
+    <div class="osb-sep"></div>
+    <div class="osb-sec">Analytics</div>
+    <a href="organizer_feedback.xhtml" class="osb-a #{activeMenu eq 'feedback' ? 'on' : ''}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Feedback &amp; Ratings
+    </a>
+    <a href="organizer_certificates.xhtml" class="osb-a #{activeMenu eq 'certificates' ? 'on' : ''}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Certificates
+    </a>
+
+    <div class="osb-foot">
+        <a href="organizer_profile.xhtml" class="osb-fa #{activeMenu eq 'profile' ? 'on' : ''}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            My Profile
+        </a>
+        <h:form>
+            <h:commandLink action="#{authBean.logout}" styleClass="osb-fa out">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Sign out
+            </h:commandLink>
+        </h:form>
+    </div>
+</div>
+
+<script>
+//<![CDATA[
+(function(){
+  function mainEl(){
+    return document.querySelector('.main') || document.getElementById('main') || document.getElementById('mainContent');
+  }
+  function applyPadding(open){ var m = mainEl(); if(m) m.style.paddingLeft = open ? '256px' : '0'; }
+  window.osbToggle = function(){
+    var sb = document.getElementById('osb');
+    var open = sb.classList.contains('collapsed');
+    sb.classList.toggle('collapsed');
+    document.getElementById('osbToggle').classList.toggle('open', open);
+    applyPadding(open);
+    localStorage.setItem('orgSidebarOpen', open);
+  };
+  var saved = localStorage.getItem('orgSidebarOpen');
+  var startOpen = (saved !== 'false');
+  var sb = document.getElementById('osb');
+  if(!startOpen){ sb.classList.add('collapsed'); document.getElementById('osbToggle').classList.remove('open'); }
+  applyPadding(startOpen);
+})();
+//]]>
+</script>
+</ui:composition>

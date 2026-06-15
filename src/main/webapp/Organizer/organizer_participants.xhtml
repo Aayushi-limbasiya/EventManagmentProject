@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
+<html xmlns:ui="jakarta.faces.facelets"
+      xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
       lang="en">
@@ -131,30 +132,9 @@
 </h:head>
 <h:body>
 
-<button class="sb-toggle open" id="sbToggle" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
-
-<!-- SIDEBAR -->
-<div class="sidebar" id="sidebar">
-    <a href="../index.xhtml" class="sb-logo"><div class="sb-logo-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg></div><span class="sb-logo-text">EventMS</span><span class="sb-logo-tag">Organizer</span></a>
-    <a href="organizer_profile.xhtml" class="sb-user" style="text-decoration:none;"><div class="sb-av"><h:outputText value="#{authBean.loggedInUser.name.substring(0,2).toUpperCase()}"/></div><div><div class="sb-uname"><h:outputText value="#{authBean.loggedInUser.name}"/></div><div class="sb-utag">Event Organizer</div></div></a>
-    <div class="sb-section">My Workspace</div>
-    <a href="organizer_dashboard.xhtml" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
-    <a href="organizer_my_events.xhtml" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>My Events</a>
-    <a href="organizer_create_event.xhtml" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Create Event<span class="sb-badge">New</span></a>
-    <div class="sb-sep"/>
-    <div class="sb-section">Event Management</div>
-    <a href="organizer_schedule.xhtml" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Schedule &amp; Venues</a>
-    <a href="organizer_participants.xhtml" class="sb-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>Participants</a>
-    <a href="organizer_registrations.xhtml" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Registrations</a>
-    <div class="sb-sep"/>
-    <div class="sb-section">Analytics</div>
-    <a href="#" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Feedback &amp; Ratings</a>
-    <a href="#" class="sb-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Certificates</a>
-    <div class="sb-footer">
-        <a href="#" class="sb-foot-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>My Profile</a>
-        <a href="../login.xhtml" class="sb-foot-link out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign out</a>
-    </div>
-</div>
+<ui:include src="organizer_sidebar.xhtml">
+    <ui:param name="activeMenu" value="participants"/>
+</ui:include>
 
 <!-- MAIN -->
 <div class="main" id="mainContent">
@@ -300,10 +280,7 @@
 <div class="toast" id="toast"><div class="toast-icon" id="tIcon">✅</div><div style="flex:1;"><div class="toast-title" id="tTitle">Done!</div><div class="toast-msg" id="tMsg"></div></div><button class="toast-close" onclick="hideToast()">×</button><div class="toast-bar" id="tBar"></div></div>
 
 <script>//<![CDATA[
-var so=true;
-function toggleSidebar(){so=!so;document.getElementById('sidebar').classList.toggle('collapsed',!so);document.getElementById('mainContent').classList.toggle('expanded',!so);document.getElementById('sbToggle').classList.toggle('open',so);localStorage.setItem('so',so);}
-(function(){if(localStorage.getItem('so')==='false')toggleSidebar();})();
-
+/* toggle handled by organizer_sidebar.xhtml */
 // Click on event card → submit the hidden JSF form to call toggleExpand()
 function toggleEvent(eventId) {
     var btn = document.getElementById('expandForm-' + eventId + ':expandBtn-' + eventId);

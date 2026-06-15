@@ -148,6 +148,32 @@ public class PaymentBean implements PaymentBeanLocal {
         }
         payment.setPaymentStatus("Paid");
         em.merge(payment);
+
+        // ── Email notification to participant on approval ──
+        try {
+            Entity.Users participant = payment.getRegistrationId().getUserId();
+            Entity.Events event      = payment.getRegistrationId().getEventId();
+
+            String subject = "Payment Confirmed - " + event.getTitle();
+            String body =
+                "Dear " + participant.getName() + ",\n\n" +
+                "Your payment has been verified and confirmed!\n\n" +
+                "------------------------------\n" +
+                "  PAYMENT RECEIPT\n" +
+                "------------------------------\n" +
+                "  Event      : " + event.getTitle() + "\n" +
+                "  Amount     : Rs." + payment.getAmount() + "\n" +
+                "  Method     : " + payment.getPaymentMethod() + "\n" +
+                "  Payment ID : #PAY-" + payment.getPaymentId() + "\n" +
+                "  Status     : PAID\n" +
+                "------------------------------\n\n" +
+                "Your spot is confirmed. See you at the event!\n\n" +
+                "- EventMS Team";
+
+            EmailUtil.sendEmail(participant.getEmail(), subject, body);
+        } catch (Exception e) {
+            System.err.println("Payment email failed: " + e.getMessage());
+        }
     }
 
     @Override

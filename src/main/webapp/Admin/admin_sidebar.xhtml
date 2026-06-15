@@ -1,0 +1,140 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets">
+<!--
+  ============================================================
+   SHARED ADMIN SIDEBAR  (admin_sidebar.xhtml)
+   Include in any page:
+     <ui:include src="admin_sidebar.xhtml">
+         <ui:param name="activeMenu" value="dashboard"/>
+     </ui:include>
+   Edit ONLY this file to change the sidebar everywhere.
+   activeMenu: dashboard | users | events | approvals |
+               venues | payments | analytics | certificates | profile
+   (Removed: Notifications, Feedback Reports, Registrations, Settings)
+  ============================================================
+-->
+<style>
+    .asb-toggle{position:fixed;top:14px;left:14px;z-index:200;width:34px;height:34px;border-radius:6px;background:#1C1A14;border:1px solid rgba(255,255,255,0.1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(0,0,0,.25);}
+    .asb-toggle:hover{background:#3D3B31;}
+    .asb-toggle span{display:block;width:16px;height:1.5px;background:rgba(255,255,255,0.7);border-radius:2px;transition:all .2s;}
+    .asb-toggle.open span:nth-child(1){transform:translateY(5.5px) rotate(45deg);}
+    .asb-toggle.open span:nth-child(2){opacity:0;}
+    .asb-toggle.open span:nth-child(3){transform:translateY(-5.5px) rotate(-45deg);}
+    .asb{position:fixed;inset-block:0;left:0;width:256px;background:#1C1A14;display:flex;flex-direction:column;z-index:100;overflow-y:auto;overflow-x:hidden;transition:width .25s ease,transform .25s ease;}
+    .asb.collapsed{width:0;transform:translateX(-100%);}
+    .asb::-webkit-scrollbar{width:0;}
+    .asb-stripe{height:2px;background:linear-gradient(90deg,#4A7058 0%,#E8C87A 100%);flex-shrink:0;}
+    .asb-logo{display:flex;align-items:center;gap:11px;padding:20px 18px 18px 54px;border-bottom:1px solid rgba(255,255,255,0.06);text-decoration:none;white-space:nowrap;}
+    .asb-logo-mark{width:32px;height:32px;border-radius:6px;background:#4A7058;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .asb-logo-mark svg{width:16px;height:16px;fill:white;}
+    .asb-logo-text{font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;font-weight:600;color:#FAFAF7;}
+    .asb-logo-role{margin-left:auto;font-size:9px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:#8A8675;border:1px solid rgba(255,255,255,0.08);padding:2px 7px;border-radius:20px;white-space:nowrap;}
+    .asb-identity{margin:12px 14px 6px;padding:11px 13px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:10px;display:flex;align-items:center;gap:10px;white-space:nowrap;text-decoration:none;cursor:pointer;transition:.15s;}
+    .asb-identity:hover{background:rgba(255,255,255,0.08);}
+    .asb-av{width:30px;height:30px;border-radius:50%;background:#4A7058;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:white;flex-shrink:0;}
+    .asb-name{font-size:13px;font-weight:500;color:#EAE8E0;overflow:hidden;text-overflow:ellipsis;}
+    .asb-tag{font-size:10px;color:#8A8675;margin-top:1px;}
+    .asb-section{padding:16px 18px 5px;font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#605D50;white-space:nowrap;}
+    .asb-link{display:flex;align-items:center;gap:9px;padding:8px 15px;margin:1px 8px;border-radius:6px;font-size:13px;font-weight:400;color:#B8B4A4;text-decoration:none;cursor:pointer;transition:all .14s;position:relative;white-space:nowrap;}
+    .asb-link:hover{background:rgba(255,255,255,0.05);color:#F5F4EF;}
+    .asb-link.active{background:rgba(74,112,88,0.18);color:#FAFAF7;font-weight:500;}
+    .asb-link.active::before{content:'';position:absolute;left:0;top:22%;bottom:22%;width:2px;border-radius:0 2px 2px 0;background:#4A7058;}
+    .asb-link svg{width:14px;height:14px;flex-shrink:0;opacity:.6;}
+    .asb-link.active svg,.asb-link:hover svg{opacity:1;}
+    .asb-count{margin-left:auto;font-size:10px;font-weight:600;background:#8B5E1A;color:white;padding:1px 7px;border-radius:20px;}
+    .asb-sep{height:1px;background:rgba(255,255,255,0.05);margin:8px 14px;}
+    .asb-footer{margin-top:auto;border-top:1px solid rgba(255,255,255,0.05);padding:10px 8px 14px;}
+    .asb-foot-link{display:flex;align-items:center;gap:9px;padding:8px 15px;border-radius:6px;font-size:13px;color:#8A8675;text-decoration:none;cursor:pointer;transition:all .14s;white-space:nowrap;background:none;border:none;width:100%;font-family:inherit;}
+    .asb-foot-link:hover{background:rgba(255,255,255,0.04);color:#D6D3C8;}
+    .asb-foot-link.out:hover{background:rgba(139,46,46,0.12);color:#D47878;}
+    .asb-foot-link svg{width:14px;height:14px;opacity:.5;}
+</style>
+
+<button class="asb-toggle open" id="asbToggle" onclick="asbToggle()" title="Toggle sidebar">
+    <span></span><span></span><span></span>
+</button>
+
+<div class="asb" id="asb">
+    <div class="asb-stripe"></div>
+    <a href="admin_dashboard.xhtml" class="asb-logo">
+        <div class="asb-logo-mark"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg></div>
+        <span class="asb-logo-text">EventMS</span>
+        <span class="asb-logo-role">Admin</span>
+    </a>
+
+    <a href="admin_profile.xhtml" class="asb-identity">
+        <div class="asb-av"><h:outputText value="#{authBean.loggedInUser.name.substring(0,2).toUpperCase()}"/></div>
+        <div>
+            <div class="asb-name"><h:outputText value="#{authBean.loggedInUser.name}"/></div>
+            <div class="asb-tag">Administrator</div>
+        </div>
+    </a>
+
+    <div class="asb-section">Overview</div>
+    <a href="admin_dashboard.xhtml" class="asb-link #{activeMenu eq 'dashboard' ? 'active' : ''}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard
+    </a>
+    <a href="admin_user_management.xhtml" class="asb-link #{activeMenu eq 'users' ? 'active' : ''}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>User Management
+    </a>
+    <a href="admin_all_events.xhtml" class="asb-link #{activeMenu eq 'events' ? 'active' : ''}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>All Events
+    </a>
+
+    <div class="asb-sep"></div>
+    <div class="asb-section">Manage</div>
+    <a href="admin_event_approvals.xhtml" class="asb-link #{activeMenu eq 'approvals' ? 'active' : ''}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Event Approvals
+        <span class="asb-count">#{adminDashBean.pendingApprovals}</span>
+    </a>
+    <a href="admin_venues.xhtml" class="asb-link #{activeMenu eq 'venues' ? 'active' : ''}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Venues
+    </a>
+    <a href="admin_payments.xhtml" class="asb-link #{activeMenu eq 'payments' ? 'active' : ''}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Payments
+    </a>
+
+    <div class="asb-sep"></div>
+    <div class="asb-section">Reports</div>
+    <a href="admin_analytics.xhtml" class="asb-link #{activeMenu eq 'analytics' ? 'active' : ''}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics
+    </a>
+    <a href="admin_certificates.xhtml" class="asb-link #{activeMenu eq 'certificates' ? 'active' : ''}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Certificates
+    </a>
+
+    <div class="asb-footer">
+        <a href="admin_profile.xhtml" class="asb-foot-link #{activeMenu eq 'profile' ? 'active' : ''}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>My Profile
+        </a>
+        <h:form>
+            <h:commandLink action="#{authBean.logout}" styleClass="asb-foot-link out">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign out
+            </h:commandLink>
+        </h:form>
+    </div>
+</div>
+
+<script>
+//<![CDATA[
+(function(){
+  function mainEl(){ return document.getElementById('mainContent') || document.querySelector('.main') || document.getElementById('main'); }
+  function applyPadding(open){ var m = mainEl(); if(m) m.style.paddingLeft = open ? '256px' : '0'; }
+  window.asbToggle = function(){
+    var sb = document.getElementById('asb');
+    var open = sb.classList.contains('collapsed');
+    sb.classList.toggle('collapsed');
+    document.getElementById('asbToggle').classList.toggle('open', open);
+    applyPadding(open);
+    localStorage.setItem('adminSidebarOpen', open);
+  };
+  var saved = localStorage.getItem('adminSidebarOpen');
+  var startOpen = (saved !== 'false');
+  var sb = document.getElementById('asb');
+  if(!startOpen){ sb.classList.add('collapsed'); document.getElementById('asbToggle').classList.remove('open'); }
+  applyPadding(startOpen);
+})();
+//]]>
+</script>
+</ui:composition>

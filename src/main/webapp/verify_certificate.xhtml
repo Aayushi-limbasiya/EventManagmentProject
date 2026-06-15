@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:pt="jakarta.faces.passthrough"
+      lang="en">
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Verify Certificate — EventMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&amp;family=Outfit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <style>
+    :root{--bg:#FFFFFF;--bg2:#F8F8FC;--border:#EBEBF5;--border2:#D8D7EE;
+    --indigo:#4F46E5;--violet:#7C3AED;--indigolt:#EEF2FF;
+    --green:#059669;--greenlt:#ECFDF5;--red:#DC2626;--redlt:#FEF2F2;
+    --gold:#C9A227;--goldlt:#FBF6E3;
+    --ink:#1A1833;--ink2:#3D3A5C;--ink3:#7C799E;--ink4:#AEACCB;
+    --r:10px;--rxl:22px;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Outfit',sans-serif;background:linear-gradient(160deg,#EEF2FF 0%,#F8F8FC 40%,#F3EFFE 100%);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;}
+
+    .nav{padding:18px 32px;display:flex;align-items:center;gap:11px;}
+    .nav-mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--indigo),var(--violet));display:flex;align-items:center;justify-content:center;}
+    .nav-mark svg{width:17px;height:17px;fill:white;}
+    .nav-name{font-family:'DM Serif Display',serif;font-size:19px;}
+    .nav a{margin-left:auto;color:var(--indigo);text-decoration:none;font-size:13px;font-weight:600;}
+
+    .wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:30px 20px;}
+    .box{width:100%;max-width:520px;}
+    .head{text-align:center;margin-bottom:26px;}
+    .head-ic{font-size:46px;margin-bottom:10px;}
+    .head h1{font-family:'DM Serif Display',serif;font-size:28px;margin-bottom:8px;}
+    .head p{font-size:14px;color:var(--ink3);line-height:1.6;}
+
+    .card{background:var(--bg);border:1px solid var(--border);border-radius:var(--rxl);padding:26px;box-shadow:0 10px 40px rgba(79,70,229,.08);}
+    .search-row{display:flex;gap:10px;}
+    .fi{flex:1;padding:13px 16px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:monospace;color:var(--ink);outline:none;transition:border-color .15s;}
+    .fi:focus{border-color:var(--indigo);box-shadow:0 0 0 3px var(--indigolt);}
+    .btn-v{padding:13px 26px;border-radius:12px;font-size:14px;font-weight:700;font-family:'Outfit',sans-serif;background:linear-gradient(135deg,var(--indigo),var(--violet));color:white;border:none;cursor:pointer;box-shadow:0 3px 12px rgba(79,70,229,.3);}
+    .btn-v:hover{opacity:.92;}
+    .hint{font-size:11px;color:var(--ink4);margin-top:9px;text-align:center;}
+
+    /* result */
+    .result{margin-top:20px;border-radius:18px;padding:24px;animation:pop .3s cubic-bezier(.34,1.56,.64,1);}
+    @keyframes pop{from{transform:scale(.94);opacity:0;}to{transform:scale(1);opacity:1;}}
+    .result.ok{background:var(--greenlt);border:1.5px solid #BBE5D2;}
+    .result.bad{background:var(--redlt);border:1.5px solid #F2C5C5;text-align:center;}
+    .ok-head{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+    .ok-badge{font-size:26px;}
+    .ok-title{font-family:'DM Serif Display',serif;font-size:19px;color:var(--green);}
+    .row{display:flex;gap:14px;padding:9px 0;border-bottom:1px solid rgba(5,150,105,.12);font-size:13px;}
+    .row:last-of-type{border-bottom:none;}
+    .lbl{width:120px;flex-shrink:0;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);padding-top:2px;}
+    .val{font-weight:600;color:var(--ink);}
+    .bad-ic{font-size:36px;margin-bottom:8px;}
+    .bad-t{font-family:'DM Serif Display',serif;font-size:18px;color:var(--red);margin-bottom:4px;}
+    .bad-s{font-size:13px;color:var(--ink3);}
+    .dl{display:inline-block;margin-top:16px;padding:11px 22px;border-radius:11px;background:var(--green);color:white;text-decoration:none;font-size:13px;font-weight:700;}
+    .foot{text-align:center;padding:18px;font-size:12px;color:var(--ink4);}
+    </style>
+</h:head>
+<h:body>
+
+<div class="nav">
+    <div class="nav-mark"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg></div>
+    <span class="nav-name">EventMS</span>
+    <a href="login.xhtml">Sign in →</a>
+</div>
+
+<div class="wrap">
+    <div class="box">
+        <div class="head">
+            <div class="head-ic">🛡️</div>
+            <h1>Certificate Verification</h1>
+            <p>Enter a certificate number to confirm it was genuinely<br/>issued by EventMS. No login required.</p>
+        </div>
+
+        <div class="card">
+            <h:form id="vForm">
+                <div class="search-row">
+                    <h:inputText value="#{certVerifyBean.certificateNumber}"
+                                 styleClass="fi"
+                                 pt:placeholder="CERT-1-2-AB12CD34"/>
+                    <h:commandButton value="Verify" styleClass="btn-v"
+                                     action="#{certVerifyBean.verify}"/>
+                </div>
+                <div class="hint">Find the number at the bottom of any EventMS certificate PDF</div>
+
+                <!-- VALID -->
+                <h:panelGroup layout="block" rendered="#{certVerifyBean.searched and certVerifyBean.valid}">
+                    <div class="result ok">
+                        <div class="ok-head">
+                            <span class="ok-badge">✅</span>
+                            <span class="ok-title">Authentic Certificate</span>
+                        </div>
+                        <div class="row"><span class="lbl">Participant</span><span class="val"><h:outputText value="#{certVerifyBean.result.registrationId.userId.name}"/></span></div>
+                        <div class="row"><span class="lbl">Event</span><span class="val"><h:outputText value="#{certVerifyBean.result.registrationId.eventId.title}"/></span></div>
+                        <div class="row"><span class="lbl">Organizer</span><span class="val"><h:outputText value="#{certVerifyBean.result.registrationId.eventId.userId.name}"/></span></div>
+                        <div class="row"><span class="lbl">Issued on</span><span class="val"><h:outputText value="#{certVerifyBean.result.issueDate}"><f:convertDateTime pattern="dd MMMM yyyy"/></h:outputText></span></div>
+                        <div class="row"><span class="lbl">Certificate №</span><span class="val" style="font-family:monospace;"><h:outputText value="#{certVerifyBean.result.certificateNumber}"/></span></div>
+                        <a class="dl" href="#{request.contextPath}/certificate/download?number=#{certVerifyBean.result.certificateNumber}">⬇ Download PDF</a>
+                    </div>
+                </h:panelGroup>
+
+                <!-- INVALID -->
+                <h:panelGroup layout="block" rendered="#{certVerifyBean.searched and not certVerifyBean.valid}">
+                    <div class="result bad">
+                        <div class="bad-ic">❌</div>
+                        <div class="bad-t">Certificate Not Found</div>
+                        <div class="bad-s">This number does not match any certificate issued by EventMS.<br/>Check for typos and try again.</div>
+                    </div>
+                </h:panelGroup>
+            </h:form>
+        </div>
+
+        <div class="foot">EventMS · Every certificate carries a tamper-proof unique ID</div>
+    </div>
+</div>
+</h:body>
+</html>

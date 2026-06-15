@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      lang="en">
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Certificates — EventMS Organizer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+    <style>
+    :root{
+        --teal-900:#0B3D2E;--teal-800:#0F4F3A;--teal-600:#178E69;--teal-50:#EDF7F2;
+        --cream:#FAF7F0;--paper:#FFFFFF;--line:#E8E3D8;--line-2:#D8D2C4;
+        --ink:#1F2A24;--ink-2:#4A564E;--ink-3:#8A948C;
+        --gold:#C9A227;--gold-lt:#FBF6E3;
+        --green:#1B7A4E;--green-lt:#E9F6EF;--amber:#A8731C;--amber-lt:#FBF2E2;--red:#A33B3B;--red-lt:#F8ECEC;
+        --display:'Fraunces',Georgia,serif;--body:'Inter',system-ui,sans-serif;
+        --sw:256px;--r:10px;--rl:14px;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--body);background:var(--cream);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;}
+    .main{padding-left:var(--sw);display:flex;flex-direction:column;min-height:100vh;transition:padding-left .25s ease;}
+    .hd{height:60px;background:var(--paper);border-bottom:1px solid var(--line);padding:0 26px;display:flex;align-items:center;position:sticky;top:0;z-index:50;}
+    .hd-t{font-family:var(--display);font-size:20px;font-weight:600;}
+    .hd-s{font-size:12px;color:var(--ink-3);margin-top:1px;}
+    .pg{padding:24px 28px;flex:1;}
+
+    .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--rl);overflow:hidden;margin-bottom:18px;}
+    .card-head{padding:16px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;}
+    .card-title{font-family:var(--display);font-size:16px;font-weight:600;}
+    .card-sub{font-size:11px;color:var(--ink-3);margin-top:2px;}
+    .card-body{padding:20px 22px;}
+
+    .issue-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;}
+    .fg{flex:1;min-width:260px;}
+    .fl{display:block;font-size:11px;font-weight:600;color:var(--ink-3);margin-bottom:6px;letter-spacing:.05em;text-transform:uppercase;}
+    select.fi{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:var(--r);font-size:14px;font-family:var(--body);background:white;outline:none;}
+    select.fi:focus{border-color:var(--teal-600);}
+    .btn{padding:11px 20px;border-radius:var(--r);font-size:13px;font-weight:600;font-family:var(--body);border:1px solid var(--line);background:white;color:var(--ink-2);cursor:pointer;transition:.15s;}
+    .btn:hover{background:var(--cream);}
+    .btn-teal{background:var(--teal-800);color:white;border-color:var(--teal-800);}
+    .btn-teal:hover{background:var(--teal-600);}
+    .note{background:var(--gold-lt);border:1px solid #EAD9A0;border-radius:var(--r);padding:10px 14px;font-size:12px;color:#8A6D14;margin-top:14px;}
+
+    .c-row{display:flex;align-items:center;gap:14px;padding:13px 22px;border-bottom:1px solid var(--line);font-size:13px;}
+    .c-row:last-child{border-bottom:none;}
+    .c-row:hover{background:var(--cream);}
+    .c-ic{width:38px;height:38px;border-radius:9px;background:var(--gold-lt);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+    .c-name{font-weight:600;}
+    .c-no{font-size:11px;font-family:monospace;color:var(--ink-3);}
+    .c-date{font-size:11px;color:var(--ink-3);margin-left:auto;margin-right:12px;white-space:nowrap;}
+    .btn-sm{padding:7px 13px;border-radius:8px;font-size:12px;font-weight:600;background:var(--teal-50);color:var(--teal-800);border:1px solid #CBE5D8;cursor:pointer;text-decoration:none;}
+    .btn-sm:hover{background:#DEF0E7;}
+    .count-pill{background:var(--teal-50);color:var(--teal-800);font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;border:1px solid #CBE5D8;}
+    .empty{text-align:center;padding:44px;color:var(--ink-3);font-size:13px;}
+    </style>
+</h:head>
+<h:body>
+
+<ui:include src="organizer_sidebar.xhtml">
+    <ui:param name="activeMenu" value="certificates"/>
+</ui:include>
+
+<div class="main" id="main">
+    <div class="hd">
+        <div>
+            <div class="hd-t">Certificates</div>
+            <div class="hd-s">Issue participation certificates for your events</div>
+        </div>
+    </div>
+
+    <div class="pg">
+
+        <h:messages globalOnly="true"
+            style="display:block;margin-bottom:14px;padding:12px 16px;background:var(--teal-50);border-radius:10px;font-size:13px;color:var(--teal-800);" layout="list"/>
+
+        <!-- ISSUE PANEL -->
+        <h:form id="issueForm">
+            <div class="card">
+                <div class="card-head">
+                    <div>
+                        <div class="card-title">🎓 Issue Certificates</div>
+                        <div class="card-sub">Select an event — all Confirmed participants get a certificate (duplicates auto-skipped)</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="issue-row">
+                        <div class="fg">
+                            <label class="fl">Select Event</label>
+                            <h:selectOneMenu value="#{orgCertBean.selectedEventId}" styleClass="fi">
+                                <f:selectItem itemLabel="— choose an event —" itemValue="0"/>
+                                <f:selectItems value="#{orgCertBean.myEvents}" var="ev"
+                                               itemLabel="#{ev.title} (#{ev.status})"
+                                               itemValue="#{ev.eventId}"/>
+                            </h:selectOneMenu>
+                        </div>
+                        <h:commandButton value="View Issued" styleClass="btn"
+                                         action="#{orgCertBean.loadEventCertificates}"/>
+                        <h:commandButton value="🏅 Issue for All Confirmed" styleClass="btn btn-teal"
+                                         action="#{orgCertBean.issueForEvent}"
+                                         onclick="return confirm('Issue certificates for ALL confirmed participants of this event?')"/>
+                    </div>
+                    <div class="note">💡 Best practice: issue certificates after the event is over. Participants instantly see them in their dashboard and can download the PDF.</div>
+                </div>
+            </div>
+        </h:form>
+
+        <!-- ISSUED LIST -->
+        <h:form id="listForm">
+            <div class="card">
+                <div class="card-head">
+                    <div>
+                        <div class="card-title">Issued Certificates</div>
+                        <div class="card-sub">For the selected event</div>
+                    </div>
+                    <span class="count-pill"><h:outputText value="#{orgCertBean.issuedCount}"/> issued</span>
+                </div>
+                <ui:fragment rendered="#{empty orgCertBean.eventCertificates}">
+                    <div class="empty">Select an event and click "View Issued" to see certificates here.</div>
+                </ui:fragment>
+                <ui:repeat value="#{orgCertBean.eventCertificates}" var="c">
+                    <div class="c-row">
+                        <div class="c-ic">🏅</div>
+                        <div>
+                            <div class="c-name"><h:outputText value="#{c.registrationId.userId.name}"/></div>
+                            <div class="c-no"><h:outputText value="#{c.certificateNumber}"/></div>
+                        </div>
+                        <div class="c-date">
+                            <h:outputText value="#{c.issueDate}"><f:convertDateTime pattern="dd MMM yyyy"/></h:outputText>
+                        </div>
+                        <a class="btn-sm"
+                           href="#{request.contextPath}/certificate/download?number=#{c.certificateNumber}">⬇ PDF</a>
+                    </div>
+                </ui:repeat>
+            </div>
+        </h:form>
+
+    </div>
+</div>
+</h:body>
+</html>
