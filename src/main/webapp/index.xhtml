@@ -8,7 +8,7 @@
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        :root {
+/*        :root {
             --brand:       #2D5BE3;
             --brand-dark:  #1A3DA8;
             --brand-light: #EEF3FF;
@@ -27,7 +27,34 @@
             --shadow-sm:   0 1px 3px rgba(13,17,23,0.07), 0 1px 2px rgba(13,17,23,0.04);
             --shadow-md:   0 4px 16px rgba(13,17,23,0.10), 0 2px 6px rgba(13,17,23,0.06);
             --shadow-lg:   0 16px 48px rgba(13,17,23,0.12), 0 6px 18px rgba(13,17,23,0.07);
-        }
+        }*/
+
+         :root {
+    --brand:       #8B6F47;
+    --brand-dark:  #6B5335;
+    --brand-light: #F8F3EA;
+
+    --accent:      #C58B39;
+
+    --ink:         #3A2F24;
+    --ink-2:       #5A4D3F;
+    --ink-3:       #8B7B68;
+
+    --surface:     #FFFDF8;
+    --surface-2:   #F8F3EA;
+    --surface-3:   #EFE7D8;
+
+    --border:      #DDD2C0;
+
+    --radius-sm:   8px;
+    --radius-md:   14px;
+    --radius-lg:   22px;
+    --radius-xl:   32px;
+
+    --shadow-sm:   0 1px 3px rgba(58,47,36,0.08);
+    --shadow-md:   0 4px 16px rgba(58,47,36,0.10);
+    --shadow-lg:   0 16px 48px rgba(58,47,36,0.12);
+}
 
         html { scroll-behavior: smooth; }
 
@@ -42,7 +69,7 @@
         /* ── NAV ─────────────────────────────────────────────────── */
         nav {
             position: sticky; top: 0; z-index: 100;
-            background: rgba(237,238,243,0.93);
+            background: rgba(255,253,248,0.95);
             backdrop-filter: blur(14px);
             border-bottom: 1px solid var(--border);
             padding: 0 5%;
@@ -67,7 +94,8 @@
             font-size: 14px; font-weight: 500; color: var(--ink-2);
             text-decoration: none; transition: background 0.15s, color 0.15s;
         }
-        .nav-links a:hover { background: var(--surface-2); color: var(--ink); }
+        .nav-links a:hover { background: #EFE7D8;
+    color: #6B5335; }
         .nav-cta { display: flex; gap: 10px; align-items: center; }
         .btn-ghost {
             padding: 8px 18px; border-radius: var(--radius-sm);
@@ -76,16 +104,22 @@
             background: transparent; cursor: pointer;
             text-decoration: none; transition: all 0.15s;
         }
-        .btn-ghost:hover { background: var(--surface-2); border-color: #c4cbdb; }
+        .btn-ghost:hover {  background: #EFE7D8;
+    border-color: #CDBFA9;
+    color: #6B5335;}
         .btn-primary {
             padding: 8px 20px; border-radius: var(--radius-sm);
-            border: none; background: var(--brand);
+            border: none;
             font-size: 14px; font-weight: 600; color: white;
             cursor: pointer; text-decoration: none;
             transition: background 0.15s, box-shadow 0.15s;
-            box-shadow: 0 2px 8px rgba(45,91,227,0.30);
+             background: #8B6F47;
+    color: #FFFDF8;
+    box-shadow: 0 2px 10px rgba(139,111,71,0.25);
+            /*box-shadow: 0 2px 8px rgba(45,91,227,0.30);*/
         }
-        .btn-primary:hover { background: var(--brand-dark); box-shadow: 0 4px 14px rgba(45,91,227,0.40); }
+        .btn-primary:hover {  background: #6B5335;
+    box-shadow: 0 4px 14px rgba(107,83,53,0.35);     }
 
         /* ── HERO ────────────────────────────────────────────────── */
         .hero {

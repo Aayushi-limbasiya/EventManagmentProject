@@ -160,7 +160,7 @@ select * from roles;
 
 select * from users;
 
-	select * from events;
+select * from events;
 
 select * from auth_tokens;
 
@@ -175,4 +175,10 @@ select * from payments;
 select * from registrations;
 
 select * from notifications;
+
+alter table events add column fee decimal(10,2) not null default 0.00 after status;
+
+
+insert into users(name,email,password,role_id)
+values('Admin','admin@gmail.com','admin123',1);
 
